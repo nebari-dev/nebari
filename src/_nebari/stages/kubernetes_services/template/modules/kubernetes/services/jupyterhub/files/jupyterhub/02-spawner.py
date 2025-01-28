@@ -1,9 +1,7 @@
 import inspect
 import json
-import logging
 
 import kubernetes.client.models
-from tornado import gen
 
 kubernetes.client.models.V1EndpointPort = (
     kubernetes.client.models.CoreV1EndpointPort
@@ -12,18 +10,8 @@ kubernetes.client.models.V1EndpointPort = (
 from kubespawner import KubeSpawner  # noqa: E402
 
 
-@gen.coroutine
-def get_username_hook(spawner):
-    auth_state = yield spawner.user.get_auth_state()
-    if auth_state is not None:
-        logging.warning(f"======auth_state: {auth_state}")
-    else:
-        logging.warning("======auth_state is None")
-        if spawner.user.name == "service-account-jupyterhub":
-            logging.warning(f"========type(spawner.user): {type(spawner.user)}")
-            yield spawner.authenticator.set_service_account_auth_state(spawner.user)
-            auth_state = yield spawner.authenticator.authenticate_service_account()
-
+async def get_username_hook(spawner):
+    auth_state = await spawner.user.get_auth_state()
     username = auth_state["oauth_user"]["preferred_username"]
 
     spawner.environment.update(
@@ -31,6 +19,13 @@ def get_username_hook(spawner):
             "PREFERRED_USERNAME": username,
         }
     )
+
+
+async def pre_spawn_hook(spawner):
+    # if we are starting a service account pod, set/update auth_state
+    if spawner.user.name == "service-account-jupyterhub":
+        await spawner.authenticator.set_service_account_auth_state(spawner.user)
+    await get_username_hook(spawner)
 
 
 def get_conda_store_environments(user_info: dict):
@@ -54,7 +49,7 @@ def get_conda_store_environments(user_info: dict):
     return [f"{env['namespace']['name']}-{env['name']}" for env in j.get("data", [])]
 
 
-c.Spawner.pre_spawn_hook = get_username_hook
+c.Spawner.pre_spawn_hook = pre_spawn_hook
 
 c.JupyterHub.allow_named_servers = False
 c.JupyterHub.spawner_class = KubeSpawner
