@@ -37,25 +37,6 @@ resource "kubernetes_secret" "jhub_apps_secrets" {
 }
 
 
-resource "keycloak_user" "jhub_apps_service_account" {
-  count    = var.jhub-apps-enabled ? 1 : 0
-  realm_id = var.realm_id
-  username = "jhub-apps-sa"
-  enabled  = true
-}
-
-
-resource "keycloak_user_roles" "jhub_apps_sa_allow_app_sharing_role" {
-  count    = var.jhub-apps-enabled ? 1 : 0
-  realm_id = var.realm_id
-  user_id  = keycloak_user.jhub_apps_service_account[0].id
-  role_ids = [
-    module.jupyterhub-openid-client.client_role_ids["allow-app-sharing-role"]
-  ]
-  # include default roles as well
-  exhaustive = false
-}
-
 locals {
   jupyterhub_env_vars = [
     {
