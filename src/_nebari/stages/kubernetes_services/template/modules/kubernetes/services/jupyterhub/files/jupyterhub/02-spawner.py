@@ -24,7 +24,7 @@ async def get_username_hook(spawner):
 async def pre_spawn_hook(spawner):
     # if we are starting a service account pod, set/update auth_state
     if spawner.user.name == spawner.authenticator.JHUB_SERVICE_ACCOUNT_NAME:
-        await spawner.authenticator.set_service_account_auth_state(spawner.user)
+        await spawner.authenticator.set_jhub_service_account_auth_state(spawner.user)
     await get_username_hook(spawner)
 
 

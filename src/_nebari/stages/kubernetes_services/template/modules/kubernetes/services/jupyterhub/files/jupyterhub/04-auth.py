@@ -38,12 +38,11 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
     reset_managed_roles_on_startup = Bool(True)
 
     async def set_jhub_service_account_auth_state(self, user):
-        auth_model = await self.authenticate_service_account()
         if user.name != self.JHUB_SERVICE_ACCOUNT_NAME:
             raise ValueError(
                 'User name "{user.name}" does not match service account name "{self.JHUB_SERVICE_ACCOUNT_NAME}"'
             )
-
+        auth_model = await self.authenticate_service_account()
         await user.save_auth_state(auth_model["auth_state"])
         logging.info(f'Auth state set for service account: "{user.name}"')
 

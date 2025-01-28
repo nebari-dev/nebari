@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 import z2jh
+from tornado import gen
 
 
 def base_profile_home_mounts(username):
@@ -546,12 +547,13 @@ def render_profile(
     return profile
 
 
-async def render_profiles(spawner):
+@gen.coroutine
+def render_profiles(spawner):
     # jupyterhub does not yet manage groups but it will soon
     # so for now we rely on auth_state from the keycloak
     # userinfo request to have the groups in the key
     # "auth_state.oauth_user.groups"
-    auth_state = await spawner.user.get_auth_state()
+    auth_state = yield spawner.user.get_auth_state()
     username = auth_state["oauth_user"]["preferred_username"]
 
     # only return the lowest level group name
