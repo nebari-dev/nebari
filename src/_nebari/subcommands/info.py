@@ -14,6 +14,9 @@ def nebari_subcommand(cli: typer.Typer):
 
     @cli.command()
     def info(ctx: typer.Context):
+        """
+        Display information about installed Nebari plugins and their configurations.
+        """
         from nebari.plugins import nebari_plugin_manager
 
         rich.print(f"Nebari version: {__version__}")
