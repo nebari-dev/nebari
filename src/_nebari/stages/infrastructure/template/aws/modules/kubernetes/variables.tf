@@ -53,6 +53,11 @@ variable "node_groups" {
     single_subnet   = bool
     launch_template = map(any)
     ami_type        = string
+    node_taints = list(object({
+      key    = string
+      value  = string
+      effect = string
+    }))
   }))
 }
 

@@ -93,6 +93,15 @@ resource "google_container_node_pool" "main" {
 
     oauth_scopes = local.node_group_oauth_scopes
 
+    dynamic "taint" {
+      for_each = local.merged_node_groups[count.index].node_taints
+      content {
+        key    = taint.value.key
+        value  = taint.value.value
+        effect = taint.value.effect
+      }
+    }
+
     metadata = {
       disable-legacy-endpoints = "true"
     }
@@ -108,9 +117,4 @@ resource "google_container_node_pool" "main" {
     tags = var.tags
   }
 
-  lifecycle {
-    ignore_changes = [
-      node_config[0].taint
-    ]
-  }
 }
