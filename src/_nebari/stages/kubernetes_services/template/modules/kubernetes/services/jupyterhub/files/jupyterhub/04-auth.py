@@ -84,15 +84,15 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         user_id = auth_model["auth_state"]["oauth_user"]["sub"]
         token = await self._get_token()
 
-        jupyterhub_client_id = await self._get_jupyterhub_client_id(token=token)
+        jupyterhub_client_uuid = await self._get_jupyterhub_client_uuid(token=token)
         user_info = auth_model["auth_state"][self.user_auth_state_key]
         user_roles_from_claims = self._get_user_roles(user_info=user_info)
         keycloak_api_call_start = time.time()
         user_roles = await self._get_client_roles_for_user(
-            user_id=user_id, client_id=jupyterhub_client_id, token=token
+            user_id=user_id, client_id=jupyterhub_client_uuid, token=token
         )
         user_roles_rich = await self._get_roles_with_attributes(
-            roles=user_roles, client_id=jupyterhub_client_id, token=token
+            roles=user_roles, client_id=jupyterhub_client_uuid, token=token
         )
 
         # Include which groups have permission to mount shared directories (user by
@@ -101,7 +101,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             await self.get_client_groups_with_mount_permissions(
                 user_groups=auth_model["auth_state"]["oauth_user"]["groups"],
                 user_roles=user_roles_rich,
-                client_id=jupyterhub_client_id,
+                client_id=jupyterhub_client_uuid,
                 token=token,
             )
         )
@@ -152,7 +152,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         )
         return client_roles_rich
 
-    async def _get_jupyterhub_client_id(self, token):
+    async def _get_jupyterhub_client_uuid(self, token):
         # Get the clients list to find the "id" of "jupyterhub" client.
         clients_data = await self._fetch_api(endpoint="clients/", token=token)
         jupyterhub_clients = [
@@ -169,9 +169,9 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
                 "Managed roles can only be loaded when `manage_roles` is True"
             )
         token = await self._get_token()
-        jupyterhub_client_id = await self._get_jupyterhub_client_id(token=token)
+        jupyterhub_client_uuid = await self._get_jupyterhub_client_uuid(token=token)
         client_roles_rich = await self._get_jupyterhub_client_roles(
-            jupyterhub_client_id=jupyterhub_client_id, token=token
+            jupyterhub_client_id=jupyterhub_client_uuid, token=token
         )
 
         # Includes roles like "default-roles-nebari", "offline_access", "uma_authorization"
@@ -206,7 +206,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
                 await self._get_users_and_groups_for_role(
                     role_name,
                     token=token,
-                    client_id=jupyterhub_client_id,
+                    client_id=jupyterhub_client_uuid,
                 )
             )
 
