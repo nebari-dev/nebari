@@ -30,6 +30,13 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
 
     reset_managed_roles_on_startup = Bool(True)
 
+    async def set_service_account_auth_state(self, user):
+
+        # get user from spawner.user, I think
+        service_account_auth_state = await self.authenticate_service_account()
+
+        await user.save_auth_state(service_account_auth_state)
+
     async def authenticate_service_account(self):
         token_info = await self._get_token_info()
 
