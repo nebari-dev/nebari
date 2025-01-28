@@ -22,6 +22,21 @@ startupScripts:
     /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u root -p "{{ .Values.initial_root_password }}"
     /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u nebari-bot -p "{{ .Values.nebari_bot_password }}"
 
+  mv-custom-themes.sh: |
+    #!/bin/sh
+    printf '=%.0s' {1..73}
+    echo "Start moving custom themes to /opt/jboss/keycloak/themes"
+
+    if [ -d /opt/data/custom-themes/themes ]; then
+      echo 'Copying custom themes from /opt/data/custom-themes/themes to /opt/jboss/keycloak/themes'
+      cp -r /opt/data/custom-themes/themes/* /opt/jboss/keycloak/themes/
+    else
+      echo 'No custom themes found in /opt/data/custom-themes'
+    fi
+
+    echo "Finished moving custom themes"
+    printf '=%.0s' {1..73}
+
 extraInitContainers: |
   - command:
     - sh
@@ -47,11 +62,44 @@ extraInitContainers: |
     volumeMounts:
       - name: metrics-plugin
         mountPath: /data
+  {{- if .Values.customThemes.enabled }}
+  - env:
+    - name: GIT_SYNC_REPO
+      value: {{ .Values.customThemes.repository }}
+    - name: GIT_SYNC_BRANCH
+      value: {{ .Values.customThemes.branch }}
+    - name: GIT_SYNC_ONE_TIME
+      value: "true"
+    - name: GIT_SYNC_GROUP_WRITE
+      value: "true"
+    - name: GIT_SYNC_ROOT
+      value: /opt/data/custom-themes
+    - name: GIT_SYNC_DEST
+      value: themes
+    - name: GIT_SYNC_SSH
+      value: "false"
+    image: k8s.gcr.io/git-sync:v3.1.5
+    imagePullPolicy: IfNotPresent
+    name: keycloak-git-sync
+    resources: {}
+    securityContext:
+      runAsGroup: 1000
+      runAsUser: 0
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /opt/data/custom-themes
+      name: custom-themes
+  {{- end }}
 
 extraVolumeMounts: |
   - name: metrics-plugin
     mountPath: /opt/jboss/keycloak/providers/
+  - mountPath: /opt/data/custom-themes
+    name: custom-themes
 
 extraVolumes: |
   - name: metrics-plugin
+    emptyDir: {}
+  - name: custom-themes
     emptyDir: {}
