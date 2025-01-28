@@ -36,7 +36,6 @@ resource "kubernetes_secret" "jhub_apps_secrets" {
   type = "Opaque"
 }
 
-
 locals {
   jupyterhub_env_vars = [
     {
