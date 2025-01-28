@@ -25,7 +25,7 @@ variable "service-accounts-enabled" {
 
 variable "service-account-roles" {
   description = <<-EOT
-  List of client roles to be granted to the service account client. Requires setting service-accounts-enabled to true.
+  Map of client to client-roles to be granted to the service account client. Requires setting service-accounts-enabled to true.
 
   e.g. {
     "my-client": ["my-role"],
