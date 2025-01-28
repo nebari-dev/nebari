@@ -21,7 +21,7 @@ def get_username_hook(spawner):
         logging.warning("======auth_state is None")
         if spawner.user.name == "service-account-jupyterhub":
             logging.warning(f"========type(spawner.user): {type(spawner.user)}")
-            spawner.authenticator.set_service_account_auth_state(spawner.user)
+            yield spawner.authenticator.set_service_account_auth_state(spawner.user)
             auth_state = yield spawner.authenticator.authenticate_service_account()
 
     username = auth_state["oauth_user"]["preferred_username"]
