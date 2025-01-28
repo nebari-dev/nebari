@@ -19,6 +19,8 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
     feature added in JupyterHub 5.0 (https://github.com/jupyterhub/jupyterhub/pull/4748).
     """
 
+    JHUB_SERVICE_ACCOUNT_NAME = "service-account-jupyterhub"
+
     claim_roles_key = Union(
         [Unicode(os.environ.get("OAUTH2_ROLES_KEY", "groups")), Callable()],
         config=True,
@@ -31,10 +33,15 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
 
     reset_managed_roles_on_startup = Bool(True)
 
-    async def set_service_account_auth_state(self, user):
-        service_account_auth_state = await self.authenticate_service_account()
-        await user.save_auth_state(service_account_auth_state)
-        logging.info(f'Auth state set for service account "{user.name}"')
+    async def set_jhub_service_account_auth_state(self, user):
+        auth_model = await self.authenticate_service_account()
+        if user.name != self.JHUB_SERVICE_ACCOUNT_NAME:
+            raise ValueError(
+                'User name "{user.name}" does not match service account name "{self.JHUB_SERVICE_ACCOUNT_NAME}"'
+            )
+
+        await user.save_auth_state(auth_model["auth_state"])
+        logging.info(f'Auth state set for service account: "{user.name}"')
 
     async def authenticate_service_account(self):
         token_info = await self._get_token_info()
@@ -55,7 +62,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
 
         auth_model = await self.update_auth_model(auth_model)
 
-        return auth_model["auth_state"]
+        return auth_model
 
     async def update_auth_model(self, auth_model):
         """Updates and returns the auth_model dict.
