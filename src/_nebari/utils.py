@@ -49,7 +49,7 @@ def change_directory(directory):
 
 def strip_ansi_errors(line):
     """Strips red ANSI escape code from a string."""
-    ansi_escape = re.compile(r"\x1b\[31m")
+    ansi_escape = re.compile(rb"\x1b\[31m")
     stripped_line = ansi_escape.sub("", line.decode("utf-8"))
     return stripped_line.encode("utf-8")
 
