@@ -48,10 +48,9 @@ def change_directory(directory):
 
 
 def strip_ansi_errors(line):
-    """Strips red ANSI escape code from a string."""
-    ansi_escape = re.compile(rb"\x1b\[31m")
-    stripped_line = ansi_escape.sub("", line.decode("utf-8"))
-    return stripped_line.encode("utf-8")
+    """Strips ANSI escape codes from a string."""
+    ansi_escape = re.compile(rb"\x1b\[[0-9;]*[mK]")
+    return ansi_escape.sub(b"", line)
 
 
 def process_streams(
