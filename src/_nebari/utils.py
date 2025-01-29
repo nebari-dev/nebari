@@ -103,6 +103,10 @@ def process_streams(
                             outputs["stderr"].append(line_w_newline)
     finally:
         sel.close()
+        if process.stdout:
+            process.stdout.close()
+        if process.stderr:
+            process.stderr.close()
 
     return outputs["stdout"], outputs["stderr"]
 
