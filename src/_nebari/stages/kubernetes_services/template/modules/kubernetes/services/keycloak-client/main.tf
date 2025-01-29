@@ -67,28 +67,53 @@ data "keycloak_realm" "master" {
   realm = "nebari"
 }
 
-data "keycloak_openid_client" "realm_management" {
+
+# Get client data for each service account client
+data "keycloak_openid_client" "service_clients" {
+  for_each = var.service-account-roles
+
+  realm_id   = var.realm_id
+  client_id  = each.key
+  depends_on = [keycloak_openid_client.main]
+}
+
+# Get role data for each client's roles
+data "keycloak_role" "client_roles" {
+  for_each = {
+    for pair in flatten([
+      for client, roles in var.service-account-roles : [
+        for role in roles : {
+          key    = "${client}-${role}"
+          client = client
+          role   = role
+        }
+      ]
+    ]) : pair.key => pair
+  }
+
   realm_id  = var.realm_id
-  client_id = "realm-management"
+  client_id = data.keycloak_openid_client.service_clients[each.value.client].id
+  name      = each.value.role
 }
 
-data "keycloak_role" "main-service" {
-  for_each = toset(var.service-account-roles)
-
-  realm_id  = data.keycloak_realm.master.id
-  client_id = data.keycloak_openid_client.realm_management.id
-  name      = each.key
-}
-
-resource "keycloak_openid_client_service_account_role" "main" {
-  for_each = toset(var.service-account-roles)
+resource "keycloak_openid_client_service_account_role" "client_roles" {
+  for_each = {
+    for pair in flatten([
+      for client, roles in var.service-account-roles : [
+        for role in roles : {
+          key    = "${client}-${role}"
+          client = client
+          role   = role
+        }
+      ]
+    ]) : pair.key => pair
+  }
 
   realm_id                = var.realm_id
   service_account_user_id = keycloak_openid_client.main.service_account_user_id
-  client_id               = data.keycloak_openid_client.realm_management.id
-  role                    = data.keycloak_role.main-service[each.key].name
+  client_id               = data.keycloak_openid_client.service_clients[each.value.client].id
+  role                    = data.keycloak_role.client_roles[each.key].name
 }
-
 
 resource "keycloak_role" "main" {
   for_each = toset(flatten(values(var.role_mapping)))

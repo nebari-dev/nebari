@@ -554,7 +554,6 @@ def render_profiles(spawner):
     # userinfo request to have the groups in the key
     # "auth_state.oauth_user.groups"
     auth_state = yield spawner.user.get_auth_state()
-
     username = auth_state["oauth_user"]["preferred_username"]
 
     # only return the lowest level group name
