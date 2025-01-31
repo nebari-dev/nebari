@@ -11,8 +11,8 @@ from pathlib import Path
 
 import requests
 from conda_store_server import api
-from conda_store_server._internal import schema
 from conda_store_server._internal.server.dependencies import get_conda_store
+from conda_store_server.server import schema as auth_schema
 from conda_store_server.server.auth import GenericOAuthAuthentication
 from conda_store_server.storage import S3Storage
 
@@ -357,7 +357,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         return client_roles_rich
 
     def _get_current_entity_bindings(self, username):
-        entity = schema.AuthenticationToken(
+        entity = auth_schema.AuthenticationToken(
             primary_namespace=username, role_bindings={}
         )
         self.log.info(f"entity: {entity}")
@@ -387,7 +387,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
 
         # superadmin gets access to everything
         if "conda_store_superadmin" in user_data.get("roles", []):
-            return schema.AuthenticationToken(
+            return auth_schema.AuthenticationToken(
                 primary_namespace=username,
                 role_bindings={"*/*": {"admin"}},
             )
@@ -425,7 +425,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
                 if _namespace is None:
                     api.ensure_namespace(db, name=namespace)
 
-        return schema.AuthenticationToken(
+        return auth_schema.AuthenticationToken(
             primary_namespace=username,
             role_bindings=role_bindings,
         )
