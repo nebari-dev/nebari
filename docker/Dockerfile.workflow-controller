@@ -1,0 +1,61 @@
+# Copyright (c) Nebari Development Team.
+# Distributed under the terms of the Modified BSD License.
+# Usage:
+# ------
+#
+# To make a local build of the container, from the root directory:
+# docker build -f Dockerfile.workflow-controller -t nebari-workflow-controller:latest .
+
+ARG BASE_IMAGE=ubuntu:20.04
+FROM $BASE_IMAGE
+LABEL MAINTAINER="Nebari development team"
+
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
+RUN chmod -R a-w ~
+COPY scripts/install-apt-minimal.sh /opt/scripts/install-apt-minimal.sh
+RUN /opt/scripts/install-apt-minimal.sh
+
+COPY scripts/fix-permissions /opt/scripts/fix-permissions
+
+ENV MAMBAFORGE_VERSION 4.13.0-1
+ENV MAMBAFORGE_AARCH64_SHA256 69e3c90092f61916da7add745474e15317ed0dc6d48bfe4e4c90f359ba141d23
+ENV MAMBAFORGE_X86_64_SHA256 412b79330e90e49cf7e39a7b6f4752970fcdb8eb54b1a45cc91afe6777e8518c
+SHELL ["/bin/bash", "-c"]
+ENV CONDA_DIR=/opt/conda \
+    DEFAULT_ENV=default
+# Set timezone
+ENV TZ=America/Chicago
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Set PATH for Dockerfile so that conda works and some useful scripts are
+# available. Any changes intended to propagate to runtime containers should be
+# set in /etc/profile.d (see setup_shell_behavior.sh)
+ENV PATH=/opt/conda/envs/${DEFAULT_ENV}/bin:/opt/conda/bin:${PATH}:/opt/scripts
+
+# ============= base install ===============
+# install conda
+COPY scripts/install-conda.sh /opt/scripts/install-conda.sh
+RUN echo "${SHELL}"; env; cat ~/.bashrc; cat ~/.profile ; /opt/scripts/install-conda.sh
+
+# ========== nebari-workflow-controller install ============
+COPY scripts/install-apt.sh /opt/scripts/install-apt.sh
+COPY nebari-workflow-controller/apt.txt /opt/nebari-workflow-controller/apt.txt
+RUN /opt/scripts/install-apt.sh
+
+# uncomment to install dev dependencies
+# RUN /opt/scripts/install-apt.sh /opt/nebari-workflow-controller/apt.txt  
+
+ARG SKIP_CONDA_SOLVE=no
+COPY scripts/install-conda-environment.sh /opt/scripts/install-conda-environment.sh
+COPY nebari-workflow-controller/environment.yaml /opt/nebari-workflow-controller/environment.yaml
+RUN \
+    if [ "${SKIP_CONDA_SOLVE}" != "no" ];then  \
+    ENV_FILE=/opt/nebari-workflow-controller/conda-linux-64.lock ; \
+    else  \
+    ENV_FILE=/opt/nebari-workflow-controller/environment.yaml ; \
+    fi ; \
+    /opt/scripts/install-conda-environment.sh "${ENV_FILE}" 'true'
+
+COPY nebari-workflow-controller /opt/nebari-workflow-controller
+
+CMD ["python", "-m", "nebari_workflow_controller"]

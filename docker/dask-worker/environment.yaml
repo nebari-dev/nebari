@@ -1,0 +1,9 @@
+# Copyright (c) Nebari Development Team.
+# Distributed under the terms of the Modified BSD License.
+
+name: base
+channels:
+  - conda-forge
+dependencies:
+  # dask
+  - nebari-dask
