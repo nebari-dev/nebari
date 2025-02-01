@@ -30,3 +30,52 @@ GCP_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-gcp"
 AWS_DEFAULT_REGION = "us-east-1"
 AZURE_DEFAULT_REGION = "Central US"
 GCP_DEFAULT_REGION = "us-central1"
+
+# TERRAFORM REQUIRED PROVIDERS
+REQUIRED_PROVIDERS = {
+    "aws": {
+        "_name": "aws",
+        "source": "hashicorp/aws",
+        "version": "5.12.0",
+    },
+    "azurerm": {
+        "_name": "azurerm",
+        "source": "hashicorp/azurerm",
+        "version": "=3.97.1",
+    },
+    "docker": {
+        "_name": "docker",
+        "source": "kreuzwerker/docker",
+        "version": "2.16.0",
+    },
+    "google": {
+        "_name": "google",
+        "source": "hashicorp/google",
+        "version": "4.83.0",
+    },
+    "helm": {
+        "_name": "helm",
+        "source": "hashicorp/helm",
+        "version": "2.1.2",
+    },
+    "keycloak": {
+        "_name": "keycloak",
+        "source": "mrparkers/keycloak",
+        "version": "3.7.0",
+    },
+    "kind": {
+        "_name": "kind",
+        "source": "tehcyx/kind",
+        "version": "0.4.0",
+    },
+    "kubectl": {
+        "_name": "kubectl",
+        "source": "gavinbunney/kubectl",
+        "version": ">= 1.7.0",
+    },
+    "kubernetes": {
+        "_name": "kubernetes",
+        "source": "hashicorp/kubernetes",
+        "version": ">= 2.35.1",
+    },
+}
