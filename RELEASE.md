@@ -9,6 +9,40 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
+## Release 2025.1.1 - January 27, 2025
+
+> NOTE: In this release, we have updated our maximum supported Kubernetes version from
+> 1.29 to 1.31. we strongly recommend updating the Kubernetes version
+> specified in your nebari-config YAML file and redeploying to apply the changes.
+>
+> Remember that Kubernetes minor versions must be upgraded incrementally (1.29 → 1.30 →
+> 1.31).
+
+## What's Changed
+* fix bug to allow --import-plugin to work by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2864
+* Add azure kubernetes policy add-on by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2888
+* Yaml config sets by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2876
+* Add ability to list user installed plugins from the CLI by @soapy1 in https://github.com/nebari-dev/nebari/pull/2891
+* [AUTO] Update CLI doc by @nebari-sensei in https://github.com/nebari-dev/nebari/pull/2841
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/2896
+* [ENH] - Include "--attempt-fixes" flag from Nebari upgrade CLI in upgrade steps logic by @smokestacklightnin in https://github.com/nebari-dev/nebari/pull/2839
+* add authorized ip range variable for azure by @dcmcand in https://github.com/nebari-dev/nebari/pull/2880
+* Upgrade conda-store to 2024.11.2 by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2815
+* Handle default value for azure addon policy by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2905
+* Update conda-store-ui tests for updated page verbiage by @soapy1 in https://github.com/nebari-dev/nebari/pull/2911
+* Remove unintended character at the end of the TF_LOG variable by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2912
+* Update k8s max version by @dcmcand in https://github.com/nebari-dev/nebari/pull/2903
+* [ENH] - Use GitHub secrets instead of Vault by @smokestacklightnin in https://github.com/nebari-dev/nebari/pull/2889
+* adds info command text display & change the order of command display by @kernel-loophole in https://github.com/nebari-dev/nebari/pull/2916
+* [AUTO] Update CLI doc by @nebari-sensei in https://github.com/nebari-dev/nebari/pull/2921
+
+## New Contributors
+* @soapy1 made their first contribution in https://github.com/nebari-dev/nebari/pull/2891
+* @smokestacklightnin made their first contribution in https://github.com/nebari-dev/nebari/pull/2839
+* @kernel-loophole made their first contribution in https://github.com/nebari-dev/nebari/pull/2916
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.12.1...2025.1.1
+
 ## Release 2024.12.1 - December 13, 2024
 
 > NOTE: Support for DigitalOcean has been removed in this release. If you plan to deploy Nebari on DigitalOcean, you first need to independently create a Kubernetes cluster and then use the `existing` deployment option.
