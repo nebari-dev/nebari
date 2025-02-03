@@ -21,6 +21,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
 
     JHUB_SERVICE_ACCOUNT_NAME = Unicode()
 
+    # Keycloak currently dictates service account name format as `service-account-<client_id>`  See https://github.com/keycloak/keycloak/blob/5e6bb9f7bd2c83febd12668f2605aa8ecbdcf130/docs/documentation/server_admin/topics/admin-cli.adoc?plain=1#L1008 for more info.
     @default("JHUB_SERVICE_ACCOUNT_NAME")
     def _default_jhub_service_account_name(self):
         return f"service-account-{self.client_id}"
