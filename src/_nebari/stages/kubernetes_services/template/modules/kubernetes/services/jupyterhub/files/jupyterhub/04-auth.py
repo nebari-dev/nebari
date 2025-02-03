@@ -40,7 +40,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
     async def set_jhub_service_account_auth_state(self, user):
         if user.name != self.JHUB_SERVICE_ACCOUNT_NAME:
             raise ValueError(
-                'User name "{user.name}" does not match service account name "{self.JHUB_SERVICE_ACCOUNT_NAME}"'
+                f'User name "{user.name}" does not match service account name "{self.JHUB_SERVICE_ACCOUNT_NAME}"'
             )
         auth_model = await self.authenticate_service_account()
         await user.save_auth_state(auth_model["auth_state"])
