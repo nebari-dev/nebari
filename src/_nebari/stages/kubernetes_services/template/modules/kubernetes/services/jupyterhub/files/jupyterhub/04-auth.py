@@ -47,6 +47,9 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         logging.info(f'Auth state set for service account: "{user.name}"')
 
     async def authenticate_service_account(self):
+        # We mimic what OAuthenticator currently does in `authenticate` method, but the logic may change in the future
+        # Currently, the logic is based on https://github.com/jupyterhub/oauthenticator/blob/d31bb193e84e7cda58b16f2f5d385c9b8affda4f/oauthenticator/oauth2.py#L1436
+
         token_info = await self._get_token_info()
 
         # Get user info using the access token
