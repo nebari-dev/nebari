@@ -180,8 +180,10 @@ jobs:
           CONDA_STORE_BASE_URL: https://${{ steps.init.outputs.domain }}
         working-directory: ${{ steps.init.outputs.directory }}
         run: |
+          cat ${{ steps.init.outputs.config }} | grep initial_root_password | cut -d ':' -f 2
+          INITIAL_ROOT_PWD=$(cat ${{ steps.init.outputs.config }} | grep initial_root_password | cut -d ':' -f 2 | awk '{$1=$1};1')
           LOGIN_URL=$(curl -c /tmp/nebari-session --insecure -Ls ${CONDA_STORE_BASE_URL}/conda-store/login/\?next= | grep auth/realms/nebari/login-actions/authenticate | grep -oP '(?<=action=")([^"]+)' | sed  's/\&amp\;/\&/g')
-          curl -X POST --insecure -b /tmp/nebari-session -H "Content-Type: application/x-www-form-urlencoded"  -vv --data '{"credentialId":"", "username": "${KEYCLOAK_USERNAME}", "password": "${KEYCLOAK_PASSWORD}"}' $LOGIN_URL
+          curl -X POST --insecure -b /tmp/nebari-session -H "Content-Type: application/x-www-form-urlencoded"  -vv --data '{"credentialId":"", "username": "root", "password": "${INITIAL_ROOT_PWD}"}' $LOGIN_URL
           echo "CONDA_STORE_TOKEN=$(curl --insecure -L -X POST -b /tmp/conda-store-cookie ${CONDA_STORE_BASE_URL}/conda-store/api/v1/token | jq --raw-output .data.token)" >> "$GITHUB_OUTPUT"
 
       - name: Run conda-store-server user_journey tests
