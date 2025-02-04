@@ -416,6 +416,7 @@ def check_cloud_provider_region(region: str, cloud_provider: str) -> str:
 def nebari_subcommand(cli: typer.Typer):
     @cli.command()
     def init(
+        ctx: typer.Context,
         cloud_provider: ProviderEnum = typer.Argument(
             ProviderEnum.local,
             help=f"options: {enum_to_list(ProviderEnum)}",
@@ -567,6 +568,9 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.explicit = explicit
 
         from nebari.plugins import nebari_plugin_manager
+
+        # I can call the `config_set hook here`
+        nebari_plugin_manager.plugin_manager.hook.nebari_config_set(inputs.config_set)
 
         handle_init(inputs, config_schema=nebari_plugin_manager.config_schema)
 
