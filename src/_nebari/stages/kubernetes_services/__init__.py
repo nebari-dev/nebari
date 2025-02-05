@@ -5,7 +5,13 @@ import time
 from typing import Any, Dict, List, Optional, Type, Union
 from urllib.parse import urlencode
 
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    ConfigDict,
+    Field,
+    field_validator,
+    model_serializer,
+    model_validator,
+)
 from typing_extensions import Self
 
 from _nebari import constants
@@ -135,6 +141,14 @@ class ProfileOption(schema.Base):
         if len(defaults) > 1:
             raise ValueError("Only one choice can be marked as default")
         return v
+
+    # We need to exclude unlisted_choice if not set.
+    # This was the recommended solution without affecting the parent.
+    # reference: https://github.com/pydantic/pydantic/discussions/7315
+    @model_serializer(mode="wrap")
+    def serialize_model(self, handler) -> dict[str, Any]:
+        result = handler(self)
+        return {k: v for k, v in result.items() if v is not None}
 
 
 class JupyterLabProfile(schema.Base):
