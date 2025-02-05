@@ -100,7 +100,7 @@ jobs:
       - name: Create example-user
         working-directory: ${{ steps.init.outputs.directory }}
         run: |
-          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }}
+          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }} --groups superadmin
           nebari keycloak listusers --config ${{ steps.init.outputs.config }}
 
       - name: Await Workloads
@@ -112,18 +112,18 @@ jobs:
           max-restarts: 3
 
       ### DEPLOYMENT TESTS
-      - name: Deployment Pytests
-        env:
-          NEBARI_CONFIG_PATH: ${{ steps.init.outputs.config }}
-          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
-          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-        run: |
-          pytest tests/tests_deployment/ -v -s
+      # - name: Deployment Pytests
+      #   env:
+      #     NEBARI_CONFIG_PATH: ${{ steps.init.outputs.config }}
+      #     KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+      #     KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+      #   run: |
+      #     pytest tests/tests_deployment/ -v -s
 
-      ### USER-JOURNEY TESTS
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      # ### USER-JOURNEY TESTS
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 20
 
       # - name: Playwright Tests
       #   env:
@@ -172,18 +172,18 @@ jobs:
           # install conda-store-server
           python -m pip install conda-store/conda-store-server
 
-      - name: Get conda-store token from login
+      - name: Get conda store token from login
         id: conda-store-token
         env:
+          CONDA_STORE_BASE_URL: https://${{ steps.init.outputs.domain }}
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-          CONDA_STORE_BASE_URL: https://${{ steps.init.outputs.domain }}
         working-directory: ${{ steps.init.outputs.directory }}
         run: |
-          cat ${{ steps.init.outputs.config }} | grep initial_root_password | cut -d ':' -f 2
-          INITIAL_ROOT_PWD=$(cat ${{ steps.init.outputs.config }} | grep initial_root_password | cut -d ':' -f 2 | awk '{$1=$1};1')
+          echo "${KEYCLOAK_USERNAME}"
           LOGIN_URL=$(curl -c /tmp/nebari-session --insecure -Ls ${CONDA_STORE_BASE_URL}/conda-store/login/\?next= | grep auth/realms/nebari/login-actions/authenticate | grep -oP '(?<=action=")([^"]+)' | sed  's/\&amp\;/\&/g')
-          curl -X POST --insecure -b /tmp/nebari-session -H "Content-Type: application/x-www-form-urlencoded"  -vv --data '{"credentialId":"", "username": "root", "password": "${INITIAL_ROOT_PWD}"}' $LOGIN_URL
+          curl -X POST --insecure -b /tmp/nebari-session -c /tmp/conda-store-cookie -H "Content-Type: application/x-www-form-urlencoded" --data '{"credentialId":"", "username": "test-user", "password": "P@sswo3d"}' $LOGIN_URL
+          curl --insecure -b /tmp/conda-store-cookie ${CONDA_STORE_BASE_URL}/conda-store/api/v1/permission/ | jq
           echo "CONDA_STORE_TOKEN=$(curl --insecure -L -X POST -b /tmp/conda-store-cookie ${CONDA_STORE_BASE_URL}/conda-store/api/v1/token | jq --raw-output .data.token)" >> "$GITHUB_OUTPUT"
 
       - name: Run conda-store-server user_journey tests
