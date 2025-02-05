@@ -109,6 +109,34 @@ class KubeSpawner(schema.Base):
     model_config = ConfigDict(extra="allow")
 
 
+class ProfileOptionUnlistedChoice(schema.Base):
+    enabled: bool = False
+    display_name: str
+    display_name_in_choices: Optional[str] = None
+    validation_regex: Optional[str] = None
+    validation_message: Optional[str] = None
+    kubespawner_override: Dict[str, Any]
+
+
+class ProfileOptionChoice(schema.Base):
+    display_name: str
+    default: Optional[bool] = False
+    kubespawner_override: Dict[str, Any]
+
+
+class ProfileOption(schema.Base):
+    display_name: str
+    unlisted_choice: Optional[ProfileOptionUnlistedChoice] = None
+    choices: Dict[str, ProfileOptionChoice]
+
+    @field_validator("choices")
+    def validate_choices(cls, v):
+        defaults = [choice for choice in v.values() if choice.default]
+        if len(defaults) > 1:
+            raise ValueError("Only one choice can be marked as default")
+        return v
+
+
 class JupyterLabProfile(schema.Base):
     access: AccessEnum = AccessEnum.all
     display_name: str
@@ -117,6 +145,7 @@ class JupyterLabProfile(schema.Base):
     users: Optional[List[str]] = None
     groups: Optional[List[str]] = None
     kubespawner_override: Optional[KubeSpawner] = None
+    profile_options: Optional[dict[str, ProfileOption]] = None
 
     @model_validator(mode="after")
     def only_yaml_can_have_groups_and_users(self):
