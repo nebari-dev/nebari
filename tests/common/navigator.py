@@ -50,7 +50,7 @@ class NavigatorMixin(ABC):
         self.page = self.context.new_page()
         self.initialized = True
 
-    def _rename_test_video_path(self, video_path):
+    def _rename_test_video_path(self, video_path: Path):
         """Rename the test video file to the test unique identifier."""
         video_file_name = (
             f"{self.video_name_prefix}.mp4" if self.video_name_prefix else None
@@ -62,7 +62,7 @@ class NavigatorMixin(ABC):
         """Teardown Playwright browser and context."""
         if self.initialized:
             # Rename the video file to the test unique identifier
-            current_video_path = self.page.video.path()
+            current_video_path = Path(self.page.video.path())
             self._rename_test_video_path(current_video_path)
 
             self.context.close()
@@ -91,6 +91,9 @@ class LoginNavigator(NavigatorMixin):
         self.username = username
         self.password = password
         self.auth = auth
+        logger.debug(
+            f"LoginNavigator initialized with {self.auth} auth method. :: {self.nebari_url}"
+        )
 
     def login(self):
         """Login to Nebari deployment using the provided authentication method."""
@@ -110,7 +113,7 @@ class LoginNavigator(NavigatorMixin):
 
     def _login_google(self):
         logger.debug(">>> Sign in via Google and start the server")
-        self.page.goto(self.nebari_url)
+        self.page.goto(url=self.nebari_url)
         expect(self.page).to_have_url(re.compile(f"{self.nebari_url}*"))
 
         self.page.get_by_role("button", name="Sign in with Keycloak").click()
@@ -123,7 +126,7 @@ class LoginNavigator(NavigatorMixin):
 
     def _login_password(self):
         logger.debug(">>> Sign in via Username/Password")
-        self.page.goto(self.nebari_url)
+        self.page.goto(url=self.nebari_url)
         expect(self.page).to_have_url(re.compile(f"{self.nebari_url}*"))
 
         self.page.get_by_role("button", name="Sign in with Keycloak").click()

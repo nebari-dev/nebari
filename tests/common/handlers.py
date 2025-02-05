@@ -11,6 +11,7 @@ class JupyterLab:
     def __init__(self, navigator):
         logger.debug(">>> Starting notebook manager...")
         self.nav = navigator
+        self.username = self.nav.username
         self.page = self.nav.page
 
     def reset_workspace(self):
@@ -86,20 +87,31 @@ class JupyterLab:
     def _shutdown_all_kernels(self):
         """Shutdown all running kernels."""
         logger.debug(">>> Shutting down all kernels")
-        kernel_menu = self.page.get_by_role("menuitem", name="Kernel")
-        kernel_menu.click()
+
+        # Open the "Kernel" menu
+        self.page.get_by_role("menuitem", name="Kernel").click()
+
+        # Locate the "Shut Down All Kernels…" menu item
         shut_down_all = self.page.get_by_role("menuitem", name="Shut Down All Kernels…")
-        logger.debug(
-            f">>> Shut down all kernels visible: {shut_down_all.is_visible()} enabled: {shut_down_all.is_enabled()}"
-        )
-        if shut_down_all.is_visible() and shut_down_all.is_enabled():
-            shut_down_all.click()
-            self.page.get_by_role("button", name="Shut Down All").click()
-        else:
+
+        # If it's not visible or is disabled, there's nothing to shut down
+        if not shut_down_all.is_visible() or shut_down_all.is_disabled():
             logger.debug(">>> No kernels to shut down")
+            return
+
+        # Otherwise, click to shut down all kernels and confirm
+        shut_down_all.click()
+        self.page.get_by_role("button", name="Shut Down All").click()
 
     def _navigate_to_root_folder(self):
         """Navigate back to the root folder in JupyterLab."""
+        # Make sure the home directory is select in the sidebar
+        if not self.page.get_by_role(
+            "region", name="File Browser Section"
+        ).is_visible():
+            file_browser_tab = self.page.get_by_role("tab", name="File Browser")
+            file_browser_tab.click()
+
         logger.debug(">>> Navigating to root folder")
         self.page.get_by_title(f"/home/{self.nav.username}", exact=True).locator(
             "path"
@@ -297,7 +309,10 @@ class CondaStore(JupyterLab):
         time.sleep(2)
 
     def _open_new_environment_tab(self):
-        self.page.get_by_label("Create a new environment in").click()
+        # self.page.get_by_label("Create a new environment in").click()
+        self.page.get_by_role(
+            "link", name=f"Create a new environment in the {self.username} namespace"
+        ).click()
         expect(
             self.page.get_by_role("button", name="Create", exact=True)
         ).to_be_visible()
