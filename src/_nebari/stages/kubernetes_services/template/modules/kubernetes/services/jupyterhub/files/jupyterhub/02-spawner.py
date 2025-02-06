@@ -73,19 +73,16 @@ def get_conda_store_environments(user_info: dict):
     # will contain all the environment info returned from the api
     env_data = []
 
-    # If there are more records than the specified size limit, then
-    # will need to page through to get all the available envs
-    if total_records > page_size:
-        # generate a list of urls to hit to build the response
-        urls = generate_paged_urls(base_url, total_records, page_size)
+    # generate a list of urls to hit to build the response
+    urls = generate_paged_urls(base_url, total_records, page_size)
 
-        # get content from urls
-        for url in urls:
-            response = http.request(
-                "GET", url, headers={"Authorization": f"Bearer {token}"}
-            )
-            decoded_response = json.loads(response.data.decode("UTF-8"))
-            env_data += decoded_response.get("data", [])
+    # get content from urls
+    for url in urls:
+        response = http.request(
+            "GET", url, headers={"Authorization": f"Bearer {token}"}
+        )
+        decoded_response = json.loads(response.data.decode("UTF-8"))
+        env_data += decoded_response.get("data", [])
 
     # Filter and return conda environments for the user
     return [f"{env['namespace']['name']}-{env['name']}" for env in env_data]
