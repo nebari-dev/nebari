@@ -30,7 +30,7 @@ def test_login_logout(navigator):
 )
 @login_parameterized()
 def test_navbar_services(navigator, services):
-    navigator.page.goto(navigator.nebari_url + "hub/home")
+    navigator.page.goto(navigator.nebari_url + "/hub/home")
     navigator.page.wait_for_load_state("networkidle")
     navbar_items = navigator.page.locator("#thenavbar").get_by_role("link")
     navbar_items_names = [item.text_content() for item in navbar_items.all()]

@@ -11,7 +11,6 @@ class JupyterLab:
     def __init__(self, navigator):
         logger.debug(">>> Starting notebook manager...")
         self.nav = navigator
-        self.username = self.nav.username
         self.page = self.nav.page
 
     def reset_workspace(self):
@@ -309,18 +308,24 @@ class CondaStore(JupyterLab):
         time.sleep(2)
 
     def _open_new_environment_tab(self):
-        # self.page.get_by_label("Create a new environment in").click()
-        self.page.get_by_role(
-            "link", name=f"Create a new environment in the {self.username} namespace"
-        ).click()
+        self.page.get_by_label("Create a new environment in").click()
         expect(
             self.page.get_by_role("button", name="Create", exact=True)
         ).to_be_visible()
 
     def _assert_user_namespace(self):
-        expect(
-            self.page.get_by_role("button", name=f"{self.nav.username} Create a new")
-        ).to_be_visible()
+        user_namespace_dropdown = self.page.get_by_role(
+            "button", name=f"{self.nav.username} Create a new"
+        )
+
+        if not (
+            expect(
+                user_namespace_dropdown
+            ).to_be_visible()  # this asserts the user namespace shows in the UI
+            or self.nav.username
+            in user_namespace_dropdown.text_content()  # this attests that the namespace corresponds to the logged in user
+        ):
+            raise ValueError(f"User namespace {self.nav.username} not found")
 
     def _get_shown_namespaces(self):
         _envs = self.page.locator("#environmentsScroll").get_by_role("button")
