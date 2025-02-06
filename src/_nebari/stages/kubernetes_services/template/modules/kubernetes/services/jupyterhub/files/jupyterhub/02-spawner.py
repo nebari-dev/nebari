@@ -46,12 +46,47 @@ def generate_paged_urls(base_url: str, total_records: int, page_size: int) -> li
     return urls
 
 
+def get_scoped_token(conda_store_url: str, admin_token: str, name: str, groups: list[str] = None, admin: bool = False):
+    import urllib3
+
+    token_endpoint = f"http://{conda_store_url}/conda-store/api/v1/token/"
+    http = urllib3.PoolManager() 
+
+    role_bindings = {
+            "role_bindings": {
+                f"{name}/*": ["viewer"],
+                "default/*": ["viewer"],
+                "filesystem/*": ["viewer"],
+                "nebari-git/*": ["viewer"],
+                "global/*": ["viewer"]
+            }
+        }
+
+    if groups is not None:
+        for group in groups:
+            group = group.replace("/", "")
+            role_bindings["role_bindings"][f"{group}/*"] = ["viewer"]
+
+    if admin:
+        role_bindings["role_bindings"]["*/*"] = ["viewer"]
+    
+    encoded_body = json.dumps(role_bindings)
+    
+    token_response = http.request( 
+        "POST", 
+        str(token_endpoint), 
+        headers={"Authorization": f"Bearer {admin_token}", 'Content-Type': 'application/json'} , 
+        body=encoded_body,
+    )
+    token_data = json.loads(token_response.data.decode("UTF-8"))
+    return token_data.get("data", {}).get("token")
+
+
 # TODO: this should get unit tests. Currently, since this is not a python module,
 # adding tests in a traditional sense is not possible. See https://github.com/soapy1/nebari/tree/try-unit-test-spawner
 # for a demo on one approach to adding test.
 def get_conda_store_environments(user_info: dict):
     import os
-
     import urllib3
 
     # Check for the environment variable `CONDA_STORE_API_PAGE_SIZE_LIMIT`. Fall
@@ -65,27 +100,33 @@ def get_conda_store_environments(user_info: dict):
     endpoint = "conda-store/api/v1/environment"
 
     base_url = f"http://{external_url}/{endpoint}/"
-    http = urllib3.PoolManager()
 
-    # get total number of records from the endpoint
-    total_records = get_total_records(base_url, token)
-
+    groups = user_info["groups"]
+    name = user_info["name"]
+    admin = user_info["admin"]
+    scoped_token = get_scoped_token(external_url, token, name, groups, admin)
+    
+    total_records = get_total_records(base_url, scoped_token)
+   
     # will contain all the environment info returned from the api
     env_data = []
 
     # generate a list of urls to hit to build the response
     urls = generate_paged_urls(base_url, total_records, page_size)
 
+    http = urllib3.PoolManager()
+
     # get content from urls
     for url in urls:
         response = http.request(
-            "GET", url, headers={"Authorization": f"Bearer {token}"}
+            "GET", url, headers={"Authorization": f"Bearer {scoped_token}"}
         )
         decoded_response = json.loads(response.data.decode("UTF-8"))
         env_data += decoded_response.get("data", [])
 
     # Filter and return conda environments for the user
-    return [f"{env['namespace']['name']}-{env['name']}" for env in env_data]
+    envs = [f"{env['namespace']['name']}-{env['name']}" for env in env_data]
+    return envs
 
 
 c.Spawner.pre_spawn_hook = get_username_hook
