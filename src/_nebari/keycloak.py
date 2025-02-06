@@ -30,7 +30,9 @@ def do_keycloak(config: schema.Main, *args):
         username = args[1]
         password = args[2] if len(args) >= 3 else None
         groups = args[3] if len(args) >= 4 else None
-        create_user(keycloak_admin, username, password, domain=config.domain, groups=groups)
+        create_user(
+            keycloak_admin, username, password, domain=config.domain, groups=groups
+        )
     elif args[0] == "listusers":
         list_users(keycloak_admin)
     else:
