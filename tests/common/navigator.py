@@ -5,6 +5,7 @@ from abc import ABC
 from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
+from yarl import URL
 
 logger = logging.getLogger()
 
@@ -87,13 +88,17 @@ class LoginNavigator(NavigatorMixin):
 
     def __init__(self, nebari_url, username, password, auth="password", **kwargs):
         super().__init__(**kwargs)
-        self.nebari_url = nebari_url
+        self._nebari_url = URL(nebari_url)
         self.username = username
         self.password = password
         self.auth = auth
         logger.debug(
             f"LoginNavigator initialized with {self.auth} auth method. :: {self.nebari_url}"
         )
+
+    @property
+    def nebari_url(self):
+        return self._nebari_url.human_repr()
 
     def login(self):
         """Login to Nebari deployment using the provided authentication method."""
