@@ -9,7 +9,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
-## Release 2025.1.1 - January 27, 2025
+## Release 2025.2.1 - February 7, 2025
 
 > NOTE: In this release, we have updated our maximum supported Kubernetes version from
 > 1.29 to 1.31. we strongly recommend updating the Kubernetes version
@@ -18,30 +18,34 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 > Remember that Kubernetes minor versions must be upgraded incrementally (1.29 → 1.30 →
 > 1.31).
 
-## What's Changed
-* fix bug to allow --import-plugin to work by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2864
-* Add azure kubernetes policy add-on by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2888
-* Yaml config sets by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2876
-* Add ability to list user installed plugins from the CLI by @soapy1 in https://github.com/nebari-dev/nebari/pull/2891
-* [AUTO] Update CLI doc by @nebari-sensei in https://github.com/nebari-dev/nebari/pull/2841
-* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/2896
-* [ENH] - Include "--attempt-fixes" flag from Nebari upgrade CLI in upgrade steps logic by @smokestacklightnin in https://github.com/nebari-dev/nebari/pull/2839
-* add authorized ip range variable for azure by @dcmcand in https://github.com/nebari-dev/nebari/pull/2880
-* Upgrade conda-store to 2024.11.2 by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2815
-* Handle default value for azure addon policy by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2905
-* Update conda-store-ui tests for updated page verbiage by @soapy1 in https://github.com/nebari-dev/nebari/pull/2911
-* Remove unintended character at the end of the TF_LOG variable by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2912
-* Update k8s max version by @dcmcand in https://github.com/nebari-dev/nebari/pull/2903
-* [ENH] - Use GitHub secrets instead of Vault by @smokestacklightnin in https://github.com/nebari-dev/nebari/pull/2889
-* adds info command text display & change the order of command display by @kernel-loophole in https://github.com/nebari-dev/nebari/pull/2916
-* [AUTO] Update CLI doc by @nebari-sensei in https://github.com/nebari-dev/nebari/pull/2921
+### What's Changed
+- fix bug to allow --import-plugin to work by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2864
+- Add azure kubernetes policy add-on by @viniciusdc in https://github.com/nebari-dev-nebari/pull/2888
+- Yaml config sets by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/287-
+- Add ability to list user installed plugins from the CLI by @soapy1 in https://githu-.com/nebari-dev/nebari/pull/2891
+- [ENH] - Include "--attempt-fixes" flag from Nebari upgrade CLI in upgrade steps log-c by @smokestacklightnin in https://github.com/nebari-dev/nebari/pull/2839
+- add authorized ip range variable for azure by @dcmcand in https://github.com/nebari-dev/nebari/pull/2880
+- Upgrade conda-store to 2024.11.2 by @marcelovilla in https://github.com/nebari-dev/-ebari/pull/2815
+- Handle default value for azure addon policy by @viniciusdc in https://github.com/ne-ari-dev/nebari/pull/2905
+- Update conda-store-ui tests for updated page by @soapy1 in https://github.com/nebar--dev/nebari/pull/2911
+- Remove unintended character at the end of the TF_LOG variable by @marcelovilla in h-tps://github.com/nebari-dev/nebari/pull/2912
+- Update k8s max version by @dcmcand in https://github.com/nebari-dev/nebari/pull/290-
+- [ENH] - Use GitHub secrets instead of Vault by @smokestacklightnin in https://github.com/nebari-d-v/nebari/pull/2889
+- adds info command text display & change the order of command display by @kernel-loophole in https-//github.com/nebari-dev/nebari/pull/2916
+- `2025.1.1` Upgrade step and version bump by @viniciusdc in https://github.com/nebari-dev/nebari/p-ll/2924
+- Retrieve all conda-store environments by @soapy1 in https://github.com/nebari-dev/nebari/pull/291-
+- [BUG] - Make sure to get envs when the number of envs is less than page limit by @soapy1 in https://github.com/nebar--dev/nebari/pull/2939
+- Fix Playwright CI errors & update local instructions by @viniciusdc in https://github.com/nebari-dev/nebari/pull/294-
+- Update conda-store-server image + use public auth_schema module for AuthenticationToken by @soapy1 in https://github.com/nebari-dev/nebari/pull/2931-
 
-## New Contributors
-* @soapy1 made their first contribution in https://github.com/nebari-dev/nebari/pull/2891
-* @smokestacklightnin made their first contribution in https://github.com/nebari-dev/nebari/pull/2839
-* @kernel-loophole made their first contribution in https://github.com/nebari-dev/nebari/pull/2916
+### New Contributors
 
-**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.12.1...2025.1.1
+- @soapy1 made their first contribution in https://github.com/nebari-dev/nebari/pull2891
+- @smokestacklightnin made their first contribution in https://github.com/nebari-dev
+/nebari/pull/2839
+- @kernel-loophole made their first contribution in https://github.com/nebari-dev/nebari/pull/2916
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.12.1...2025.2.1
 
 ## Release 2024.12.1 - December 13, 2024
 
@@ -96,7 +100,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 > NOTE: This hotfix addresses several major bugs identified in the 2024.9.1 release. For a detailed overview, please refer to the related discussion at #2798. Users should upgrade directly from 2024.7.1 to 2024.11.1.
 
-## What's Changed
+### What's Changed
 
 - fix `CHECK_URL` in kuberhealthy checks to respect namespaces by @dcmcand in https://github.com/nebari-dev/nebari/pull/2779
 - fix bug where `check_immutable_fields` throws error with old version of Nebari by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2796

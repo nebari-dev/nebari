@@ -1626,8 +1626,8 @@ class Upgrade_2024_12_1(UpgradeStep):
         return config
 
 
-class Upgrade_2025_1_1(UpgradeStep):
-    version = "2025.1.1"
+class Upgrade_2025_2_1(UpgradeStep):
+    version = "2025.2.1"
 
     @override
     def _version_specific_upgrade(
@@ -1651,7 +1651,7 @@ class Upgrade_2025_1_1(UpgradeStep):
         )
 
         rich.print(text)
-        rich.print("Ready to upgrade to Nebari version [green]2025.1.1[/green].")
+        rich.print("Ready to upgrade to Nebari version [green]2025.2.1[/green].")
 
         return config
 
