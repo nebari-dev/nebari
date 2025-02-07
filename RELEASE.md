@@ -9,7 +9,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
-## Release 2025.2.1 - February 6, 2025
+## Release 2025.2.1 - February 7, 2025
 
 > NOTE: In this release, we have updated our maximum supported Kubernetes version from
 > 1.29 to 1.31. we strongly recommend updating the Kubernetes version
