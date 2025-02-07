@@ -5,11 +5,6 @@ on:
     - cron: "0 0 * * MON"
   workflow_dispatch:
     inputs:
-      branch:
-        description: 'Nebari branch to deploy, test, destroy'
-        required: true
-        default: main
-        type: string
       image-tag:
         description: 'Nebari image tag created by the nebari-docker-images repo'
         required: true
@@ -28,7 +23,6 @@ on:
         - error
 
 env:
-  NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'main' }}
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
 
@@ -44,7 +38,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ env.NEBARI_GH_BRANCH }}
           fetch-depth: 0
 
       - name: Set up Python
@@ -57,24 +50,11 @@ jobs:
           pip install .[dev]
           playwright install
 
-      - name: Retrieve secret from Vault
-        uses: hashicorp/vault-action@v3.0.0
-        with:
-          method: jwt
-          url: "https://quansight-vault-public-vault-b2379fa7.d415e30e.z1.hashicorp.cloud:8200"
-          namespace: "admin/quansight"
-          role: "repository-nebari-dev-nebari-role"
-          secrets: |
-            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci project_id | PROJECT_ID;
-            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci workload_identity_provider | GCP_WORKFLOW_PROVIDER;
-            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci service_account_name | GCP_SERVICE_ACCOUNT;
-            kv/data/repository/nebari-dev/nebari/cloudflare/internal-devops@quansight.com/nebari-dev-ci token | CLOUDFLARE_TOKEN;
-
       - name: 'Authenticate to GCP'
         uses: 'google-github-actions/auth@v1'
         with:
-            workload_identity_provider: ${{ env.GCP_WORKFLOW_PROVIDER }}
-            service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+            workload_identity_provider: ${{ secrets.GCP_WORKFLOW_PROVIDER }}
+            service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Set required environment variables
         run: |
@@ -88,3 +68,5 @@ jobs:
           NEBARI_SECRET__default_images__jupyterhub: "quay.io/nebari/nebari-jupyterhub:${{ env.NEBARI_IMAGE_TAG }}"
           NEBARI_SECRET__default_images__jupyterlab: "quay.io/nebari/nebari-jupyterlab:${{ env.NEBARI_IMAGE_TAG }}"
           NEBARI_SECRET__default_images__dask_worker: "quay.io/nebari/nebari-dask-worker:${{ env.NEBARI_IMAGE_TAG }}"
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}

@@ -2,6 +2,7 @@ import functools
 import os
 import re
 import time
+from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 import boto3
@@ -23,25 +24,19 @@ def check_credentials() -> None:
 
 @functools.lru_cache()
 def aws_session(
-    region: Optional[str] = None, digitalocean_region: Optional[str] = None
+    region: Optional[str] = None,
 ) -> boto3.Session:
     """Create a boto3 session."""
-    if digitalocean_region:
-        aws_access_key_id = os.environ["SPACES_ACCESS_KEY_ID"]
-        aws_secret_access_key = os.environ["SPACES_SECRET_ACCESS_KEY"]
-        region = digitalocean_region
-        aws_session_token = None
-    else:
-        check_credentials()
-        aws_access_key_id = os.environ["AWS_ACCESS_KEY_ID"]
-        aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"]
-        aws_session_token = os.environ.get("AWS_SESSION_TOKEN")
+    check_credentials()
+    aws_access_key_id = os.environ["AWS_ACCESS_KEY_ID"]
+    aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"]
+    aws_session_token = os.environ.get("AWS_SESSION_TOKEN")
 
-        if not region:
-            raise ValueError(
-                "Please specify `region` in the nebari-config.yaml or if initializing the nebari-config, set the region via the "
-                "`--region` flag or via the AWS_DEFAULT_REGION environment variable.\n"
-            )
+    if not region:
+        raise ValueError(
+            "Please specify `region` in the nebari-config.yaml or if initializing the nebari-config, set the region via the "
+            "`--region` flag or via the AWS_DEFAULT_REGION environment variable.\n"
+        )
 
     return boto3.Session(
         region_name=region,
@@ -119,6 +114,35 @@ def instances(region: str) -> Dict[str, str]:
         [j["InstanceType"] for i in paginator.paginate() for j in i["InstanceTypes"]]
     )
     return {t: t for t in instance_types}
+
+
+@dataclass
+class Kms_Key_Info:
+    Arn: str
+    KeyUsage: str
+    KeySpec: str
+    KeyManager: str
+
+
+@functools.lru_cache()
+def kms_key_arns(region: str) -> Dict[str, Kms_Key_Info]:
+    """Return dict of available/enabled KMS key IDs and associated KeyMetadata for the AWS region."""
+    session = aws_session(region=region)
+    client = session.client("kms")
+    kms_keys = {}
+    # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kms/client/list_keys.html
+    for key in client.list_keys().get("Keys"):
+        key_id = key["KeyId"]
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kms/client/describe_key.html#:~:text=Response%20Structure
+        key_data = client.describe_key(KeyId=key_id).get("KeyMetadata")
+        if key_data.get("Enabled"):
+            kms_keys[key_id] = Kms_Key_Info(
+                Arn=key_data.get("Arn"),
+                KeyUsage=key_data.get("KeyUsage"),
+                KeySpec=key_data.get("KeySpec"),
+                KeyManager=key_data.get("KeyManager"),
+            )
+    return kms_keys
 
 
 def aws_get_vpc_id(name: str, namespace: str, region: str) -> Optional[str]:
@@ -682,21 +706,17 @@ def aws_delete_s3_objects(
     bucket_name: str,
     endpoint: Optional[str] = None,
     region: Optional[str] = None,
-    digitalocean_region: Optional[str] = None,
 ):
     """
     Delete all objects in the S3 bucket.
 
-    NOTE: This method is shared with Digital Ocean as their "Spaces" is S3 compatible and uses the same API.
-
     Parameters:
         bucket_name (str): S3 bucket name
-        endpoint (str): S3 endpoint URL (required for Digital Ocean spaces)
+        endpoint (str): S3 endpoint URL
         region (str): AWS region
-        digitalocean_region (str): Digital Ocean region
 
     """
-    session = aws_session(region=region, digitalocean_region=digitalocean_region)
+    session = aws_session(region=region)
     s3 = session.client("s3", endpoint_url=endpoint)
 
     try:
@@ -749,22 +769,18 @@ def aws_delete_s3_bucket(
     bucket_name: str,
     endpoint: Optional[str] = None,
     region: Optional[str] = None,
-    digitalocean_region: Optional[str] = None,
 ):
     """
     Delete S3 bucket.
 
-    NOTE: This method is shared with Digital Ocean as their "Spaces" is S3 compatible and uses the same API.
-
     Parameters:
         bucket_name (str): S3 bucket name
-        endpoint (str): S3 endpoint URL (required for Digital Ocean spaces)
+        endpoint (str): S3 endpoint URL
         region (str): AWS region
-        digitalocean_region (str): Digital Ocean region
     """
-    aws_delete_s3_objects(bucket_name, endpoint, region, digitalocean_region)
+    aws_delete_s3_objects(bucket_name, endpoint, region)
 
-    session = aws_session(region=region, digitalocean_region=digitalocean_region)
+    session = aws_session(region=region)
     s3 = session.client("s3", endpoint_url=endpoint)
 
     try:
