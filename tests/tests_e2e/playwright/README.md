@@ -33,47 +33,56 @@ tests
 - `handlers.py`: Contains classes fore handling the different level of access to
   services a User might encounter, such as Notebook, Conda-store and others.
 
+Below is an example of how you might update the **Setup** and **Running the Playwright Tests** sections of your README to reflect the new `Makefile` and the updated `pytest` invocation.
+
+---
+
 ## Setup
 
-1. **Install Nebari with Development Requirements**
+1. **Use the provided Makefile to install dependencies**
 
-   Install Nebari including development requirements (which include Playwright):
-
-   ```bash
-   pip install -e ".[dev]"
-   ```
-
-2. **Install Playwright**
-
-   Install Playwright:
+   Navigate to the Playwright tests directory and run the `setup` target:
 
    ```bash
-   playwright install
+   cd tests_e2e/playwright
+   make setup
    ```
 
-   *Note:* If you see the warning `BEWARE: your OS is not officially supported by Playwright; downloading fallback build`, it is not critical. Playwright should still work (see microsoft/playwright#15124).
+   This command will:
 
-3. **Create Environment Vars**
+   - Install the pinned dependencies from `requirements.txt`.
+   - Install Playwright and its required browser dependencies.
+   - Create a new `.env` file from `.env.tpl`.
 
-   Fill in your execution space environment with the following values:
+2. **Fill in the `.env` file**
 
-   - `KEYCLOAK_USERNAME`: Nebari username for username/password login or Google email address/Google sign-in.
-   - `KEYCLOAK_PASSWORD`: Password associated with `KEYCLOAK_USERNAME`.
-   - `NEBARI_FULL_URL`: Full URL path including scheme to the Nebari instance (e.g., "https://nebari.quansight.dev/").
+   Open the newly created `.env` file and fill in the following values:
 
-   This user can be created with the following command (or use an existing non-root user):
+   - `KEYCLOAK_USERNAME`: Nebari username for username/password login (or Google email for Google sign-in).
+   - `KEYCLOAK_PASSWORD`: Password associated with the above username.
+   - `NEBARI_FULL_URL`: Full URL (including `https://`) to the Nebari instance (e.g., `https://nebari.quansight.dev/`).
+
+   If you need to create a user for testing, you can do so with:
 
    ```bash
    nebari keycloak adduser --user <username> <password> --config <NEBARI_CONFIG_PATH>
    ```
 
+*Note:* If you see the warning:
+```
+BEWARE: your OS is not officially supported by Playwright; downloading fallback build
+```
+it is not critical. Playwright should still work despite the warning.
+
 ## Running the Playwright Tests
 
-Playwright tests are run inside of pytest using:
-
+You can run the Playwright tests with `pytest`.
 ```bash
-pytest tests_e2e/playwright/test_playwright.py
+pytest tests_e2e/playwright/test_playwright.py --numprocesses auto
 ```
+
+> **Important**: Due to how Pytest manages async code; Playwright’s sync calls can conflict with default Pytest concurrency settings, and using `--numprocesses auto` helps mitigate potential thread-blocking issues.
+
 
 Videos of the test playback will be available in `$PWD/videos/`. To disabled the browser
 runtime preview of what is happening while the test runs, pass the `--headed` option to `pytest`. You
@@ -188,3 +197,17 @@ If your test suit presents a need for a more complex sequence of actions or spec
 parsing around the contents present in each page, you can create
 your own handler to execute the auxiliary actions while the test is running. Check the
 `handlers.py` over some examples of how that's being done.
+
+
+## Debugging Playwright tests
+
+Playwright supports a debug mode called
+[Inspector](https://playwright.dev/python/docs/debug#playwright-inspector) that can be
+used to inspect the browser and the page while the test is running. To enabled this
+debugging option within the tests execution you can pass the `PWDEBUG=1` variable within
+your test execution command.
+
+For example, to run a single test with the debug mode enabled, you can use the following
+```bash
+PWDEBUG=1 pytest -s test_playwright.py::test_notebook --numprocesses 1
+```
