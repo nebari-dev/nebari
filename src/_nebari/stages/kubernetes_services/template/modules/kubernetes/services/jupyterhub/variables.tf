@@ -219,3 +219,13 @@ variable "initial-repositories" {
   type        = string
   default     = "[]"
 }
+
+variable "node-taint-tolerations" {
+  description = "Node taint toleration"
+  type = list(object({
+    key      = string
+    operator = string
+    value    = string
+    effect   = string
+  }))
+}

@@ -243,6 +243,25 @@ def base_profile_extra_mounts():
     }
 
 
+def node_taint_tolerations():
+    tolerations = z2jh.get_config("custom.node-taint-tolerations")
+
+    if not tolerations:
+        return {}
+
+    return {
+        "tolerations": [
+            {
+                "key": taint["key"],
+                "operator": taint["operator"],
+                "value": taint["value"],
+                "effect": taint["effect"],
+            }
+            for taint in tolerations
+        ]
+    }
+
+
 def configure_user_provisioned_repositories(username):
     # Define paths and configurations
     pvc_home_mount_path = f"home/{username}"
@@ -523,6 +542,7 @@ def render_profile(
             configure_user(username, groups),
             configure_user_provisioned_repositories(username),
             profile_kubespawner_override,
+            node_taint_tolerations(),
         ],
         {},
     )
