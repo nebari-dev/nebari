@@ -35,6 +35,16 @@ from tests.tests_deployment.utils import get_refresh_jupyterhub_token
                 "view-profile",
                 "allow-read-access-to-services-role",
                 "allow-group-directory-creation-role",
+                # admin roles
+                "admin",
+                "grafana_admin",
+                "conda_store_admin",
+                "argo-admin",
+                "manage-users",
+                "query-groups",
+                "query-users",
+                "jupyterhub_admin",
+                "dask_gateway_admin",
             },
         ),
         (
@@ -169,7 +179,7 @@ def test_jupyterhub_loads_groups_from_keycloak(jupyterhub_access_token):
         verify=False,
     )
     user = response.json()
-    assert set(user["groups"]) == {"/analyst", "/developer", "/users"}
+    assert set(user["groups"]) == {"/analyst", "/developer", "/admin", "/users"}
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
