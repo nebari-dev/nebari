@@ -181,7 +181,6 @@ def test_startup_apps_created(jupyterhub_access_token):
         verify=False,
     )
     shared_servers = response.json()
-    breakpoint()
     assert "my-startup-server" in {
         item["server"]["name"] for item in shared_servers["items"]
     }
