@@ -1,3 +1,5 @@
+from typing import Set
+
 import pytest
 import requests
 
@@ -14,30 +16,46 @@ from tests.tests_deployment.keycloak_utils import (
 from tests.tests_deployment.utils import get_refresh_jupyterhub_token
 
 
+@pytest.mark.parametrize(
+    "username,expected_roles",
+    [
+        (
+            constants.KEYCLOAK_USERNAME,
+            {
+                "user",
+                "manage-account",
+                "jupyterhub_developer",
+                "argo-developer",
+                "dask_gateway_developer",
+                "grafana_viewer",
+                "conda_store_developer",
+                "argo-viewer",
+                "grafana_developer",
+                "manage-account-links",
+                "view-profile",
+                "allow-read-access-to-services-role",
+                "allow-group-directory-creation-role",
+            },
+        ),
+        (
+            "service-account-jupyterhub",
+            {"allow-app-sharing-role", "default-roles-nebari", "user"},
+        ),
+    ],
+    ids=["admin_user", "analyst_user"],
+)
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
-def test_jupyterhub_loads_roles_from_keycloak(jupyterhub_access_token):
+def test_jupyterhub_loads_roles_from_keycloak(
+    jupyterhub_access_token: str, username: str, expected_roles: Set[str]
+):
+    """Test that JupyterHub correctly loads roles from Keycloak for different users"""
     response = requests.get(
-        url=f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}",
+        url=f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{username}",
         headers={"Authorization": f"Bearer {jupyterhub_access_token}"},
         verify=False,
     )
-    user = response.json()
-    assert set(user["roles"]) == {
-        "user",
-        "manage-account",
-        "jupyterhub_developer",
-        "argo-developer",
-        "dask_gateway_developer",
-        "grafana_viewer",
-        "conda_store_developer",
-        "argo-viewer",
-        "grafana_developer",
-        "manage-account-links",
-        "view-profile",
-        # default roles
-        "allow-read-access-to-services-role",
-        "allow-group-directory-creation-role",
-    }
+    actual_roles = set(response.json()["roles"])
+    assert actual_roles == expected_roles
 
 
 @token_parameterized(note="get-default-scopes")
