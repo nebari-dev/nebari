@@ -174,12 +174,14 @@ def test_jupyterhub_loads_groups_from_keycloak(jupyterhub_access_token):
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_startup_apps_created(jupyterhub_access_token):
-    username = "service-account-jupyterhub"
     response = requests.get(
-        f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{username}",
+        f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/shared",
         params={"include_stopped_servers": True},
         headers={"Authorization": f"Bearer {jupyterhub_access_token}"},
         verify=False,
     )
-    user = response.json()
-    assert "my-startup-server" in user["servers"]
+    shared_servers = response.json()
+    breakpoint()
+    assert "my-startup-server" in {
+        item["server"]["name"] for item in shared_servers["items"]
+    }
