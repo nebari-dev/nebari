@@ -75,6 +75,37 @@ runs:
                 size: 1Gi
         EOM
 
+        # Add a jhub startup app for testing
+        cat >> '${{ steps.metadata.outputs.config }}' <<- EOM
+        jhub_apps:
+          enabled: true
+          overrides: {
+            startup_apps: [
+              {
+                "username": "service-account-jupyterhub",
+                "servername": "my-startup-server",
+                "user_options": {
+                    "display_name": "My Startup Server-",
+                    "description": "description",
+                    "thumbnail": "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mNkYPhfz0AEYBxVSF+FAP5FDvcfRYWgAAAAAElFTkSuQmCC",
+                    "filepath": "panel_basic.py",
+                    "framework": "panel",
+                    "public": False,
+                    "keep_alive": False,
+                    "env": {"MY_ENV_VAR": "MY_VALUE"},
+                    "repository": {"url": "https://github.com/nebari-dev/jhub-apps-from-git-repo-example.git"},
+                    "conda_env": "global-mypanel",
+                    "profile": "small-instance",
+                    "share_with": {
+                      "users": [],
+                      "groups": ["/admin"]
+                    },
+                },
+              },
+            ]
+          }
+        EOM
+
     - shell: bash
       run: |
         # Display Nebari config
