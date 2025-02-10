@@ -42,7 +42,7 @@ from tests.tests_deployment.utils import get_refresh_jupyterhub_token
             {"allow-app-sharing-role", "default-roles-nebari", "user"},
         ),
     ],
-    ids=["admin_user", "analyst_user"],
+    ids=["test-user", "jupyterhub-service-account"],
 )
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_jupyterhub_loads_roles_from_keycloak(
