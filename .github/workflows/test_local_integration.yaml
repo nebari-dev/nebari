@@ -17,7 +17,7 @@ on:
       - ".cirun.yml"
   push:
     branches:
-      - main
+      - "*"
       - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/test_local_integration.yaml"
