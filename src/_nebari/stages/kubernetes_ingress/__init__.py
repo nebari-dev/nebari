@@ -190,11 +190,18 @@ class KubernetesIngressStage(NebariTerraformStage):
             cert_details["certificate-secret-name"] = (
                 self.config.certificate.secret_name
             )
-        cert_details["acme-challenge-type"] = self.config.certificate.acme_challenge_type
+        cert_details["acme-challenge-type"] = (
+            self.config.certificate.acme_challenge_type
+        )
         if self.config.certificate.acme_challenge_type == AcmeChallengeType.dns.value:
-            if None in {os.environ.get("CLOUDFLARE_DNS_API_TOKEN"), os.environ.get("CLOUDFLARE_EMAIL")}:
-                raise ValueError("Environment variables 'CLOUDFLARE_DNS_API_TOKEN' and 'CLOUDFLARE_EMAIL' "
-                                 "must be set for DNS challenge type ('acme_challenge_type: dns')")
+            if None in {
+                os.environ.get("CLOUDFLARE_DNS_API_TOKEN"),
+                os.environ.get("CLOUDFLARE_EMAIL"),
+            }:
+                raise ValueError(
+                    "Environment variables 'CLOUDFLARE_DNS_API_TOKEN' and 'CLOUDFLARE_EMAIL' "
+                    "must be set for DNS challenge type ('acme_challenge_type: dns')"
+                )
         return {
             **{
                 "traefik-image": {
