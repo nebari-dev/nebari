@@ -22,7 +22,7 @@ locals {
     },
     {
       name  = "CLOUDFLARE_DNS_API_TOKEN"
-      value = var.cloudflare_dns_api_token
+      value = var.cloudflare-dns-api-token
     }
   ] : []
   certificate-settings = {
