@@ -3,16 +3,37 @@ locals {
     "--entrypoints.websecure.http.tls.certResolver=default",
     "--entrypoints.minio.http.tls.certResolver=default",
   ]
+  certificate-challenge = {
+    dns = [
+      "--certificatesresolvers.letsencrypt.acme.dnschallenge=true",
+      # Only cloudflare is supported at the moment for DNS challenge
+      # TODO: add support for other DNS providers
+      "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
+    ]
+    tls = [
+      "--certificatesresolvers.letsencrypt.acme.tlschallenge",
+    ]
+  }
+  # for dns challenge, we need to set the cloudflare env vars
+  cloudflare_env_vars = var.acme_challenge_type == "dns" ? [
+    {
+      name  = "CLOUDFLARE_EMAIL"
+      value = var.cloudflare-email
+    },
+    {
+      name  = "CLOUDFLARE_DNS_API_TOKEN"
+      value = var.cloudflare_dns_api_token
+    }
+  ] : []
   certificate-settings = {
-    lets-encrypt = [
+    lets-encrypt = concat([
       "--entrypoints.websecure.http.tls.certResolver=letsencrypt",
       "--entrypoints.minio.http.tls.certResolver=letsencrypt",
-      "--certificatesresolvers.letsencrypt.acme.dnschallenge=true",
-      "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare",
       "--certificatesresolvers.letsencrypt.acme.email=${var.acme-email}",
       "--certificatesresolvers.letsencrypt.acme.storage=/mnt/acme-certificates/acme.json",
       "--certificatesresolvers.letsencrypt.acme.caserver=${var.acme-server}",
-    ]
+    ], local.certificate-challenge[var.acme-challenge-type]
+    )
     self-signed = local.default_cert
     existing    = local.default_cert
     disabled    = []
@@ -231,14 +252,13 @@ resource "kubernetes_deployment" "main" {
         container {
           image = "${var.traefik-image.image}:${var.traefik-image.tag}"
           name  = var.name
-          env {
-            name = "CLOUDFLARE_EMAIL"
-            value = "akumar@quansight.com"
-          }
 
-          env {
-            name = "CLOUDFLARE_DNS_API_TOKEN"
-            value = "YOUR-SECRET-TOKEN"
+          dynamic "env" {
+            for_each = local.cloudflare_env_vars
+            content {
+              name  = env.value.name
+              value = env.value.value
+            }
           }
 
           volume_mount {

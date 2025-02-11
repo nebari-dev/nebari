@@ -1,5 +1,6 @@
 import enum
 import logging
+import os
 import socket
 import sys
 import time
@@ -124,6 +125,11 @@ class CertificateEnum(str, enum.Enum):
         return representer.represent_str(node.value)
 
 
+class AcmeChallengeType(str, enum.Enum):
+    tls = "tls"
+    dns = "dns"
+
+
 class Certificate(schema.Base):
     type: CertificateEnum = CertificateEnum.selfsigned
     # existing
@@ -131,6 +137,7 @@ class Certificate(schema.Base):
     # lets-encrypt
     acme_email: Optional[str] = None
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
+    acme_challenge_type: Optional[str] = AcmeChallengeType.dns.value
 
 
 class DnsProvider(schema.Base):
@@ -183,7 +190,11 @@ class KubernetesIngressStage(NebariTerraformStage):
             cert_details["certificate-secret-name"] = (
                 self.config.certificate.secret_name
             )
-
+        cert_details["acme-challenge-type"] = self.config.certificate.acme_challenge_type
+        if self.config.certificate.acme_challenge_type == AcmeChallengeType.dns.value:
+            if None in {os.environ.get("CLOUDFLARE_DNS_API_TOKEN"), os.environ.get("CLOUDFLARE_EMAIL")}:
+                raise ValueError("Environment variables 'CLOUDFLARE_DNS_API_TOKEN' and 'CLOUDFLARE_EMAIL' "
+                                 "must be set for DNS challenge type ('acme_challenge_type: dns')")
         return {
             **{
                 "traefik-image": {
