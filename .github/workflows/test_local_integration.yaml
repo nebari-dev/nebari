@@ -144,6 +144,20 @@ jobs:
           path: |
             ./tests/tests_e2e/playwright/videos/
 
+      - name: Setup frp tunnel
+        if: always()
+        uses: cirunlabs/frp-tunnel-action@v1.2.0
+        with:
+          timeout_minutes: 360
+          frp_server: frp-github-actions.iakte.ch
+          frp_server_port: 7000
+          protocol: 'tcp'
+          frp_token: ${{ secrets.FRP_TOKEN }}
+          local_ip: '127.0.0.1'
+          local_port: 22
+          remote_port: 6000
+          frp_version: '0.61.1'
+
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
         # Since this is not critical for most pull requests and takes more than half of the time
