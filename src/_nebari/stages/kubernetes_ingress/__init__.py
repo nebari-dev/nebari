@@ -137,7 +137,7 @@ class Certificate(schema.Base):
     # lets-encrypt
     acme_email: Optional[str] = None
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
-    acme_challenge_type: Optional[str] = AcmeChallengeType.dns.value
+    acme_challenge_type: Optional[str] = AcmeChallengeType.tls.value
 
 
 class DnsProvider(schema.Base):
@@ -202,6 +202,11 @@ class KubernetesIngressStage(NebariTerraformStage):
                     "Environment variables 'CLOUDFLARE_DNS_API_TOKEN' and 'CLOUDFLARE_EMAIL' "
                     "must be set for DNS challenge type ('acme_challenge_type: dns')"
                 )
+            else:
+                cert_details["cloudflare-dns-api-token"] = os.environ.get(
+                    "CLOUDFLARE_DNS_API_TOKEN"
+                )
+                cert_details["cloudflare-email"] = os.environ.get("CLOUDFLARE_EMAIL")
         return {
             **{
                 "traefik-image": {

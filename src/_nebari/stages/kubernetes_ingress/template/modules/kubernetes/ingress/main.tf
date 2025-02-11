@@ -15,14 +15,14 @@ locals {
     ]
   }
   # for dns challenge, we need to set the cloudflare env vars
-  cloudflare_env_vars = var.acme_challenge_type == "dns" ? [
+  cloudflare_env_vars = var.acme-challenge-type == "dns" ? [
     {
       name  = "CLOUDFLARE_EMAIL"
       value = var.cloudflare-email
     },
     {
       name  = "CLOUDFLARE_DNS_API_TOKEN"
-      value = var.cloudflare_dns_api_token
+      value = var.cloudflare-dns-api-token
     }
   ] : []
   certificate-settings = {

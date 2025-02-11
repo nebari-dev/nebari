@@ -37,6 +37,24 @@ variable "acme-server" {
   default = "https://acme-staging-v02.api.letsencrypt.org/directory"
 }
 
+variable "acme-challenge-type" {
+  # https://letsencrypt.org/docs/challenge-types
+  description = "ACME challenge type, 'tls' or 'dns'"
+  default     = "tls"
+}
+
+variable "cloudflare-email" {
+  # https://go-acme.github.io/lego/dns/cloudflare/
+  description = "Cloudflare email"
+  default     = null
+}
+
+variable "cloudflare-dns-api-token" {
+  # https://go-acme.github.io/lego/dns/cloudflare/
+  description = "Cloudflare dns api token for DNS challenge"
+  default     = null
+}
+
 variable "certificate-secret-name" {
   description = "Kubernetes secret used for certificate"
   default     = ""
