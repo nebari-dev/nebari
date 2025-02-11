@@ -17,7 +17,7 @@ on:
       - ".cirun.yml"
   push:
     branches:
-      - main
+      - "*"
       - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/test_local_integration.yaml"
@@ -143,6 +143,31 @@ jobs:
           name: e2e-playwright
           path: |
             ./tests/tests_e2e/playwright/videos/
+
+      - name: Setup frp tunnel
+        if: always()
+        uses: cirunlabs/frp-tunnel-action@v1.2.0
+        with:
+          timeout_minutes: 360
+          frp_client_config: |
+            serverAddr = "${{ secrets.FRP_SERVER }}"
+            serverPort = 7000
+            auth.method = "token"
+            auth.token = "${{ secrets.FRP_TOKEN }}"
+
+            [[proxies]]
+            name = "github-runner-nebari-https-${{ matrix.os-version}}-${{ github.run_id }}-${{ github.sha }}"
+            type = "tcp"
+            localIp = "172.18.1.100"
+            localPort = 443
+            remotePort = 443
+
+            [[proxies]]
+            name = "github-runner-ssh-${{ matrix.os-version}}-${{ github.run_id }}-${{ github.sha }}"
+            type = "tcp"
+            localIP = "127.0.0.1"
+            localPort = 22
+            remotePort = 6000
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
