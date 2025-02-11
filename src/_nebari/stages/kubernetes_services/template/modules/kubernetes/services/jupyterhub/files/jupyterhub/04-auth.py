@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import os
 import time
 import urllib
@@ -8,7 +9,7 @@ from functools import reduce
 from jupyterhub import scopes
 from jupyterhub.traitlets import Callable
 from oauthenticator.generic import GenericOAuthenticator
-from traitlets import Bool, Unicode, Union
+from traitlets import Bool, Unicode, Union, default
 
 
 class KeyCloakOAuthenticator(GenericOAuthenticator):
@@ -17,6 +18,13 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
     This subclass adds role management on top of it, building on the new `manage_roles`
     feature added in JupyterHub 5.0 (https://github.com/jupyterhub/jupyterhub/pull/4748).
     """
+
+    JHUB_SERVICE_ACCOUNT_NAME = Unicode()
+
+    # Keycloak currently dictates service account name format as `service-account-<client_id>`  See https://github.com/keycloak/keycloak/blob/5e6bb9f7bd2c83febd12668f2605aa8ecbdcf130/docs/documentation/server_admin/topics/admin-cli.adoc?plain=1#L1008 for more info.
+    @default("JHUB_SERVICE_ACCOUNT_NAME")
+    def _default_jhub_service_account_name(self):
+        return f"service-account-{self.client_id}"
 
     claim_roles_key = Union(
         [Unicode(os.environ.get("OAUTH2_ROLES_KEY", "groups")), Callable()],
@@ -29,6 +37,39 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
     )
 
     reset_managed_roles_on_startup = Bool(True)
+
+    async def set_jhub_service_account_auth_state(self, user):
+        if user.name != self.JHUB_SERVICE_ACCOUNT_NAME:
+            raise ValueError(
+                f'User name "{user.name}" does not match service account name "{self.JHUB_SERVICE_ACCOUNT_NAME}"'
+            )
+        auth_model = await self.authenticate_service_account()
+        await user.save_auth_state(auth_model["auth_state"])
+        logging.info(f'Auth state set for service account: "{user.name}"')
+
+    async def authenticate_service_account(self):
+        # We mimic what OAuthenticator currently does in `authenticate` method, but the logic may change in the future
+        # Currently, the logic is based on https://github.com/jupyterhub/oauthenticator/blob/d31bb193e84e7cda58b16f2f5d385c9b8affda4f/oauthenticator/oauth2.py#L1436
+
+        token_info = await self._get_token_info()
+
+        # Get user info using the access token
+        user_info = await self.token_to_user(token_info)
+
+        # Get/set username
+        username = self.user_info_to_username(user_info)
+        username = self.normalize_username(username)
+
+        # Build auth model similar to OAuth flow
+        auth_model = {
+            "name": username,
+            "admin": True if username in self.admin_users else None,
+            "auth_state": self.build_auth_state_dict(token_info, user_info),
+        }
+
+        auth_model = await self.update_auth_model(auth_model)
+
+        return auth_model
 
     async def update_auth_model(self, auth_model):
         """Updates and returns the auth_model dict.
@@ -46,15 +87,15 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         user_id = auth_model["auth_state"]["oauth_user"]["sub"]
         token = await self._get_token()
 
-        jupyterhub_client_id = await self._get_jupyterhub_client_id(token=token)
+        jupyterhub_client_uuid = await self._get_jupyterhub_client_uuid(token=token)
         user_info = auth_model["auth_state"][self.user_auth_state_key]
         user_roles_from_claims = self._get_user_roles(user_info=user_info)
         keycloak_api_call_start = time.time()
         user_roles = await self._get_client_roles_for_user(
-            user_id=user_id, client_id=jupyterhub_client_id, token=token
+            user_id=user_id, client_id=jupyterhub_client_uuid, token=token
         )
         user_roles_rich = await self._get_roles_with_attributes(
-            roles=user_roles, client_id=jupyterhub_client_id, token=token
+            roles=user_roles, client_id=jupyterhub_client_uuid, token=token
         )
 
         # Include which groups have permission to mount shared directories (user by
@@ -63,7 +104,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             await self.get_client_groups_with_mount_permissions(
                 user_groups=auth_model["auth_state"]["oauth_user"]["groups"],
                 user_roles=user_roles_rich,
-                client_id=jupyterhub_client_id,
+                client_id=jupyterhub_client_uuid,
                 token=token,
             )
         )
@@ -114,7 +155,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         )
         return client_roles_rich
 
-    async def _get_jupyterhub_client_id(self, token):
+    async def _get_jupyterhub_client_uuid(self, token):
         # Get the clients list to find the "id" of "jupyterhub" client.
         clients_data = await self._fetch_api(endpoint="clients/", token=token)
         jupyterhub_clients = [
@@ -131,9 +172,9 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
                 "Managed roles can only be loaded when `manage_roles` is True"
             )
         token = await self._get_token()
-        jupyterhub_client_id = await self._get_jupyterhub_client_id(token=token)
+        jupyterhub_client_uuid = await self._get_jupyterhub_client_uuid(token=token)
         client_roles_rich = await self._get_jupyterhub_client_roles(
-            jupyterhub_client_id=jupyterhub_client_id, token=token
+            jupyterhub_client_id=jupyterhub_client_uuid, token=token
         )
 
         # Includes roles like "default-roles-nebari", "offline_access", "uma_authorization"
@@ -168,7 +209,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
                 await self._get_users_and_groups_for_role(
                     role_name,
                     token=token,
-                    client_id=jupyterhub_client_id,
+                    client_id=jupyterhub_client_uuid,
                 )
             )
 
@@ -307,7 +348,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             )
             return set()
 
-    async def _get_token(self) -> str:
+    async def _get_token_info(self) -> str:
         http = self.http_client
 
         body = urllib.parse.urlencode(
@@ -322,8 +363,12 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             method="POST",
             body=body,
         )
-        data = json.loads(response.body)
-        return data["access_token"]  # type: ignore[no-any-return]
+        token_info = json.loads(response.body)
+        return token_info
+
+    async def _get_token(self) -> str:
+        token_info = await self._get_token_info()
+        return token_info["access_token"]  # type: ignore[no-any-return]
 
     async def _fetch_api(self, endpoint: str, token: str):
         response = await self.http_client.fetch(

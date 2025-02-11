@@ -1,11 +1,14 @@
 import json
 import pathlib
-from typing import Tuple
+from typing import List, Tuple
 
 import typer
 
 from _nebari.config import read_configuration
-from _nebari.keycloak import do_keycloak, export_keycloak_users
+from _nebari.keycloak import (
+    do_keycloak,
+    export_keycloak_users,
+)
 from nebari.hookspecs import hookimpl
 
 
@@ -30,6 +33,9 @@ def nebari_subcommand(cli: typer.Typer):
         add_users: Tuple[str, str] = typer.Option(
             ..., "--user", help="Provide both: <username> <password>"
         ),
+        groups: List[str] = typer.Option(
+            None, "-g", "--groups", help="Provide existing groups to add user to"
+        ),
         config_filename: pathlib.Path = typer.Option(
             ...,
             "-c",
@@ -40,10 +46,12 @@ def nebari_subcommand(cli: typer.Typer):
         """Add a user to Keycloak. User will be automatically added to the [italic]analyst[/italic] group."""
         from nebari.plugins import nebari_plugin_manager
 
-        args = ["adduser", add_users[0], add_users[1]]
+        kwargs = {"username": add_users[0], "password": add_users[1], "groups": groups}
+
         config_schema = nebari_plugin_manager.config_schema
         config = read_configuration(config_filename, config_schema)
-        do_keycloak(config, *args)
+
+        do_keycloak(config, command="adduser", **kwargs)
 
     @app_keycloak.command(name="listusers")
     def list_users(
@@ -57,10 +65,9 @@ def nebari_subcommand(cli: typer.Typer):
         """List the users in Keycloak."""
         from nebari.plugins import nebari_plugin_manager
 
-        args = ["listusers"]
         config_schema = nebari_plugin_manager.config_schema
         config = read_configuration(config_filename, config_schema)
-        do_keycloak(config, *args)
+        do_keycloak(config, command="listusers")
 
     @app_keycloak.command(name="export-users")
     def export_users(

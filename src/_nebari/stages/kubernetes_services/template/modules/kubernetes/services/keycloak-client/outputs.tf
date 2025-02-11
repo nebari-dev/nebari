@@ -12,3 +12,10 @@ output "config" {
     callback_urls      = var.callback-url-paths
   }
 }
+
+output "client_role_ids" {
+  description = "Map of role names to their IDs"
+  value = {
+    for role_key, role in keycloak_role.default_client_roles : role_key => role.id
+  }
+}

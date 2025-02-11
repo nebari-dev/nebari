@@ -13,7 +13,7 @@ from nebari import schema
 logger = logging.getLogger(__name__)
 
 
-def do_keycloak(config: schema.Main, *args):
+def do_keycloak(config: schema.Main, command, **kwargs):
     # suppress insecure warnings
     import urllib3
 
@@ -21,19 +21,17 @@ def do_keycloak(config: schema.Main, *args):
 
     keycloak_admin = get_keycloak_admin_from_config(config)
 
-    if args[0] == "adduser":
-        if len(args) < 2:
+    if command == "adduser":
+        if "password" not in kwargs:
             raise ValueError(
                 "keycloak command 'adduser' requires `username [password]`"
             )
 
-        username = args[1]
-        password = args[2] if len(args) >= 3 else None
-        create_user(keycloak_admin, username, password, domain=config.domain)
-    elif args[0] == "listusers":
+        create_user(keycloak_admin, **kwargs, domain=config.domain)
+    elif command == "listusers":
         list_users(keycloak_admin)
     else:
-        raise ValueError(f"unknown keycloak command {args[0]}")
+        raise ValueError(f"unknown keycloak command {command}")
 
 
 def create_user(
