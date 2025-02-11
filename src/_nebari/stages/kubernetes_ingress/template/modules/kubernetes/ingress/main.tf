@@ -32,7 +32,7 @@ locals {
       "--certificatesresolvers.letsencrypt.acme.email=${var.acme-email}",
       "--certificatesresolvers.letsencrypt.acme.storage=/mnt/acme-certificates/acme.json",
       "--certificatesresolvers.letsencrypt.acme.caserver=${var.acme-server}",
-    ], local.certificate-challenge[var.acme-challenge-type]
+      ], local.certificate-challenge[var.acme-challenge-type]
     )
     self-signed = local.default_cert
     existing    = local.default_cert
