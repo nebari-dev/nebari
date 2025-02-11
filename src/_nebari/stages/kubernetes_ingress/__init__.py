@@ -137,7 +137,7 @@ class Certificate(schema.Base):
     # lets-encrypt
     acme_email: Optional[str] = None
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
-    acme_challenge_type: Optional[str] = AcmeChallengeType.dns.value
+    acme_challenge_type: Optional[str] = AcmeChallengeType.tls.value
 
 
 class DnsProvider(schema.Base):
