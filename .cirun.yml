@@ -6,8 +6,8 @@ runners:
     cloud: aws
     # Instance Type has 8 vcpu, 32 GiB memory, Up to 5 Gbps Network Performance
     instance_type: t3a.2xlarge
-    # Custom AMI with docker/cypress/hub pre-installed
-    machine_image: ami-0a388df278199ff52
+    # Custom Ubuntu 24.04 AMI with docker/hub pre-installed
+    machine_image: ami-017ef4c53aac82e41
     # Region: Oregon
     region: us-west-2
     # Use Spot Instances for cost savings
