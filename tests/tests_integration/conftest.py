@@ -11,5 +11,5 @@ def pytest_addoption(parser):
     )
 
     parser.addoption(
-        "--existing-url", action="store", help="Run tests against an existing URL"
+        "--existing-deployment", action="store", help="path to existing deployment config file"
     )
