@@ -60,7 +60,7 @@ def get_scoped_token(
     If the user is an admin, then the token will have `view` permissions
     for all namespaces.
 
-    By default, the user will have view permissions for the following 
+    By default, the user will have view permissions for the following
     groups:
     - `default/*`
     - `filesystem/*`
@@ -134,20 +134,20 @@ def get_scoped_token(
 # adding tests in a traditional sense is not possible. See https://github.com/soapy1/nebari/tree/try-unit-test-spawner
 # for a demo on one approach to adding test.
 def get_conda_store_environments(user_info: dict):
-    """Gets the conda-store environemnts for a given user using the v1 environment 
+    """Gets the conda-store environments for a given user using the v1 environment
     API.
 
     This scopes permissions for the given user using the `groups` field in the
     user_info dict. The user_info dict comes from Jupyter's user dict. The groups
     in this dict come from the keycloak groups, which include the list of conda-store
     namespaces the user has access to. For the purpose of this function, we can assume
-    that if the user is part of the group, it at least has `view` permissions on the 
+    that if the user is part of the group, it at least has `view` permissions on the
     conda-store namespaces.
 
     Parameters
     ----------
     user_info : dict
-        A dictionary containing user information originating from the JupyterHub 
+        A dictionary containing user information originating from the JupyterHub
         user info. The scheme of the user info is:
         ```
         {
@@ -167,13 +167,14 @@ def get_conda_store_environments(user_info: dict):
             "auth_state": {}
         }
         ```
-    
+
     Returns
     -------
     list[str]
         A list of all conda-store environments for the given user
     """
     import os
+
     import urllib3
 
     # Check for the environment variable `CONDA_STORE_API_PAGE_SIZE_LIMIT`. Fall
