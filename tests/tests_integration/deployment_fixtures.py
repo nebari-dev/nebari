@@ -112,6 +112,14 @@ def deploy(request):
     """Deploy Nebari on the given cloud."""
     ignore_warnings()
     cloud = request.config.getoption("--cloud")
+    existing_url = request.config.getoption("--existing-url")
+
+    if cloud is None and existing_url is None:
+        raise Exception("one of '--cloud' or '--existing-url' must be specified")
+
+    if existing_url is not None:
+        logger.info("Using existing Nebari deployment at %s", existing_url)
+        return existing_url
 
     # initialize
     deployment_dir = _get_or_create_deployment_directory(cloud)
