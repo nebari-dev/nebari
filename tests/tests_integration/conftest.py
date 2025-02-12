@@ -9,3 +9,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--cloud", action="store", help="Cloud to deploy on: aws/gcp/azure"
     )
+
+    parser.addoption(
+        "--existing-url", action="store", help="Run tests against an existing URL"
+    )

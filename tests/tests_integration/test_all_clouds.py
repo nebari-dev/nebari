@@ -31,9 +31,7 @@ def test_service_status(deploy):
 
 def test_verify_keycloak_users(deploy):
     """Tests if keycloak is working and it has expected users"""
-    keycloak_credentials = deploy["stages/05-kubernetes-keycloak"][
-        "keycloak_credentials"
-    ]["value"]
+    keycloak_credentials = deploy["stages/05-kubernetes-keycloak"]["keycloak_credentials"]["value"]
     from keycloak import KeycloakAdmin
 
     keycloak_admin = KeycloakAdmin(
