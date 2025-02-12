@@ -175,16 +175,11 @@ jobs:
       - name: Get conda store token from login
         id: conda-store-token
         env:
-          CONDA_STORE_BASE_URL: https://${{ steps.init.outputs.domain }}
+          BASE_URL: ${{ steps.init.outputs.domain }}
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-        working-directory: ${{ steps.init.outputs.directory }}
         run: |
-          echo "${KEYCLOAK_USERNAME}"
-          LOGIN_URL=$(curl -c /tmp/nebari-session --insecure -Ls ${CONDA_STORE_BASE_URL}/conda-store/login/\?next= | grep auth/realms/nebari/login-actions/authenticate | grep -oP '(?<=action=")([^"]+)' | sed  's/\&amp\;/\&/g')
-          curl -X POST --insecure -b /tmp/nebari-session -c /tmp/conda-store-cookie -H "Content-Type: application/x-www-form-urlencoded" --data '{"credentialId":"", "username": "test-user", "password": "P@sswo3d"}' $LOGIN_URL
-          curl --insecure -b /tmp/conda-store-cookie ${CONDA_STORE_BASE_URL}/conda-store/api/v1/permission/ | jq
-          echo "CONDA_STORE_TOKEN=$(curl --insecure -L -X POST -b /tmp/conda-store-cookie ${CONDA_STORE_BASE_URL}/conda-store/api/v1/token | jq --raw-output .data.token)" >> "$GITHUB_OUTPUT"
+          echo "CONDA_STORE_TOKEN=$(python scripts/get_conda_store_token.py)" >> "$GITHUB_OUTPUT"
 
       - name: Run conda-store-server user_journey tests
         env:
