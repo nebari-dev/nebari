@@ -195,16 +195,16 @@ class KubernetesIngressStage(NebariTerraformStage):
         )
         if self.config.certificate.acme_challenge_type == AcmeChallengeType.dns.value:
             if None in {
-                os.environ.get("CLOUDFLARE_DNS_API_TOKEN"),
+                os.environ.get("CLOUDFLARE_TOKEN"),
                 os.environ.get("CLOUDFLARE_EMAIL"),
             }:
                 raise ValueError(
-                    "Environment variables 'CLOUDFLARE_DNS_API_TOKEN' and 'CLOUDFLARE_EMAIL' "
+                    "Environment variables 'CLOUDFLARE_TOKEN' and 'CLOUDFLARE_EMAIL' "
                     "must be set for DNS challenge type ('acme_challenge_type: dns')"
                 )
             else:
                 cert_details["cloudflare-dns-api-token"] = os.environ.get(
-                    "CLOUDFLARE_DNS_API_TOKEN"
+                    "CLOUDFLARE_TOKEN"
                 )
                 cert_details["cloudflare-email"] = os.environ.get("CLOUDFLARE_EMAIL")
         return {
