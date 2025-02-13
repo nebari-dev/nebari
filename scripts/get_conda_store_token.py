@@ -1,14 +1,13 @@
-import re
 import os
+import re
+
 import requests
 
 
 def get_conda_store_session_token(username, password, nebari_hostname):
     """Log into conda-store using the test account and get session"""
     session = requests.Session()
-    r = session.get(
-        f"https://{nebari_hostname}/conda-store/login/?next=", verify=False
-    )
+    r = session.get(f"https://{nebari_hostname}/conda-store/login/?next=", verify=False)
     auth_url = re.search('action="([^"]+)"', r.content.decode("utf8")).group(1)
     response = session.post(
         auth_url.replace("&amp;", "&"),
@@ -31,6 +30,7 @@ def get_conda_store_session_token(username, password, nebari_hostname):
     assert response.status_code == 200
 
     return token
+
 
 if __name__ == "__main__":
     username = os.environ.get("KEYCLOAK_USERNAME")
