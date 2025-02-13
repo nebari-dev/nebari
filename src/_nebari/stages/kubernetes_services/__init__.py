@@ -5,7 +5,13 @@ import time
 from typing import Any, Dict, List, Optional, Type, Union
 from urllib.parse import urlencode
 
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    ConfigDict,
+    Field,
+    field_validator,
+    model_serializer,
+    model_validator,
+)
 from typing_extensions import Self
 
 from _nebari import constants
@@ -109,6 +115,42 @@ class KubeSpawner(schema.Base):
     model_config = ConfigDict(extra="allow")
 
 
+class ProfileOptionUnlistedChoice(schema.Base):
+    enabled: bool = False
+    display_name: str
+    display_name_in_choices: Optional[str] = None
+    validation_regex: Optional[str] = None
+    validation_message: Optional[str] = None
+    kubespawner_override: Dict[str, Any]
+
+
+class ProfileOptionChoice(schema.Base):
+    display_name: str
+    default: Optional[bool] = False
+    kubespawner_override: Dict[str, Any]
+
+
+class ProfileOption(schema.Base):
+    display_name: str
+    unlisted_choice: Optional[ProfileOptionUnlistedChoice] = None
+    choices: Dict[str, ProfileOptionChoice]
+
+    @field_validator("choices")
+    def validate_choices(cls, v):
+        defaults = [choice for choice in v.values() if choice.default]
+        if len(defaults) > 1:
+            raise ValueError("Only one choice can be marked as default")
+        return v
+
+    # We need to exclude unlisted_choice if not set.
+    # This was the recommended solution without affecting the parent.
+    # reference: https://github.com/pydantic/pydantic/discussions/7315
+    @model_serializer(mode="wrap")
+    def serialize_model(self, handler) -> dict[str, Any]:
+        result = handler(self)
+        return {k: v for k, v in result.items() if v is not None}
+
+
 class JupyterLabProfile(schema.Base):
     access: AccessEnum = AccessEnum.all
     display_name: str
@@ -117,6 +159,7 @@ class JupyterLabProfile(schema.Base):
     users: Optional[List[str]] = None
     groups: Optional[List[str]] = None
     kubespawner_override: Optional[KubeSpawner] = None
+    profile_options: Optional[dict[str, ProfileOption]] = None
 
     @model_validator(mode="after")
     def only_yaml_can_have_groups_and_users(self):
