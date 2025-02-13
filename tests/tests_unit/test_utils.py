@@ -1,6 +1,14 @@
+import sys
+
 import pytest
 
-from _nebari.utils import JsonDiff, JsonDiffEnum, byte_unit_conversion, deep_merge
+from _nebari.utils import (
+    JsonDiff,
+    JsonDiffEnum,
+    byte_unit_conversion,
+    deep_merge,
+    run_subprocess_cmd,
+)
 
 
 @pytest.mark.parametrize(
@@ -136,3 +144,32 @@ def test_deep_merge_empty():
 
     result = deep_merge()
     assert result == expected_result
+
+
+size_kb_end_args = [
+    (1, ""),  # 1KB no newline
+    (1, "\\n"),  # 1KB with newline
+    (64, ""),  # 64KB no newline
+    (64, "\\n"),  # 64KB with newline
+    (128, ""),  # 128KB no newline
+    (128, "\\n"),  # 128KB with newline
+]
+
+
+@pytest.mark.parametrize(
+    "size_kb,end",
+    size_kb_end_args,
+    ids=[
+        f"{params[0]}KB{'_newline' if params[1] else ''}" for params in size_kb_end_args
+    ],
+)
+def test_run_subprocess_cmd(size_kb, end):
+    """Test large output handling using current Python interpreter"""
+    python_exe = sys.executable
+    command = [python_exe, "-c", f"print('a' * {size_kb} * 1024, end='{end}')"]
+
+    exit_code, output = run_subprocess_cmd(
+        command, capture_output=True, strip_errors=True, timeout=1
+    )
+    assert exit_code == 0
+    assert len(output.decode()) == size_kb * 1024 + (1 if end else 0)
