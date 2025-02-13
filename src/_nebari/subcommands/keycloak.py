@@ -1,8 +1,9 @@
 import json
 import pathlib
-from typing import Tuple
+from typing import List, Tuple
 
 import typer
+from typing_extensions import Annotated
 
 from _nebari.config import read_configuration
 from _nebari.keycloak import do_keycloak, export_keycloak_users
@@ -36,11 +37,18 @@ def nebari_subcommand(cli: typer.Typer):
             "--config",
             help="nebari configuration file path",
         ),
+        groups: Annotated[
+            List[str],
+            typer.Option(
+                "--groups",
+                help="Role to give the user. Can be specified multiple times for multiple groups",
+            ),
+        ] = None,
     ):
         """Add a user to Keycloak. User will be automatically added to the [italic]analyst[/italic] group."""
         from nebari.plugins import nebari_plugin_manager
 
-        args = ["adduser", add_users[0], add_users[1]]
+        args = ["adduser", add_users[0], add_users[1], groups]
         config_schema = nebari_plugin_manager.config_schema
         config = read_configuration(config_filename, config_schema)
         do_keycloak(config, *args)
