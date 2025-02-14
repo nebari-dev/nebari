@@ -152,6 +152,8 @@ jobs:
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
           DEPLOY_DIR: ${{ steps.init.outputs.directory }}
         run: |
+          echo ${DEPLOY_DIR}
+          ls ${DEPLOY_DIR}
           cd tests/tests_integration
           pytest -vvv -s --existing-deployment=${DEPLOY_DIR} .
 
