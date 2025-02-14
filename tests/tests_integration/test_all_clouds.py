@@ -1,30 +1,35 @@
 import requests
 
 
-def test_service_status(deploy):
-    service_urls = deploy["stages/07-kubernetes-services"]["service_urls"]["value"]
-    assert (
-        requests.get(service_urls["jupyterhub"]["health_url"], verify=False).status_code
-        == 200
-    )
-    assert (
-        requests.get(service_urls["keycloak"]["health_url"], verify=False).status_code
-        == 200
-    )
+def test_service_status(deploy, nebari_endpoint):
     assert (
         requests.get(
-            service_urls["dask_gateway"]["health_url"], verify=False
+            f"https://{nebari_endpoint}/hub/api/", verify=False
         ).status_code
         == 200
     )
     assert (
         requests.get(
-            service_urls["conda_store"]["health_url"], verify=False
+            f"https://{nebari_endpoint}/auth/realms/master", verify=False
         ).status_code
         == 200
     )
     assert (
-        requests.get(service_urls["monitoring"]["health_url"], verify=False).status_code
+        requests.get(
+            f"https://{nebari_endpoint}/gateway/api/version", verify=False
+        ).status_code
+        == 200
+    )
+    assert (
+        requests.get(
+            f"https://{nebari_endpoint}/conda-store/api/v1/", verify=False
+        ).status_code
+        == 200
+    )
+    assert (
+        requests.get(
+            f"https://{nebari_endpoint}/monitoring/api/health", verify=False
+        ).status_code
         == 200
     )
 
