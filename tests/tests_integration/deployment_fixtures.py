@@ -181,7 +181,7 @@ def deployment_dir(request) -> Path:
 
 
 @pytest.fixture()
-def nebari_url(deployment_dir):
+def nebari_endpoint(deployment_dir):
     """Get the url of the nebari deployment from the nebari-config file"""
     config_path = deployment_dir / CONFIG_FILENAME
     config = _nebari_config(config_path)
