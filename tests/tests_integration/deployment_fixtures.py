@@ -107,45 +107,108 @@ def _cleanup_nebari(config: schema.Main):
         azure_cleanup(config)
 
 
-@pytest.fixture(scope="session")
-def deploy(request):
-    """Deploy Nebari on the given cloud."""
-    ignore_warnings()
+def _get_pytest_options(request):
+    """Reads the pytest options from the command line arguments and validates them.
+
+    Valid arguments to provide are:
+      * cloud  - the cloud provider to use (aws, gcp, azure)
+      * existing-deployment - path to an existing deployment directory
+
+    * These are mutually exclusive
+    * At least one of these options must be provided
+    """
     cloud = request.config.getoption("--cloud")
     existing_deployment = request.config.getoption("--existing-deployment")
 
     if cloud is None and existing_deployment is None:
         raise Exception("one of '--cloud' or '--existing-deployment' must be specified")
 
-    if existing_deployment is not None:
-        logger.info("Using existing Nebari deployment at %s", existing_deployment)
-        # todo: render deployment and return stage outputs
+    if cloud is not None and existing_deployment is not None:
+        raise Exception("may not specify both '--cloud' and '--existing-deployment'")
+    
+    if cloud is not None:
+        # ensure the specified cloud  is in the set of supported providers
+        assert hasattr(schema.ProviderEnum, cloud), f"invalid cloud provider: {cloud}"
+    else:
+        # ensure the deployment path exists
+        assert Path(existing_deployment).exists(), f"invalid existing deployment: {existing_deployment}"
+
+    return request.config
+
+
+def _nebari_config(config_path):
+    """Reads the Nebari configuration file from the specified path."""
+    from nebari.plugins import nebari_plugin_manager
+    config_schema = nebari_plugin_manager.config_schema
+    return read_configuration(config_path, config_schema)
+
+
+@pytest.fixture(scope="session")
+def deployment_dir(request) -> Path:
+    """Ensures the deployment directory and config file exists 
+    and returns the path to it.
+
+    If --cloud is specified, it creates a new deployment directory 
+    with the specified cloud provider and generates a nebari-config.
+
+    If --existing-deployment is specified, it uses the existing 
+    deployment directory and config file.
+    """
+    options = _get_pytest_options(request)
+    cloud = options.getoption("--cloud")
+    existing_deployment = options.getoption("--existing-deployment")
+
+    if cloud is not None:
+        deployment_dir = _get_or_create_deployment_directory(cloud)
+        config = render_config_partial(
+            project_name=deployment_dir.name,
+            namespace="dev",
+            nebari_domain=DOMAIN.format(cloud=cloud),
+            cloud_provider=cloud,
+            ci_provider="github-actions",
+            auth_provider="password",
+        )
+
+        deployment_dir_abs = deployment_dir.absolute()
+        os.chdir(deployment_dir)
+        logger.info(f"Temporary directory: {deployment_dir}")
+        config_path = Path(CONFIG_FILENAME)
+
+        write_configuration(config_path, config)
+        return deployment_dir_abs
+    else:
+        return Path(existing_deployment).absolute()
+
+
+@pytest.fixture()
+def nebari_url(deployment_dir):
+    """Get the url of the nebari deployment from the nebari-config file"""
+    config_path = deployment_dir / CONFIG_FILENAME
+    config = _nebari_config(config_path)
+    return config.domain
+
+
+@pytest.fixture(scope="session")
+def deploy(request, deployment_dir):
+    """Deploy Nebari on the given cloud."""
+    ignore_warnings()
+    
+    options = _get_pytest_options(request)
+    existing_deployment = options.getoption("--existing-deployment")
+    # If using an existing deployment, then no need to deploy anything. Exit early
+    if existing_deployment:
+        logger.info(f"Using existing deployment from: {existing_deployment}")
+        yield
         return
 
-    # initialize
-    deployment_dir = _get_or_create_deployment_directory(cloud)
-    config = render_config_partial(
-        project_name=deployment_dir.name,
-        namespace="dev",
-        nebari_domain=DOMAIN.format(cloud=cloud),
-        cloud_provider=cloud,
-        ci_provider="github-actions",
-        auth_provider="password",
-    )
-
-    deployment_dir_abs = deployment_dir.absolute()
-    os.chdir(deployment_dir)
-    logger.info(f"Temporary directory: {deployment_dir}")
-    config_path = Path(CONFIG_FILENAME)
-
-    write_configuration(config_path, config)
+    cloud = options.getoption("--cloud")
+    os.chdir(str(deployment_dir))
+    config_path = deployment_dir / CONFIG_FILENAME
+    config = _nebari_config(config_path)
 
     from nebari.plugins import nebari_plugin_manager
 
     stages = nebari_plugin_manager.ordered_stages
-    config_schema = nebari_plugin_manager.config_schema
-
-    config = read_configuration(config_path, config_schema)
 
     # Modify config
     config.certificate.type = "lets-encrypt"
@@ -172,7 +235,7 @@ def deploy(request):
     print("*" * 100)
 
     # render
-    render_template(deployment_dir_abs, config, stages)
+    render_template(deployment_dir, config, stages)
 
     failed = False
 
@@ -216,7 +279,7 @@ def deploy(request):
             logger.error(
                 "Cleanup failed, please check if there are any lingering resources!"
             )
-        _delete_deployment_directory(deployment_dir_abs)
+        _delete_deployment_directory(deployment_dir)
 
     if failed:
         raise AssertionError("Deployment failed")
