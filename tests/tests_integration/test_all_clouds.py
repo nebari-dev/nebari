@@ -34,17 +34,19 @@ def test_service_status(deploy, nebari_endpoint):
     )
 
 
-def test_verify_keycloak_users(deploy):
+def test_verify_keycloak_users(deploy, nebari_config):
     """Tests if keycloak is working and it has expected users"""
-    keycloak_credentials = deploy["stages/05-kubernetes-keycloak"]["keycloak_credentials"]["value"]
+    keycloak_url = f"https://{nebari_config.domain}/auth"
+    password = nebari_config.security.keycloak.initial_root_password
+
     from keycloak import KeycloakAdmin
 
     keycloak_admin = KeycloakAdmin(
-        server_url=f"{keycloak_credentials['url']}/auth/",
-        username=keycloak_credentials["username"],
-        password=keycloak_credentials["password"],
-        realm_name=keycloak_credentials["realm"],
-        client_id=keycloak_credentials["client_id"],
+        server_url=keycloak_url,
+        username="nebari-bot",
+        password=password,
+        realm_name="master",
+        client_id="admin-cli",
         verify=False,
     )
     assert set([u["username"] for u in keycloak_admin.get_users()]) == {

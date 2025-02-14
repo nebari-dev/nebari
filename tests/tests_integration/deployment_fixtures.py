@@ -143,6 +143,21 @@ def _nebari_config(config_path):
     return read_configuration(config_path, config_schema)
 
 
+@pytest.fixture()
+def nebari_config(deployment_dir):
+    """Get the url of the nebari deployment from the nebari-config file"""
+    config_path = deployment_dir / CONFIG_FILENAME
+    return _nebari_config(config_path)
+
+
+@pytest.fixture()
+def nebari_endpoint(deployment_dir):
+    """Get the url of the nebari deployment from the nebari-config file"""
+    config_path = deployment_dir / CONFIG_FILENAME
+    config = _nebari_config(config_path)
+    return config.domain
+
+
 @pytest.fixture(scope="session")
 def deployment_dir(request) -> Path:
     """Ensures the deployment directory and config file exists 
@@ -178,14 +193,6 @@ def deployment_dir(request) -> Path:
         return deployment_dir_abs
     else:
         return Path(existing_deployment).absolute()
-
-
-@pytest.fixture()
-def nebari_endpoint(deployment_dir):
-    """Get the url of the nebari deployment from the nebari-config file"""
-    config_path = deployment_dir / CONFIG_FILENAME
-    config = _nebari_config(config_path)
-    return config.domain
 
 
 @pytest.fixture(scope="session")
