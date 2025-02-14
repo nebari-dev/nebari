@@ -5,23 +5,28 @@ from tests.common.config_mod_utils import PREEMPTIBLE_NODE_GROUP_NAME
 
 
 @pytest.mark.preemptible
-def test_preemptible(request, deploy):
-    config.load_kube_config(
-        config_file=deploy["stages/02-infrastructure"]["kubeconfig_filename"]["value"]
-    )
-    if request.node.get_closest_marker("aws"):
+def test_preemptible(deploy, nebari_config):
+    if nebari_config.provider == "aws":
         name_label = "eks.amazonaws.com/nodegroup"
         preemptible_key = "eks.amazonaws.com/capacityType"
         expected_value = "SPOT"
         pytest.xfail("Preemptible instances are not supported on AWS atm")
 
-    elif request.node.get_closest_marker("gcp"):
+    elif nebari_config.provider == "gcp":
         name_label = "cloud.google.com/gke-nodepool"
         preemptible_key = "cloud.google.com/gke-preemptible"
         expected_value = "true"
     else:
         pytest.skip("Unsupported cloud for preemptible")
 
+    if deploy is not None:
+        config.load_kube_config(
+            config_file=deploy["stages/02-infrastructure"]["kubeconfig_filename"]["value"]
+        )
+    else:
+        config.load_kube_config(
+            config_file="~/.kube/config",
+        )
     api_instance = client.CoreV1Api()
     nodes = api_instance.list_node()
     node_labels_map = {}
