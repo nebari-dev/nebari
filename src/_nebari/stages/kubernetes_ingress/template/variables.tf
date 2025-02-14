@@ -43,12 +43,6 @@ variable "acme-challenge-type" {
   default     = "tls"
 }
 
-variable "cloudflare-email" {
-  # https://go-acme.github.io/lego/dns/cloudflare/
-  description = "Cloudflare email"
-  default     = null
-}
-
 variable "cloudflare-dns-api-token" {
   # https://go-acme.github.io/lego/dns/cloudflare/
   description = "Cloudflare dns api token for DNS challenge"
