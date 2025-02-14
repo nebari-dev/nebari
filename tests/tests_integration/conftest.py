@@ -9,3 +9,9 @@ def pytest_addoption(parser):
     parser.addoption(
         "--cloud", action="store", help="Cloud to deploy on: aws/gcp/azure"
     )
+
+    parser.addoption(
+        "--existing-deployment",
+        action="store",
+        help="path to existing deployment config file",
+    )
