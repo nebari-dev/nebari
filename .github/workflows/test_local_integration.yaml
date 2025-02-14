@@ -144,6 +144,17 @@ jobs:
           path: |
             ./tests/tests_e2e/playwright/videos/
 
+      ### INTEGRATION TESTS
+      - name: Integration tests
+        env:
+          NEBARI_CONFIG_PATH: ${{ steps.init.outputs.config }}
+          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+          DEPLOY_DIR: ${{ steps.init.outputs.directory }}
+        run: |
+          cd tests/tests_integration
+          pytest -vvv -s --existing-deployment=${DEPLOY_DIR} .
+
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
         # Since this is not critical for most pull requests and takes more than half of the time
