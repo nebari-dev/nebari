@@ -21,7 +21,9 @@ def test_preemptible(deploy, nebari_config):
 
     if deploy is not None:
         config.load_kube_config(
-            config_file=deploy["stages/02-infrastructure"]["kubeconfig_filename"]["value"]
+            config_file=deploy["stages/02-infrastructure"]["kubeconfig_filename"][
+                "value"
+            ]
         )
     else:
         config.load_kube_config(

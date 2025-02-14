@@ -3,9 +3,7 @@ import requests
 
 def test_service_status(deploy, nebari_endpoint):
     assert (
-        requests.get(
-            f"https://{nebari_endpoint}/hub/api/", verify=False
-        ).status_code
+        requests.get(f"https://{nebari_endpoint}/hub/api/", verify=False).status_code
         == 200
     )
     assert (

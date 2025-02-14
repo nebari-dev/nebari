@@ -125,13 +125,15 @@ def _get_pytest_options(request):
 
     if cloud is not None and existing_deployment is not None:
         raise Exception("may not specify both '--cloud' and '--existing-deployment'")
-    
+
     if cloud is not None:
         # ensure the specified cloud  is in the set of supported providers
         assert hasattr(schema.ProviderEnum, cloud), f"invalid cloud provider: {cloud}"
     else:
         # ensure the deployment path exists
-        assert Path(existing_deployment).exists(), f"invalid existing deployment: {existing_deployment}"
+        assert Path(
+            existing_deployment
+        ).exists(), f"invalid existing deployment: {existing_deployment}"
 
     return request.config
 
@@ -139,6 +141,7 @@ def _get_pytest_options(request):
 def _nebari_config(config_path):
     """Reads the Nebari configuration file from the specified path."""
     from nebari.plugins import nebari_plugin_manager
+
     config_schema = nebari_plugin_manager.config_schema
     return read_configuration(config_path, config_schema)
 
@@ -160,13 +163,13 @@ def nebari_endpoint(deployment_dir):
 
 @pytest.fixture(scope="session")
 def deployment_dir(request) -> Path:
-    """Ensures the deployment directory and config file exists 
+    """Ensures the deployment directory and config file exists
     and returns the path to it.
 
-    If --cloud is specified, it creates a new deployment directory 
+    If --cloud is specified, it creates a new deployment directory
     with the specified cloud provider and generates a nebari-config.
 
-    If --existing-deployment is specified, it uses the existing 
+    If --existing-deployment is specified, it uses the existing
     deployment directory and config file.
     """
     options = _get_pytest_options(request)
@@ -199,7 +202,7 @@ def deployment_dir(request) -> Path:
 def deploy(request, deployment_dir):
     """Deploy Nebari on the given cloud."""
     ignore_warnings()
-    
+
     options = _get_pytest_options(request)
     existing_deployment = options.getoption("--existing-deployment")
     # If using an existing deployment, then no need to deploy anything. Exit early
