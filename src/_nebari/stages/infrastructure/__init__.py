@@ -318,8 +318,7 @@ class GoogleCloudPlatformProvider(schema.Base):
         available_regions = google_cloud.regions()
         if data["region"] not in available_regions:
             raise ValueError(
-                f"Google Cloud region={
-                    data['region']} is not one of {available_regions}"
+                f"Google Cloud region={data['region']} is not one of {available_regions}"
             )
 
         available_kubernetes_versions = google_cloud.kubernetes_versions(data["region"])
@@ -916,7 +915,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
         print(
             f"After stage={
-              self.name} kubernetes cluster successfully provisioned"
+                self.name} kubernetes cluster successfully provisioned"
         )
 
     def set_outputs(
