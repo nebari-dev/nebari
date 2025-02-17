@@ -170,6 +170,7 @@ class AWSInputVars(schema.Base):
         Literal["private", "public", "public_and_private"]
     ] = "public"
     eks_kms_arn: Optional[str] = None
+    eks_public_access_cidrs: Optional[List[str]] = ["0.0.0.0/0"]
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
@@ -317,7 +318,8 @@ class GoogleCloudPlatformProvider(schema.Base):
         available_regions = google_cloud.regions()
         if data["region"] not in available_regions:
             raise ValueError(
-                f"Google Cloud region={data['region']} is not one of {available_regions}"
+                f"Google Cloud region={
+                    data['region']} is not one of {available_regions}"
             )
 
         available_kubernetes_versions = google_cloud.kubernetes_versions(data["region"])
@@ -326,7 +328,8 @@ class GoogleCloudPlatformProvider(schema.Base):
             for v in available_kubernetes_versions
         ):
             raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+                f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {
+                    available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
 
         # check if instances are valid
@@ -340,7 +343,8 @@ class GoogleCloudPlatformProvider(schema.Base):
                 )
                 if instance not in available_instances:
                     raise ValueError(
-                        f"Google Cloud Platform instance {instance} not one of available instance types={available_instances}"
+                        f"Google Cloud Platform instance {
+                            instance} not one of available instance types={available_instances}"
                     )
 
         return data
@@ -390,7 +394,8 @@ class AzureProvider(schema.Base):
             value = available_kubernetes_versions[-1]
         elif value not in available_kubernetes_versions:
             raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+                f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {
+                    available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
         return value
 
@@ -402,7 +407,8 @@ class AzureProvider(schema.Base):
         length = len(value) + len(AZURE_NODE_RESOURCE_GROUP_SUFFIX)
         if length < 1 or length > 90:
             raise ValueError(
-                f"Azure Resource Group name must be between 1 and 90 characters long, when combined with the suffix `{AZURE_NODE_RESOURCE_GROUP_SUFFIX}`."
+                f"Azure Resource Group name must be between 1 and 90 characters long, when combined with the suffix `{
+                    AZURE_NODE_RESOURCE_GROUP_SUFFIX}`."
             )
         if not re.match(r"^[\w\-\.\(\)]+$", value):
             raise ValueError(
@@ -457,6 +463,7 @@ class AmazonWebServicesProvider(schema.Base):
     eks_endpoint_access: Optional[
         Literal["private", "public", "public_and_private"]
     ] = "public"
+    eks_public_access_cidrs: Optional[List[str]] = ["0.0.0.0/0"]
     eks_kms_arn: Optional[str] = None
     existing_subnet_ids: Optional[List[str]] = None
     existing_security_group_id: Optional[str] = None
@@ -473,7 +480,8 @@ class AmazonWebServicesProvider(schema.Base):
         available_regions = amazon_web_services.regions(data["region"])
         if data["region"] not in available_regions:
             raise ValueError(
-                f"Amazon Web Services region={data['region']} is not one of {available_regions}"
+                f"Amazon Web Services region={
+                    data['region']} is not one of {available_regions}"
             )
 
         # check if kubernetes version is valid
@@ -486,7 +494,8 @@ class AmazonWebServicesProvider(schema.Base):
             data["kubernetes_version"] = available_kubernetes_versions[-1]
         elif data["kubernetes_version"] not in available_kubernetes_versions:
             raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+                f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {
+                    available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
 
         # check if availability zones are valid
@@ -497,7 +506,8 @@ class AmazonWebServicesProvider(schema.Base):
             for zone in data["availability_zones"]:
                 if zone not in available_zones:
                     raise ValueError(
-                        f"Amazon Web Services availability zone={zone} is not one of {available_zones}"
+                        f"Amazon Web Services availability zone={
+                            zone} is not one of {available_zones}"
                     )
 
         # check if instances are valid
@@ -511,7 +521,8 @@ class AmazonWebServicesProvider(schema.Base):
                 )
                 if instance not in available_instances:
                     raise ValueError(
-                        f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
+                        f"Amazon Web Services instance {
+                            node_group.instance} not one of available instance types={available_instances}"
                     )
 
         # check if kms key is valid
@@ -526,28 +537,33 @@ class AmazonWebServicesProvider(schema.Base):
                 or available_kms_keys[key_id[0]].Arn != data["eks_kms_arn"]
             ):
                 raise ValueError(
-                    f"Amazon Web Services KMS Key with ARN {data['eks_kms_arn']} not one of available/enabled keys={[v.Arn for v in available_kms_keys.values() if v.KeyManager=='CUSTOMER' and v.KeySpec=='SYMMETRIC_DEFAULT']}"
+                    f"Amazon Web Services KMS Key with ARN {data['eks_kms_arn']} not one of available/enabled keys={
+                        [v.Arn for v in available_kms_keys.values() if v.KeyManager == 'CUSTOMER' and v.KeySpec == 'SYMMETRIC_DEFAULT']}"
                 )
             key_id = key_id[0]
             # Raise error if key is not a customer managed key
             if available_kms_keys[key_id].KeyManager != "CUSTOMER":
                 raise ValueError(
-                    f"Amazon Web Services KMS Key with ID {key_id} is not a customer managed key"
+                    f"Amazon Web Services KMS Key with ID {
+                        key_id} is not a customer managed key"
                 )
             # Symmetric KMS keys with Encrypt and decrypt key-usage have the SYMMETRIC_DEFAULT key-spec
             # EKS cluster encryption requires a Symmetric key that is set to encrypt and decrypt data
             if available_kms_keys[key_id].KeySpec != "SYMMETRIC_DEFAULT":
                 if available_kms_keys[key_id].KeyUsage == "GENERATE_VERIFY_MAC":
                     raise ValueError(
-                        f"Amazon Web Services KMS Key with ID {key_id} does not have KeyUsage set to 'Encrypt and decrypt' data"
+                        f"Amazon Web Services KMS Key with ID {
+                            key_id} does not have KeyUsage set to 'Encrypt and decrypt' data"
                     )
                 elif available_kms_keys[key_id].KeyUsage != "ENCRYPT_DECRYPT":
                     raise ValueError(
-                        f"Amazon Web Services KMS Key with ID {key_id} is not of type Symmetric, and KeyUsage not set to 'Encrypt and decrypt' data"
+                        f"Amazon Web Services KMS Key with ID {
+                            key_id} is not of type Symmetric, and KeyUsage not set to 'Encrypt and decrypt' data"
                     )
                 else:
                     raise ValueError(
-                        f"Amazon Web Services KMS Key with ID {key_id} is not of type Symmetric"
+                        f"Amazon Web Services KMS Key with ID {
+                            key_id} is not of type Symmetric"
                     )
 
         return data
@@ -632,7 +648,8 @@ class InputSchema(schema.Base):
             extra_provider_config = set_providers - {expected_provider_config}
             if extra_provider_config:
                 warnings.warn(
-                    f"Provider is set to {getattr(provider, 'value', provider)},  but configuration defined for other providers: {extra_provider_config}"
+                    f"Provider is set to {getattr(provider, 'value', provider)},  but configuration defined for other providers: {
+                        extra_provider_config}"
                 )
 
         else:
@@ -835,6 +852,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
                 eks_endpoint_access=self.config.amazon_web_services.eks_endpoint_access,
+                eks_public_access_cidrs=self.config.amazon_web_services.eks_public_access_cidrs,
                 eks_kms_arn=self.config.amazon_web_services.eks_kms_arn,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
                 existing_security_group_id=self.config.amazon_web_services.existing_security_group_id,
@@ -884,17 +902,22 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             result = api_instance.list_namespace()
         except ApiException:
             print(
-                f"ERROR: After stage={self.name} unable to connect to kubernetes cluster"
+                f"ERROR: After stage={
+                    self.name} unable to connect to kubernetes cluster"
             )
             sys.exit(1)
 
         if len(result.items) < 1:
             print(
-                f"ERROR: After stage={self.name} no nodes provisioned within kubernetes cluster"
+                f"ERROR: After stage={
+                    self.name} no nodes provisioned within kubernetes cluster"
             )
             sys.exit(1)
 
-        print(f"After stage={self.name} kubernetes cluster successfully provisioned")
+        print(
+            f"After stage={
+              self.name} kubernetes cluster successfully provisioned"
+        )
 
     def set_outputs(
         self, stage_outputs: Dict[str, Dict[str, Any]], outputs: Dict[str, Any]
