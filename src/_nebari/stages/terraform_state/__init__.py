@@ -1,9 +1,11 @@
 import contextlib
 import enum
 import inspect
+import json
 import os
 import pathlib
 import re
+import tempfile
 from typing import Any, Dict, List, Optional, Tuple, Type
 
 from pydantic import BaseModel, field_validator
@@ -213,18 +215,17 @@ class TerraformStateStage(NebariTerraformStage):
     def deploy(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
     ):
-        self.check_immutable_fields()
+        self.check_immutable_fields(stage_outputs)
 
         # No need to run tofu init here as it's being called when running the
         # terraform show command, inside check_immutable_fields
         with super().deploy(stage_outputs, disable_prompt, tofu_init=False):
             env_mapping = {}
-
             with modified_environ(**env_mapping):
                 yield
 
-    def check_immutable_fields(self):
-        nebari_config_state = self.get_nebari_config_state()
+    def check_immutable_fields(self, stage_outputs=Dict[str, Dict[str, Any]]):
+        nebari_config_state = self.get_nebari_config_state(stage_outputs=stage_outputs)
         if not nebari_config_state:
             return
 
@@ -260,8 +261,19 @@ class TerraformStateStage(NebariTerraformStage):
                     f'Attempting to change immutable field "{key_path}" ("{old}"->"{new}") in Nebari config file.  Immutable fields cannot be changed after initial deployment.'
                 )
 
-    def get_nebari_config_state(self) -> dict:
+    def get_nebari_config_state(self, stage_outputs=Dict[str, Dict[str, Any]]) -> dict:
         directory = str(self.output_directory / self.stage_prefix)
+        if stage_outputs:
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", suffix=".tfvars.json"
+            ) as f:
+                input_vars = self.input_vars(stage_outputs)
+                json.dump(input_vars, f.file)
+                f.file.flush()
+                opentofu.refresh(
+                    self.output_directory / self.stage_prefix, var_files=[f.name]
+                )
+
         tf_state = opentofu.show(directory)
         nebari_config_state = None
 
