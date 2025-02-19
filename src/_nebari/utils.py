@@ -15,6 +15,7 @@ import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Set
 
+import rich
 from ruamel.yaml import YAML
 
 from _nebari import constants
@@ -472,3 +473,49 @@ class JsonDiff:
 
     def __repr__(self):
         return f"{self.__class__.__name__}(diff={json.dumps(self.diff)})"
+
+
+def update_tfstate_file(state_filepath: Path, migration_map: dict) -> None:
+    """
+    Updates a Terraform state file by replacing deprecated attributes with their new
+    counterparts.
+
+    Originally introduced in the Nebari `2025.2.1` release to accommodate major schema
+    changes from Terraform cloud providers, this function can be extended for future
+    migrations or patches. By centralizing the replacement logic, it ensures a clean,
+    modular design that keeps upgrade steps concise.
+
+    :param state_filepath: A Path object pointing to the Terraform state file.
+    :param migration_map: A dictionary where keys are old attribute paths and values are new attribute paths.
+    """
+    if not state_filepath.exists():
+        rich.print(
+            f"[red]No Terraform state file found at {state_filepath}. Skipping migration.[/red]"
+        )
+        return
+
+    try:
+        with open(state_filepath, "r") as f:
+            state = json.load(f)
+    except json.JSONDecodeError:
+        rich.print(
+            f"[red]Invalid JSON structure in {state_filepath}. Skipping migration.[/red]"
+        )
+        return
+
+    # Traverse the resources → instances → attributes hierarchy
+    # and apply the specified attribute replacements.
+    for resource in state.get("resources", []):
+        for instance in resource.get("instances", []):
+            attributes = instance.get("attributes", {})
+            for old_attr, new_attr in migration_map.items():
+                if old_attr in attributes:
+                    attributes[new_attr] = attributes.pop(old_attr)
+
+    # Save the modified state back to disk
+    with open(state_filepath, "w") as f:
+        json.dump(state, f, indent=2)
+
+    rich.print(
+        f" ✅ [green]Successfully updated the Terraform state file: {state_filepath}[/green]"
+    )
