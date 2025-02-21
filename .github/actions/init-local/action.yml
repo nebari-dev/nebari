@@ -75,6 +75,12 @@ runs:
                 size: 1Gi
         EOM
 
+        # Change jupyterhub image for PR testing purposes
+        cat >> '${{ steps.metadata.outputs.config }}' <<- EOM
+        default_images:
+          jupyterhub: quay.io/nebari/nebari-jupyterhub:jhub-fancy-profiles
+        EOM
+
     - shell: bash
       run: |
         # Display Nebari config
