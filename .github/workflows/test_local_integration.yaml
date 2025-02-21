@@ -105,7 +105,7 @@ jobs:
       - name: Create example-user
         working-directory: ${{ steps.init.outputs.directory }}
         run: |
-          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }}
+          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --groups developer --groups admin --config ${{ steps.init.outputs.config }}
           nebari keycloak listusers --config ${{ steps.init.outputs.config }}
 
       - name: Await Workloads

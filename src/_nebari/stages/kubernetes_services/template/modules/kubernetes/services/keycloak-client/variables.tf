@@ -22,10 +22,17 @@ variable "service-accounts-enabled" {
   default     = false
 }
 
+
 variable "service-account-roles" {
-  description = "Roles to be granted to the service account. Requires setting service-accounts-enabled to true."
-  type        = list(string)
-  default     = []
+  description = <<-EOT
+  Map of client to client-roles to be granted to the service account client. Requires setting service-accounts-enabled to true.
+
+  e.g. {
+    "my-client": ["my-client-role"],
+  }
+  EOT
+  type        = map(list(string))
+  default     = {}
 }
 
 
