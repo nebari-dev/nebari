@@ -5,7 +5,7 @@ from tests.common.config_mod_utils import PREEMPTIBLE_NODE_GROUP_NAME
 
 
 @pytest.mark.preemptible
-def test_preemptible(deploy, nebari_config):
+def test_preemptible(nebari_config):
     if nebari_config.provider == "aws":
         name_label = "eks.amazonaws.com/nodegroup"
         preemptible_key = "eks.amazonaws.com/capacityType"
@@ -19,14 +19,6 @@ def test_preemptible(deploy, nebari_config):
     else:
         pytest.skip("Unsupported cloud for preemptible")
 
-    if deploy is not None:
-        config.load_kube_config(
-            config_file=deploy["stages/02-infrastructure"]["kubeconfig_filename"]["value"]
-        )
-    else:
-        config.load_kube_config(
-            config_file="~/.kube/config",
-        )
     api_instance = client.CoreV1Api()
     nodes = api_instance.list_node()
     node_labels_map = {}

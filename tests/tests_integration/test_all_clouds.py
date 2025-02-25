@@ -1,7 +1,7 @@
 import requests
 
 
-def test_service_status(deploy, nebari_endpoint):
+def test_service_status(nebari_endpoint):
     assert (
         requests.get(
             f"https://{nebari_endpoint}/hub/api/", verify=False
@@ -34,7 +34,7 @@ def test_service_status(deploy, nebari_endpoint):
     )
 
 
-def test_verify_keycloak_users(deploy, nebari_config):
+def test_verify_keycloak_users(nebari_config):
     """Tests if keycloak is working and it has expected users"""
     keycloak_url = f"https://{nebari_config.domain}/auth"
     password = nebari_config.security.keycloak.initial_root_password

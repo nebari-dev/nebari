@@ -150,12 +150,10 @@ jobs:
           NEBARI_CONFIG_PATH: ${{ steps.init.outputs.config }}
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-          DEPLOY_DIR: ${{ steps.init.outputs.directory }}
+          EXISTING_DEPLOYMENT_DIR: ${{ steps.init.outputs.directory }}
         run: |
-          echo ${DEPLOY_DIR}
-          ls ${DEPLOY_DIR}
           cd tests/tests_integration
-          pytest -vvv -s --existing-deployment=${DEPLOY_DIR} .
+          pytest -vvv -s .
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
