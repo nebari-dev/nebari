@@ -209,7 +209,7 @@ def assert_nebari_init_args(
             app, args + ["--output", tmp_file.resolve()], input=input
         )
 
-        assert not result.exception
+        assert not result.exception, result.output
         assert 0 == result.exit_code
         assert tmp_file.exists() is True
 
