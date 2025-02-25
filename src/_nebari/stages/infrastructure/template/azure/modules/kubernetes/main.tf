@@ -25,11 +25,10 @@ resource "azurerm_kubernetes_cluster" "main" {
   dynamic "network_profile" {
     for_each = var.network_profile != null ? [var.network_profile] : []
     content {
-      network_plugin     = network_profile.value.network_plugin != null ? network_profile.value.network_plugin : null
-      network_policy     = network_profile.value.network_policy != null ? network_profile.value.network_policy : null
-      service_cidr       = network_profile.value.service_cidr != null ? network_profile.value.service_cidr : null
-      dns_service_ip     = network_profile.value.dns_service_ip != null ? network_profile.value.dns_service_ip : null
-      docker_bridge_cidr = network_profile.value.docker_bridge_cidr != null ? network_profile.value.docker_bridge_cidr : null
+      network_plugin = network_profile.value.network_plugin != null ? network_profile.value.network_plugin : null
+      network_policy = network_profile.value.network_policy != null ? network_profile.value.network_policy : null
+      service_cidr   = network_profile.value.service_cidr != null ? network_profile.value.service_cidr : null
+      dns_service_ip = network_profile.value.dns_service_ip != null ? network_profile.value.dns_service_ip : null
     }
   }
 
@@ -77,7 +76,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "node_group" {
   name                  = each.value.name
   kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
   vm_size               = each.value.instance_type
-  enable_auto_scaling   = "true"
+  auto_scaling_enabled  = "true"
   mode                  = "User" # "System" or "User", only "User" nodes can scale down to 0
   min_count             = each.value.min_size
   max_count             = each.value.max_size

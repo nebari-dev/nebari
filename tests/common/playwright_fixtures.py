@@ -23,17 +23,43 @@ def load_env_vars():
 def build_params(request, pytestconfig, extra_params=None):
     """Construct and return parameters for navigator instances."""
     env_vars = load_env_vars()
+
+    # Retrieve values from request or environment
+    nebari_url = request.param.get("nebari_url") or env_vars.get("nebari_url")
+    username = request.param.get("keycloak_username") or env_vars.get("username")
+    password = request.param.get("keycloak_password") or env_vars.get("password")
+
+    # Validate that required fields are present
+    if not nebari_url:
+        raise ValueError(
+            "Error: 'nebari_url' is required but was not provided in "
+            "'request.param' or environment variables."
+        )
+    if not username:
+        raise ValueError(
+            "Error: 'username' is required but was not provided in "
+            "'request.param' or environment variables."
+        )
+    if not password:
+        raise ValueError(
+            "Error: 'password' is required but was not provided in "
+            "'request.param' or environment variables."
+        )
+
+    # Build the params dictionary once all required fields are validated
     params = {
-        "nebari_url": request.param.get("nebari_url") or env_vars["nebari_url"],
-        "username": request.param.get("keycloak_username") or env_vars["username"],
-        "password": request.param.get("keycloak_password") or env_vars["password"],
+        "nebari_url": nebari_url,
+        "username": username,
+        "password": password,
         "auth": "password",
         "video_dir": "videos/",
         "headless": pytestconfig.getoption("--headed"),
         "slow_mo": pytestconfig.getoption("--slowmo"),
     }
+
     if extra_params:
         params.update(extra_params)
+
     return params
 
 

@@ -10,6 +10,9 @@ kubernetes.client.models.V1EndpointPort = (
 
 from kubespawner import KubeSpawner  # noqa: E402
 
+# conda-store default page size
+DEFAULT_PAGE_SIZE_LIMIT = 100
+
 
 @gen.coroutine
 def get_username_hook(spawner):
@@ -23,25 +26,66 @@ def get_username_hook(spawner):
     )
 
 
-def get_conda_store_environments(user_info: dict):
+def get_total_records(url: str, token: str) -> int:
     import urllib3
-    import yarl
+
+    http = urllib3.PoolManager()
+    response = http.request("GET", url, headers={"Authorization": f"Bearer {token}"})
+    decoded_response = json.loads(response.data.decode("UTF-8"))
+    return decoded_response.get("count", 0)
+
+
+def generate_paged_urls(base_url: str, total_records: int, page_size: int) -> list[str]:
+    import math
+
+    urls = []
+    # pages starts at 1
+    for page in range(1, math.ceil(total_records / page_size) + 1):
+        urls.append(f"{base_url}?size={page_size}&page={page}")
+
+    return urls
+
+
+# TODO: this should get unit tests. Currently, since this is not a python module,
+# adding tests in a traditional sense is not possible. See https://github.com/soapy1/nebari/tree/try-unit-test-spawner
+# for a demo on one approach to adding test.
+def get_conda_store_environments(user_info: dict):
+    import os
+
+    import urllib3
+
+    # Check for the environment variable `CONDA_STORE_API_PAGE_SIZE_LIMIT`. Fall
+    # back to using the default page size limit if not set.
+    page_size = os.environ.get(
+        "CONDA_STORE_API_PAGE_SIZE_LIMIT", DEFAULT_PAGE_SIZE_LIMIT
+    )
 
     external_url = z2jh.get_config("custom.conda-store-service-name")
     token = z2jh.get_config("custom.conda-store-jhub-apps-token")
     endpoint = "conda-store/api/v1/environment"
 
-    url = yarl.URL(f"http://{external_url}/{endpoint}/")
-
+    base_url = f"http://{external_url}/{endpoint}/"
     http = urllib3.PoolManager()
-    response = http.request(
-        "GET", str(url), headers={"Authorization": f"Bearer {token}"}
-    )
 
-    # parse response
-    j = json.loads(response.data.decode("UTF-8"))
+    # get total number of records from the endpoint
+    total_records = get_total_records(base_url, token)
+
+    # will contain all the environment info returned from the api
+    env_data = []
+
+    # generate a list of urls to hit to build the response
+    urls = generate_paged_urls(base_url, total_records, page_size)
+
+    # get content from urls
+    for url in urls:
+        response = http.request(
+            "GET", url, headers={"Authorization": f"Bearer {token}"}
+        )
+        decoded_response = json.loads(response.data.decode("UTF-8"))
+        env_data += decoded_response.get("data", [])
+
     # Filter and return conda environments for the user
-    return [f"{env['namespace']['name']}-{env['name']}" for env in j.get("data", [])]
+    return [f"{env['namespace']['name']}-{env['name']}" for env in env_data]
 
 
 c.Spawner.pre_spawn_hook = get_username_hook
