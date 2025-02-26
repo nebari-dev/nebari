@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import textwrap
 from urllib.parse import urljoin
 
 import keycloak
@@ -30,6 +31,8 @@ def do_keycloak(config: schema.Main, command, **kwargs):
         create_user(keycloak_admin, **kwargs, domain=config.domain)
     elif command == "listusers":
         list_users(keycloak_admin)
+    elif command == "listgroups":
+        list_groups(keycloak_admin)
     else:
         raise ValueError(f"unknown keycloak command {command}")
 
@@ -38,7 +41,7 @@ def create_user(
     keycloak_admin: keycloak.KeycloakAdmin,
     username: str,
     password: str = None,
-    groups=None,
+    groups: list = None,
     email=None,
     domain=None,
     enabled=True,
@@ -53,6 +56,10 @@ def create_user(
         payload["credentials"] = [
             {"type": "password", "value": password, "temporary": False}
         ]
+    if groups:
+        _available_group_names = [_["name"] for _ in keycloak_admin.get_groups()]
+        if not all([_ in _available_group_names for _ in groups]):
+            raise ValueError(f"Keycloak group(s) not found: {groups}")
     else:
         rich.print(
             f"Creating user=[green]{username}[/green] without password (none supplied)"
@@ -77,6 +84,36 @@ def list_users(keycloak_admin: keycloak.KeycloakAdmin):
                 username=user["username"], email=user["email"], groups=user_groups
             )
         )
+
+
+def list_groups(keycloak_admin: keycloak.KeycloakAdmin):
+    name_col_width = 16
+    perm_col_width = 64
+
+    # Print header
+    print(f"{'name':<{name_col_width}} | {'permissions':<{perm_col_width}}")
+    print("-" * (name_col_width + 3 + perm_col_width))
+
+    for group in keycloak_admin.get_groups():
+        attrs = keycloak_admin.get_group_by_path(group["path"])
+        client_roles = attrs.get("clientRoles", {})
+
+        # Collect permissions except 'realm-management' (unless group is 'superadmin')
+        permissions = [
+            role
+            for client, roles in client_roles.items()
+            for role in roles
+            if not (client == "realm-management" and group["name"] != "superadmin")
+        ]
+
+        wrapped = textwrap.wrap(", ".join(permissions), width=perm_col_width) or [""]
+
+        print(f"{group['name']:<{name_col_width}} | {wrapped[0]}")
+
+        for line in wrapped[1:]:
+            print(f"{'':<{name_col_width}} | {line}")
+
+        print()
 
 
 def get_keycloak_admin(server_url, username, password, verify=False):

@@ -69,6 +69,22 @@ def nebari_subcommand(cli: typer.Typer):
         config = read_configuration(config_filename, config_schema)
         do_keycloak(config, command="listusers")
 
+    @app_keycloak.command(name="list-groups")
+    def list_groups(
+        config_filename: pathlib.Path = typer.Option(
+            ...,
+            "-c",
+            "--config",
+            help="nebari configuration file path",
+        )
+    ):
+        """List the groups and their current roles in Keycloak."""
+        from nebari.plugins import nebari_plugin_manager
+
+        config_schema = nebari_plugin_manager.config_schema
+        config = read_configuration(config_filename, config_schema)
+        do_keycloak(config, command="listgroups")
+
     @app_keycloak.command(name="export-users")
     def export_users(
         config_filename: pathlib.Path = typer.Option(
