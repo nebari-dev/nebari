@@ -219,7 +219,6 @@ class TerraformStateStage(NebariTerraformStage):
         # terraform show command, inside check_immutable_fields
         with super().deploy(stage_outputs, disable_prompt, tofu_init=False):
             env_mapping = {}
-
             with modified_environ(**env_mapping):
                 yield
 
@@ -262,6 +261,7 @@ class TerraformStateStage(NebariTerraformStage):
 
     def get_nebari_config_state(self) -> dict:
         directory = str(self.output_directory / self.stage_prefix)
+
         tf_state = opentofu.show(directory)
         nebari_config_state = None
 
