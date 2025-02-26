@@ -36,7 +36,7 @@ def test_service_status(nebari_endpoint):
 
 def test_verify_keycloak_users(nebari_config):
     """Tests if keycloak is working and it has expected users"""
-    keycloak_url = f"https://{nebari_config.domain}/auth"
+    keycloak_url = f"https://{nebari_config.domain}/auth/"
     password = nebari_config.security.keycloak.initial_root_password
 
     from keycloak import KeycloakAdmin
@@ -45,10 +45,8 @@ def test_verify_keycloak_users(nebari_config):
         server_url=keycloak_url,
         username="root",
         password=password,
-        # realm_name="nebari",
-        # client_id="account",
+        realm_name="nebari",
+        user_realm_name="master",
         verify=False,
     )
-    assert set([u["username"] for u in keycloak_admin.get_users()]) == {
-        "root",
-    }
+    assert set([u["name"] for u in keycloak_admin.get_groups()]) == {'admin', 'analyst', 'developer', 'superadmin', 'users'}
