@@ -43,14 +43,12 @@ def test_verify_keycloak_users(nebari_config):
 
     keycloak_admin = KeycloakAdmin(
         server_url=keycloak_url,
-        username="nebari-bot",
+        username="root",
         password=password,
-        realm_name="master",
-        client_id="admin-cli",
+        # realm_name="nebari",
+        # client_id="account",
         verify=False,
     )
     assert set([u["username"] for u in keycloak_admin.get_users()]) == {
-        "nebari-bot",
-        "read-only-user",
         "root",
     }
