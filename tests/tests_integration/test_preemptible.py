@@ -1,5 +1,5 @@
 import pytest
-from kubernetes import client, config
+from kubernetes import client
 
 from tests.common.config_mod_utils import PREEMPTIBLE_NODE_GROUP_NAME
 

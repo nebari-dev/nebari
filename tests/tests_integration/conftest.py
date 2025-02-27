@@ -32,6 +32,7 @@ def disable_warnings():
 def _nebari_config(config_path):
     """Reads the Nebari configuration file from the specified path."""
     from nebari.plugins import nebari_plugin_manager
+
     config_schema = nebari_plugin_manager.config_schema
     return read_configuration(config_path, config_schema)
 
@@ -53,10 +54,9 @@ def nebari_endpoint(deployment_dir):
 
 @pytest.fixture(scope="session")
 def deployment_dir(request) -> Path:
-    """Ensures the deployment directory and config file exists 
+    """Ensures the deployment directory and config file exists
     and returns the path to it.
     """
     existing_deployment = Path(os.environ.get("EXISTING_DEPLOYMENT_DIR", ""))
     assert existing_deployment.exists()
     return existing_deployment.absolute()
-

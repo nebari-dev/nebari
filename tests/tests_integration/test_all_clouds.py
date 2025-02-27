@@ -3,9 +3,7 @@ import requests
 
 def test_service_status(nebari_endpoint):
     assert (
-        requests.get(
-            f"https://{nebari_endpoint}/hub/api/", verify=False
-        ).status_code
+        requests.get(f"https://{nebari_endpoint}/hub/api/", verify=False).status_code
         == 200
     )
     assert (
@@ -49,4 +47,10 @@ def test_verify_keycloak_users(nebari_config):
         user_realm_name="master",
         verify=False,
     )
-    assert set([u["name"] for u in keycloak_admin.get_groups()]) == {'admin', 'analyst', 'developer', 'superadmin', 'users'}
+    assert set([u["name"] for u in keycloak_admin.get_groups()]) == {
+        "admin",
+        "analyst",
+        "developer",
+        "superadmin",
+        "users",
+    }
