@@ -62,11 +62,10 @@ variable "tags" {
 variable "network_profile" {
   description = "Network profile"
   type = object({
-    network_plugin     = string
-    network_policy     = string
-    service_cidr       = string
-    dns_service_ip     = string
-    docker_bridge_cidr = string
+    network_plugin = string
+    network_policy = string
+    service_cidr   = string
+    dns_service_ip = string
   })
   default = null
 }
@@ -79,6 +78,18 @@ variable "max_pods" {
 
 variable "workload_identity_enabled" {
   description = "Enable Workload Identity"
+  type        = bool
+  default     = false
+}
+
+variable "authorized_ip_ranges" {
+  description = "The ip range allowed to access the Kubernetes API server, defaults to 0.0.0.0/0"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "azure_policy_enabled" {
+  description = "Enable Azure Policy"
   type        = bool
   default     = false
 }

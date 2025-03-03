@@ -10,7 +10,7 @@ from nebari.plugins import nebari_plugin_manager
 class OrderCommands(TyperGroup):
     def list_commands(self, ctx: typer.Context):
         """Return list of commands in the order appear."""
-        return list(self.commands)
+        return list(self.commands)[::-1]
 
 
 def version_callback(value: bool):
@@ -65,6 +65,7 @@ def create_cli():
             [],
             "--import-plugin",
             help="Import nebari plugin",
+            callback=import_plugin,
         ),
         excluded_stages: typing.List[str] = typer.Option(
             [],

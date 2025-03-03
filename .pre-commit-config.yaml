@@ -37,12 +37,12 @@ repos:
         exclude: "^src/_nebari/template/"
 
   - repo: https://github.com/crate-ci/typos
-    rev: typos-dict-v0.11.37
+    rev: typos-dict-v0.12.4
     hooks:
       - id: typos
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.3.0
+    rev: v2.4.1
     hooks:
       - id: codespell
         args:
@@ -55,19 +55,19 @@ repos:
 
   # python
   - repo: https://github.com/psf/black
-    rev: 24.10.0
+    rev: 25.1.0
     hooks:
       - id: black
         args: ["--line-length=88", "--exclude=/src/_nebari/template/"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.1
+    rev: v0.9.4
     hooks:
       - id: ruff
         args: ["--fix"]
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
+    rev: 6.0.0
     hooks:
       - id: isort
         name: isort
@@ -77,7 +77,7 @@ repos:
 
   # terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.96.2
+    rev: v1.97.2
     hooks:
       - id: terraform_fmt
         args:
