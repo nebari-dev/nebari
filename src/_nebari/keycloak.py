@@ -120,6 +120,15 @@ def list_users(keycloak_admin: keycloak.KeycloakAdmin) -> Dict[str, Any]:
     }
 
 
+def get_expected_roles(expected_roles, group_name):
+    return [
+        role
+        for client, roles in expected_roles.items()
+        for role in roles
+        if not (client == "realm-management" and group_name != "superadmin")
+    ]
+
+
 @do_keycloak()
 def list_groups(keycloak_admin: keycloak.KeycloakAdmin) -> List[Dict[str, Any]]:
     """Return a list of group info from Keycloak, excluding 'realm-management' roles for all groups except 'superadmin'."""
@@ -129,12 +138,7 @@ def list_groups(keycloak_admin: keycloak.KeycloakAdmin) -> List[Dict[str, Any]]:
         client_roles = attrs.get("clientRoles", {})
 
         # Collect roles except 'realm-management' (unless group is 'superadmin')
-        roles = [
-            role
-            for client, roles in client_roles.items()
-            for role in roles
-            if not (client == "realm-management" and group["name"] != "superadmin")
-        ]
+        roles = get_expected_roles(client_roles, group_name=group["name"])
 
         groups_data.append(
             {

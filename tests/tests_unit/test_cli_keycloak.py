@@ -13,6 +13,7 @@ import yaml
 from typer.testing import CliRunner
 
 from _nebari.cli import create_cli
+from _nebari.keycloak import get_expected_roles
 
 TEST_KEYCLOAK_USERS = [
     {"id": "1", "username": "test-dev", "groups": ["analyst", "developer"]},
@@ -28,59 +29,44 @@ TEST_KEYCLOAK_GROUPS = [
     {"name": "users", "path": "/users"},
 ]
 
-TEST_KEYCLOAK_GROUP_CLIENT_ROLES = [
-    {
-        "id": "1",
-        "clientRoles": {
-            "realm-management": ["query-users", "query-groups", "manage-users"],
-            "jupyterhub": [
-                "jupyterhub_admin",
-                "dask_gateway_admin",
-                "allow-group-directory-creation-role",
-            ],
-            "grafana": ["grafana_admin"],
-            "argo-server-sso": ["argo-admin"],
-            "conda_store": ["conda_store_admin"],
-        },
+TEST_KEYCLOAK_GROUP_CLIENT_ROLES = {
+    "/admin": {
+        "realm-management": ["query-users", "query-groups", "manage-users"],
+        "jupyterhub": [
+            "jupyterhub_admin",
+            "dask_gateway_admin",
+            "allow-group-directory-creation-role",
+        ],
+        "grafana": ["grafana_admin"],
+        "argo-server-sso": ["argo-admin"],
+        "conda_store": ["conda_store_admin"],
     },
-    {
-        "id": "2",
-        "clientRoles": {
-            "jupyterhub": [
-                "jupyterhub_developer",
-                "allow-group-directory-creation-role",
-                "allow-read-access-to-services-role",
-            ],
-            "grafana": ["grafana_viewer"],
-            "argo-server-sso": ["argo-viewer"],
-            "conda_store": ["conda_store_developer"],
-        },
+    "/analyst": {
+        "jupyterhub": [
+            "jupyterhub_developer",
+            "allow-group-directory-creation-role",
+            "allow-read-access-to-services-role",
+        ],
+        "grafana": ["grafana_viewer"],
+        "argo-server-sso": ["argo-viewer"],
+        "conda_store": ["conda_store_developer"],
     },
-    {
-        "id": "3",
-        "clientRoles": {
-            "jupyterhub": [
-                "jupyterhub_developer",
-                "allow-group-directory-creation-role",
-                "dask_gateway_developer",
-            ],
-            "grafana": ["grafana_developer"],
-            "argo-server-sso": ["argo-developer"],
-            "conda_store": ["conda_store_developer"],
-        },
+    "/developer": {
+        "jupyterhub": [
+            "jupyterhub_developer",
+            "allow-group-directory-creation-role",
+            "dask_gateway_developer",
+        ],
+        "grafana": ["grafana_developer"],
+        "argo-server-sso": ["argo-developer"],
+        "conda_store": ["conda_store_developer"],
     },
-    {
-        "id": "4",
-        "clientRoles": {
-            "realm-management": ["realm-admin"],
-            "conda_store": ["conda_store_superadmin"],
-        },
+    "/superadmin": {
+        "realm-management": ["realm-admin"],
+        "conda_store": ["conda_store_superadmin"],
     },
-    {
-        "id": "5",
-        "clientRoles": {},
-    },
-]
+    "/users": {},
+}
 
 
 TEST_DOMAIN = "nebari.example.com"
@@ -393,34 +379,33 @@ def test_cli_keycloak_listusers_happy_path_from_config(_mock_keycloak_admin):
         ),
         get_group_by_path=Mock(
             side_effect=lambda path: {
-                path: {
-                    "id": group["id"],
-                    "name": path.strip("/"),
-                    "path": path,
-                    "attributes": {},
-                    "realmRoles": [],
-                    "clientRoles": group["clientRoles"],
-                    "subGroups": [],
-                }
-                for group in TEST_KEYCLOAK_GROUP_CLIENT_ROLES
-                if group["path"] == path
+                "id": "00000000-0000-0000-0000-000000000000",
+                "name": path.strip("/"),
+                "path": path,
+                "attributes": {},
+                "realmRoles": [],
+                "clientRoles": TEST_KEYCLOAK_GROUP_CLIENT_ROLES[path],
+                "subGroups": [],
             }
         ),
     ),
 )
-def test_cli_keycloak_listgroups_happy_path_from_config(_mock_keycloak_admin):
-    result = run_cli_keycloak_listgroups(use_env=False)
-
+def test_cli_keycloak_listgroups_happy_path_from_env(_mock_keycloak_admin):
+    result = run_cli_keycloak_listgroups(use_env=True)
     assert 0 == result.exit_code
     assert not result.exception
 
     parsed_result = parse_yaml(result.stdout, ["name", "roles"])
 
-    for i, g in enumerate(TEST_KEYCLOAK_GROUP_CLIENT_ROLES):
-        print(g)
-        print(parsed_result[i])
-        assert g[i]["name"] == parsed_result[i]["name"]
-        assert g[i]["clientRoles"] == parsed_result[i]["roles"]
+    parsed_result_dict = {item["name"]: item["roles"] for item in parsed_result}
+
+    for group_path, expected_roles in TEST_KEYCLOAK_GROUP_CLIENT_ROLES.items():
+        group_name = group_path.strip("/")
+        assert group_name in parsed_result_dict
+        assert (
+            get_expected_roles(expected_roles, group_name)
+            == parsed_result_dict[group_name]
+        )
 
 
 @patch(
@@ -431,31 +416,33 @@ def test_cli_keycloak_listgroups_happy_path_from_config(_mock_keycloak_admin):
         ),
         get_group_by_path=Mock(
             side_effect=lambda path: {
-                path: {
-                    "id": TEST_KEYCLOAK_GROUP_CLIENT_ROLES[path]["id"],
-                    "name": path.strip("/"),
-                    "path": path,
-                    "attributes": {},
-                    "realmRoles": [],
-                    "clientRoles": TEST_KEYCLOAK_GROUP_CLIENT_ROLES[path][
-                        "clientRoles"
-                    ],
-                    "subGroups": [],
-                }
+                "id": "00000000-0000-0000-0000-000000000000",
+                "name": path.strip("/"),
+                "path": path,
+                "attributes": {},
+                "realmRoles": [],
+                "clientRoles": TEST_KEYCLOAK_GROUP_CLIENT_ROLES[path],
+                "subGroups": [],
             }
         ),
     ),
 )
-def test_cli_keycloak_listgroups_happy_path_from_env(_mock_keycloak_admin):
-    result = run_cli_keycloak_listgroups(use_env=True)
-
+def test_cli_keycloak_listgroups_happy_path_from_config(_mock_keycloak_admin):
+    result = run_cli_keycloak_listgroups(use_env=False)
     assert 0 == result.exit_code
     assert not result.exception
 
     parsed_result = parse_yaml(result.stdout, ["name", "roles"])
 
-    for i, g in enumerate(TEST_KEYCLOAK_GROUPS):
-        assert g["name"] == parsed_result[i]["name"]
+    parsed_result_dict = {item["name"]: item["roles"] for item in parsed_result}
+
+    for group_path, expected_roles in TEST_KEYCLOAK_GROUP_CLIENT_ROLES.items():
+        group_name = group_path.strip("/")
+        assert group_name in parsed_result_dict
+        assert (
+            get_expected_roles(expected_roles, group_name)
+            == parsed_result_dict[group_name]
+        )
 
 
 @patch(
