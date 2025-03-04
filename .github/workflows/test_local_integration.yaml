@@ -105,8 +105,8 @@ jobs:
       - name: Create example-user
         working-directory: ${{ steps.init.outputs.directory }}
         run: |
-          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }}
-          nebari keycloak listusers --config ${{ steps.init.outputs.config }}
+          nebari keycloak add-user --user "${TEST_USERNAME}" -p "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }}
+          nebari keycloak list-users --config ${{ steps.init.outputs.config }}
 
       - name: Await Workloads
         uses: jupyterhub/action-k8s-await-workloads@v3
