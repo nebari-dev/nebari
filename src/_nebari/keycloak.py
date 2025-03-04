@@ -16,29 +16,6 @@ from nebari import schema
 logger = logging.getLogger(__name__)
 
 
-# def do_keycloak(config: schema.Main, command, **kwargs):
-#     # suppress insecure warnings
-#     import urllib3
-
-#     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-#     keycloak_admin = get_keycloak_admin_from_config(config)
-
-#     if command == "adduser":
-#         if "password" not in kwargs:
-#             raise ValueError(
-#                 "keycloak command 'adduser' requires `username [password]`"
-#             )
-
-#         create_user(keycloak_admin, **kwargs, domain=config.domain)
-#     elif command == "listusers":
-#         list_users(keycloak_admin)
-#     elif command == "listgroups":
-#         list_groups(keycloak_admin)
-#     else:
-#         raise ValueError(f"unknown keycloak command {command}")
-
-
 def do_keycloak() -> Callable:
     """
     A simple decorator *factory* to wrap functions that interact with Keycloak. Injects
