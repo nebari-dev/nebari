@@ -1,37 +1,40 @@
 name: AWS Deployment
 
+env:
+  TEST_USERNAME: "test-user"
+  TEST_PASSWORD: "P@sswo3d"
+  NEBARI_IMAGE_TAG: "main"
+  AWS_DEFAULT_REGION: "us-west-2"
+
 on:
+  pull_request:
+    paths:
+      - ".github/workflows/test_aws_integration.yaml"
+      - "tests/**"
+      - "scripts/**"
+      - "src/**"
+      - "pyproject.toml"
+      - "pytest.ini"
+      - ".cirun.yml"
+  push:
+    branches:
+      - main
+      - release/\d{4}.\d{1,2}.\d{1,2}
+    paths:
+      - ".github/workflows/test_aws_integration.yaml"
+      - "tests/**"
+      - "scripts/**"
+      - "src/**"
+      - "pyproject.toml"
+      - "pytest.ini"
+      - ".cirun.yml"
   schedule:
     - cron: "0 0 * * MON"
   workflow_dispatch:
-    inputs:
-      image-tag:
-        description: 'Nebari image tag created by the nebari-docker-images repo'
-        required: true
-        default: main
-        type: string
-      tf-log-level:
-        description: 'Change Terraform log levels'
-        required: false
-        default: info
-        type: choice
-        options:
-        - info
-        - warn
-        - debug
-        - trace
-        - error
-
-
-env:
-  AWS_DEFAULT_REGION: "us-west-2"
-  NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
-  TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
 
 jobs:
   test-aws-integration:
     runs-on: ubuntu-latest
-    if: ${{ vars.SKIP_AWS_INTEGRATION_TEST != 'true' }}
     permissions:
       id-token: write
       contents: read
@@ -42,9 +45,18 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: conda-incubator/setup-miniconda@v3
+        env:
+          CONDA: /home/runnerx/miniconda3
         with:
-          python-version: 3.11
+          auto-update-conda: true
+          python-version: "3.11"
+          miniconda-version: "latest"
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.19.16
 
       - name: Install Nebari
         run: |
@@ -58,12 +70,72 @@ jobs:
           role-session-name: github-action
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: Integration Tests
+      - name: Initialize Nebari config for aws deployment
+        id: init
+        uses: ./.github/actions/init-cloud-aws
+
+      - name: Deploy Nebari
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
+
+      - name: Health check
+        uses: ./.github/actions/health-check
+        with:
+          domain: ${{ steps.init.outputs.domain }}
+
+      - name: Create example-user
+        working-directory: ${{ steps.init.outputs.directory }}
         run: |
-          pytest --version
-          pytest tests/tests_integration/ -vvv -s --cloud aws
+          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }}
+          nebari keycloak listusers --config ${{ steps.init.outputs.config }}
+
+      - name: Await Workloads
+        uses: jupyterhub/action-k8s-await-workloads@v3
+        with:
+          workloads: "" # all
+          namespace: "dev"
+          timeout: 300
+          max-restarts: 3
+
+      ### DEPLOYMENT TESTS
+      - name: Deployment Pytests
         env:
-          NEBARI_SECRET__default_images__jupyterhub: "quay.io/nebari/nebari-jupyterhub:${{ env.NEBARI_IMAGE_TAG }}"
-          NEBARI_SECRET__default_images__jupyterlab: "quay.io/nebari/nebari-jupyterlab:${{ env.NEBARI_IMAGE_TAG }}"
-          NEBARI_SECRET__default_images__dask_worker: "quay.io/nebari/nebari-dask-worker:${{ env.NEBARI_IMAGE_TAG }}"
-          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
+          NEBARI_CONFIG_PATH: ${{ steps.init.outputs.config }}
+          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+        run: |
+          pytest tests/tests_deployment/ -v -s
+
+      ### USER-JOURNEY TESTS
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Playwright Tests
+        env:
+          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+          NEBARI_FULL_URL: "https://${{ steps.init.outputs.domain }}/"
+        working-directory: tests/tests_e2e/playwright
+        run: |
+          # create environment file
+          envsubst < .env.tpl > .env
+          # run playwright pytest tests in headed mode with the chromium browser
+          xvfb-run pytest --browser chromium --slowmo 300 --headed
+
+      - name: Save Playwright recording artifacts
+        if: always()
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: e2e-playwright
+          path: |
+            ./tests/tests_e2e/playwright/videos/
+
+      ### CLEANUP AFTER TESTS
+      - name: Cleanup nebari deployment
+        # Since this is not critical for most pull requests and takes more than half of the time
+        # in the CI, it makes sense to only run on merge to main or workflow_dispatch to speed
+        # up feedback cycle
+        if: github.ref_name == 'main' || github.event_name == 'workflow_dispatch'
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari destroy --config ${{ steps.init.outputs.config }} --disable-prompt
