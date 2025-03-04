@@ -64,6 +64,7 @@ def process_streams(
 
     outputs = {"stdout": [], "stderr": []}
     partial = {"stdout": b"", "stderr": b""}
+    reset_code = b"\x1b[0m"  # ANSI reset code
 
     try:
         while True:
@@ -109,6 +110,15 @@ def process_streams(
                             sys.stderr.flush()
                         else:
                             outputs["stderr"].append(line_w_newline)
+
+        # Add reset code when we're done processing output
+        if print_stdout:
+            sys.stdout.buffer.write(reset_code)
+            sys.stdout.flush()
+        if print_stderr:
+            sys.stderr.buffer.write(reset_code)
+            sys.stderr.flush()
+
     finally:
         sel.close()
         if process.stdout:
