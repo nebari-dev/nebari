@@ -130,9 +130,6 @@ jobs:
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
-        # Since this is not critical for most pull requests and takes more than half of the time
-        # in the CI, it makes sense to only run on merge to main or workflow_dispatch to speed
-        # up feedback cycle
-        if: github.ref_name == 'main' || github.event_name == 'workflow_dispatch'
+        if: always()
         working-directory: ${{ steps.init.outputs.directory }}
         run: nebari destroy --config ${{ steps.init.outputs.config }} --disable-prompt
