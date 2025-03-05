@@ -69,11 +69,12 @@ jobs:
         with:
           aws_region: ${{ env.AWS_DEFAULT_REGION }}
           aws_role_to_assume: ${{ secrets.AWS_ROLE_ARN }}
-          cloudflare_token: ${{ secrets.CLOUDFLARE_TOKEN }}
 
       - name: Deploy Nebari
         working-directory: ${{ steps.init.outputs.directory }}
         run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
+        env:
+          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
 
       - name: Health check
         uses: ./.github/actions/health-check
