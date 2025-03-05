@@ -13,9 +13,6 @@ inputs:
   aws_role_to_assume:
     description: "ARN of AWS role to assume for deployment"
     required: true
-  cloudflare_token:
-    description: "Token for Cloudflare API"
-    required: true
 
 outputs:
   directory:
@@ -68,8 +65,6 @@ runs:
           --domain-name '${{ steps.metadata.outputs.domain }}' \
           --auth-provider password \
           --output '${{ steps.metadata.outputs.config }}'
-      env:
-        CLOUDFLARE_TOKEN: ${{ inputs.cloudflare_token }}
 
     - shell: bash
       run: |
