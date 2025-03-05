@@ -6,6 +6,16 @@ inputs:
     description: "Path to directory to initialize in"
     required: false
     default: './local-deployment'
+  aws_region:
+    description: "AWS region to use for deployment"
+    required: false
+    default: 'us-west-2'
+  aws_role_to_assume:
+    description: "ARN of AWS role to assume for deployment"
+    required: true
+  cloudflare_token:
+    description: "Token for Cloudflare API"
+    required: true
 
 outputs:
   directory:
@@ -46,9 +56,9 @@ runs:
     - name: Authenticate to AWS
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        role-to-assume: ${{ inputs.aws_role_to_assume }}
         role-session-name: github-action
-        aws-region: ${{ env.AWS_DEFAULT_REGION }}
+        aws-region: ${{ inputs.aws_region }}
 
     - shell: bash -l {0}
       id: init
@@ -60,7 +70,7 @@ runs:
           --auth-provider password \
           --output '${{ steps.metadata.outputs.config }}'
       env:
-        CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
+        CLOUDFLARE_TOKEN: ${{ inputs.cloudflare_token }}
 
     - shell: bash
       run: |
