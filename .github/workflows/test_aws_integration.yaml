@@ -63,16 +63,13 @@ jobs:
           pip install .[dev]
           playwright install
 
-      - name: Authenticate to AWS
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          role-session-name: github-action
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
-
       - name: Initialize Nebari config for aws deployment
         id: init
         uses: ./.github/actions/init-cloud-aws
+        with:
+          aws_region: ${{ env.AWS_DEFAULT_REGION }}
+          aws_role_to_assume: ${{ secrets.AWS_ROLE_ARN }}
+          cloudflare_token: ${{ secrets.CLOUDFLARE_TOKEN }}
 
       - name: Deploy Nebari
         working-directory: ${{ steps.init.outputs.directory }}
