@@ -5,7 +5,7 @@ inputs:
   directory:
     description: "Path to directory to initialize in"
     required: false
-    default: './local-deployment'
+    default: './aws-deployment'
   aws_region:
     description: "AWS region to use for deployment"
     required: false
@@ -49,8 +49,7 @@ runs:
         PROJECT='github-actions'
         echo "project=${PROJECT}" | tee --append "${GITHUB_OUTPUT}"
 
-        DOMAIN='github-actions-aws.nebari.dev'
-        nslookup "${DOMAIN}"
+        DOMAIN='ci-aws.nebari.dev'
         echo "domain=${DOMAIN}" | tee --append "${GITHUB_OUTPUT}"
 
     - name: Authenticate to AWS
@@ -92,6 +91,21 @@ runs:
             minio:
               persistence:
                 size: 1Gi
+        EOM
+
+        # Update certificate info
+        cat >> '${{ steps.metadata.outputs.config }}' <<- EOM
+        certificate:
+          type: lets-encrypt
+          acme_email: internal-devops@quansight.com
+          acme_server: https://acme-v02.api.letsencrypt.org/directory
+        EOM
+
+        # Update dns config
+        cat >> '${{ steps.metadata.outputs.config }}' <<- EOM
+        dns:
+          provider: cloudflare
+          auto_provision: true
         EOM
 
     - shell: bash
