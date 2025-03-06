@@ -1,6 +1,12 @@
 variable "kube_context" {
   description = "Optional kubernetes context to use to connect to kubernetes cluster"
   type        = string
+  default     = "default"
+}
+
+variable "kubeconfig_path" {
+  description = "Path to kubeconfig file to use to connect to kubernetes cluster"
+  type        = string
 }
 
 variable "metallb_ip_max" {
