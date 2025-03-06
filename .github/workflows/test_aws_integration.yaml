@@ -110,8 +110,9 @@ jobs:
           NEBARI_CONFIG_PATH: ${{ steps.init.outputs.config }}
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+          NEBARI_HOSTNAME: ${{ steps.init.outputs.domain }}
         run: |
-          pytest tests/tests_deployment/ -v -s
+          pytest tests/tests_deployment/ -v
 
       ### USER-JOURNEY TESTS
       - uses: actions/setup-node@v4
