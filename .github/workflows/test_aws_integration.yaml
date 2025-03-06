@@ -63,25 +63,24 @@ jobs:
           pip install .[dev]
           playwright install
 
-      - name: Initialize Nebari config for aws deployment
-        id: init
-        uses: ./.github/actions/init-cloud-aws
-        with:
-          aws_region: ${{ env.AWS_DEFAULT_REGION }}
-          aws_role_to_assume: ${{ secrets.AWS_ROLE_ARN }}
-
-      - name: Deploy Nebari
-        working-directory: ${{ steps.init.outputs.directory }}
-        run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
-        env:
-          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
-
       - name: Authenticate to AWS
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-session-name: github-action
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+      - name: Initialize Nebari config for aws deployment
+        id: init
+        uses: ./.github/actions/init-cloud
+        with:
+          cloud: aws
+
+      - name: Deploy Nebari
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
+        env:
+          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
 
       - name: Update kube config
         run: aws eks update-kubeconfig --name github-actions-dev --region ${{ env.AWS_DEFAULT_REGION }}
