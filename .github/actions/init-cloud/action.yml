@@ -1,17 +1,13 @@
-name: init-cloud-aws
+name: init-cloud
 description: "Initialize Nebari config for cloud deployment"
 
 inputs:
   directory:
     description: "Path to directory to initialize in"
     required: false
-    default: './aws-deployment'
-  aws_region:
-    description: "AWS region to use for deployment"
-    required: false
-    default: 'us-west-2'
-  aws_role_to_assume:
-    description: "ARN of AWS role to assume for deployment"
+    default: './cloud-deployment'
+  cloud:
+    description: "Cloud provider to use for deployment"
     required: true
 
 outputs:
@@ -46,21 +42,14 @@ runs:
         PROJECT='github-actions'
         echo "project=${PROJECT}" | tee --append "${GITHUB_OUTPUT}"
 
-        DOMAIN='ci-aws.nebari.dev'
+        DOMAIN='ci-${{ inputs.cloud }}.nebari.dev'
         echo "domain=${DOMAIN}" | tee --append "${GITHUB_OUTPUT}"
-
-    - name: Authenticate to AWS
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        role-to-assume: ${{ inputs.aws_role_to_assume }}
-        role-session-name: github-action
-        aws-region: ${{ inputs.aws_region }}
 
     - shell: bash -l {0}
       id: init
       working-directory: ${{ steps.metadata.outputs.directory }}
       run: |
-        nebari init aws \
+        nebari init ${{ inputs.cloud }} \
           --project-name '${{ steps.metadata.outputs.project }}' \
           --domain-name '${{ steps.metadata.outputs.domain }}' \
           --auth-provider password \
