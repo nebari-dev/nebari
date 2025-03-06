@@ -2,9 +2,11 @@ import json
 import logging
 import os
 import re
+import subprocess
 from pathlib import Path
 
 import hcl2
+import yaml
 from tqdm import tqdm
 
 from _nebari.utils import deep_merge
@@ -15,8 +17,8 @@ logging.basicConfig(level=logging.INFO)
 
 class HelmChartIndexer:
     # Define regex patterns to extract variable names
-    LOCAL_VAR_PATTERN = re.compile(r"local.(.*[a-z])")
-    VAR_PATTERN = re.compile(r"var.(.*[a-z])")
+    LOCAL_VAR_PATTERN = re.compile(r"local\.(.*[a-zA-Z0-9_])")
+    VAR_PATTERN = re.compile(r"var\.(.*[a-zA-Z0-9_])")
 
     def __init__(self, stages_dir, skip_charts, debug=False):
         self.stages_dir = stages_dir
@@ -156,7 +158,7 @@ class HelmChartIndexer:
 
 def pull_helm_chart(chart_index: dict, skip_charts: list) -> None:
     """
-    Pull helm charts specified in `chart_index` and save them in the `helm_charts` directory.
+    Pull helm charts specified in `chart_index`, extract images, and save them in the `helm_charts` directory.
 
     Args:
         chart_index: A dictionary containing chart names as keys and chart metadata (version and repository)
@@ -185,14 +187,83 @@ def pull_helm_chart(chart_index: dict, skip_charts: list) -> None:
             f"helm pull {chart_name} --version {chart_version} --repo {chart_repository} --untar"
         )
 
-        chart_filename = Path(f"{chart_name}-{chart_version}.tgz")
-        if not chart_filename.exists():
+        chart_path = Path(chart_name)
+
+        if not chart_path.exists():
             raise ValueError(
                 f"Could not find {chart_name}:{chart_version} directory in {chart_dir}."
             )
 
-    print("All charts downloaded successfully!")
-    # shutil.rmtree(Path(os.getcwd()).parent / chart_dir)
+        # Now, run 'helm template' on the chart
+        try:
+            result = subprocess.run(
+                ["helm", "template", chart_name, str(chart_path)],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            templates_output = result.stdout
+        except subprocess.CalledProcessError as e:
+            raise ValueError(f"Error running helm template on {chart_name}: {e.stderr}")
+
+        # Parse the output to extract images
+        images = extract_images_from_templates(templates_output)
+        chart_metadata["images"] = images
+
+    print("All charts downloaded and images extracted successfully!")
+
+
+def extract_images_from_templates(templates_output: str) -> list:
+    """
+    Parse the helm template output and extract unique docker image references.
+
+    Args:
+        templates_output: The output string from 'helm template' command.
+
+    Returns:
+        A list of unique docker image references found in the templates.
+    """
+    # Split the output into individual YAML documents
+    yaml_documents = templates_output.split("---")
+    images = set()
+
+    for doc in yaml_documents:
+        if not doc.strip():
+            continue
+        try:
+            yaml_obj = yaml.safe_load(doc)
+            # Now, recursively search for 'image' keys
+            doc_images = find_images_in_yaml(yaml_obj)
+            images.update(doc_images)
+        except yaml.YAMLError:
+            # Handle YAML parsing errors
+            continue
+
+    return sorted(images)
+
+
+def find_images_in_yaml(yaml_obj) -> set:
+    """
+    Recursively search for 'image' keys in a YAML object.
+
+    Args:
+        yaml_obj: The YAML object to search.
+
+    Returns:
+        A set of image strings found in the YAML object.
+    """
+    images = set()
+    if isinstance(yaml_obj, dict):
+        for key, value in yaml_obj.items():
+            if key == "image" and isinstance(value, str):
+                images.add(value)
+            else:
+                images.update(find_images_in_yaml(value))
+    elif isinstance(yaml_obj, list):
+        for item in yaml_obj:
+            images.update(find_images_in_yaml(item))
+    return images
 
 
 def add_workflow_job_summary(chart_index: dict):
@@ -209,7 +280,16 @@ def add_workflow_job_summary(chart_index: dict):
             for chart_name, chart_metadata in chart_index.items():
                 chart_version = chart_metadata["version"]
                 chart_repository = chart_metadata["repository"]
-                f.write(f"- {chart_name} ({chart_version}) from {chart_repository}\n")
+                images = chart_metadata.get("images", [])
+                f.write(
+                    f"- **{chart_name}** ({chart_version}) from {chart_repository}\n"
+                )
+                if images:
+                    f.write("  <details>\n")
+                    f.write("    <summary>Images</summary>\n\n")
+                    for image in images:
+                        f.write(f"    - {image}\n")
+                    f.write("  </details>\n")
 
 
 if __name__ == "__main__":
