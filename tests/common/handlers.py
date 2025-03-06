@@ -308,7 +308,10 @@ class CondaStore(JupyterLab):
         time.sleep(2)
 
     def _open_new_environment_tab(self):
-        self.page.get_by_label("Create a new environment in").click()
+        self.page.get_by_role(
+            "link",
+            name=f"Create a new environment in the {self.nav.username} namespace",
+        ).click()
         expect(
             self.page.get_by_role("button", name="Create", exact=True)
         ).to_be_visible()

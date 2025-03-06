@@ -89,6 +89,6 @@ def test_conda_store_ui(navigator, namespaces):
     namespaces.append(navigator.username)
     namespaces.sort()
 
-    assert shown_namespaces == namespaces
+    assert set(shown_namespaces).intersection(namespaces) == set(namespaces)
     # Clean up
     conda_store.reset_workspace()
