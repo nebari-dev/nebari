@@ -159,7 +159,7 @@ class JupyterLabProfile(schema.Base):
     users: Optional[List[str]] = None
     groups: Optional[List[str]] = None
     kubespawner_override: Optional[KubeSpawner] = None
-    profile_options: Optional[dict[str, ProfileOption]] = None
+    profile_options: dict[str, ProfileOption] = {}
 
     @model_validator(mode="after")
     def only_yaml_can_have_groups_and_users(self):
