@@ -141,7 +141,6 @@ def init(directory=None, upgrade=True):
 def apply(directory=None, targets=None, var_files=None):
     targets = targets or []
     var_files = var_files or []
-
     logger.info(f"tofu apply directory={directory} targets={targets}")
     command = (
         ["apply", "-auto-approve"]

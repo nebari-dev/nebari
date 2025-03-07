@@ -12,10 +12,17 @@ variable "kubeconfig_path" {
 variable "metallb_ip_max" {
   description = "Maximum IP address for MetalLB"
   type        = string
-  default     = "192.168.3.92"
+  default     = ""
 }
+
 variable "metallb_ip_min" {
   description = "Minimum IP address for MetalLB"
   type        = string
-  default     = "192.168.3.90"
+  default     = ""
+}
+
+variable "metallb_enabled" {
+  description = "Enable MetalLB"
+  type        = bool
+  default     = false
 }

@@ -18,6 +18,7 @@ provider "kubectl" {
 }
 
 resource "kubernetes_namespace" "metallb" {
+  count = var.metallb_ip_min != "" && var.metallb_ip_max != "" && var.metallb_enabled ? 1 : 0
   metadata {
     name = "metallb-system"
   }
@@ -35,11 +36,12 @@ resource "kubectl_manifest" "metallb" {
 }
 
 resource "kubectl_manifest" "load-balancer" {
+  count = var.metallb_ip_min != "" && var.metallb_ip_max != "" && var.metallb_enabled ? 1 : 0
   yaml_body = yamlencode({
     apiVersion = "v1"
     kind       = "ConfigMap"
     metadata = {
-      namespace = kubernetes_namespace.metallb.metadata.0.name
+      namespace = kubernetes_namespace.metallb.0.metadata.0.name
       name      = "config"
     }
     data = {
