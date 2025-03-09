@@ -83,7 +83,7 @@ jobs:
           CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
 
       - name: Update kube config
-        run: aws eks update-kubeconfig --name github-actions-dev --region ${{ env.AWS_DEFAULT_REGION }}
+        run: aws eks update-kubeconfig --name gha-cloud-test-dev --region ${{ env.AWS_DEFAULT_REGION }}
 
       - name: Health check
         uses: ./.github/actions/health-check
