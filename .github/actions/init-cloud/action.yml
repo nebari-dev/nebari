@@ -39,7 +39,7 @@ runs:
         CONFIG="${DIRECTORY}/nebari-config.yaml"
         echo "config=${CONFIG}" | tee --append "${GITHUB_OUTPUT}"
 
-        PROJECT='github-actions'
+        PROJECT='gha-cloud-test'
         echo "project=${PROJECT}" | tee --append "${GITHUB_OUTPUT}"
 
         DOMAIN='ci-${{ inputs.cloud }}.nebari.dev'
