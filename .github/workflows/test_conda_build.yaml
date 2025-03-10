@@ -52,7 +52,7 @@ jobs:
 
       - name: Build conda package
         run: |
-          echo "export PACKAGE_DIR=$(pwd)/conda-packages"
+          PACKAGE_DIR=$(pwd)/conda-packages
           conda build nebari --output-folder $PACKAGE_DIR
           echo "PACKAGE_DIR=$PACKAGE_DIR" >> $GITHUB_ENV
 
