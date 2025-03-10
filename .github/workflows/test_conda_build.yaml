@@ -52,9 +52,9 @@ jobs:
 
       - name: Build conda package
         run: |
-          conda build nebari
+          conda build . --output-folder ./conda-bld
 
       - name: Test conda package
         run: |
-          conda install --use-local local::nebari
+          conda install -c file://$(pwd)/conda-bld nebari
           nebari --version
