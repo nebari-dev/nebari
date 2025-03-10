@@ -52,8 +52,9 @@ jobs:
 
       - name: Build conda package
         run: |
-          echo "PACKAGE_DIR=$(pwd)/conda-packages" >> $GITHUB_ENV
-          conda build nebari --output-folder ${{ env.PACKAGE_DIR }}
+          echo "export PACKAGE_DIR=$(pwd)/conda-packages"
+          conda build nebari --output-folder $PACKAGE_DIR
+          echo "PACKAGE_DIR=$PACKAGE_DIR" >> $GITHUB_ENV
 
       - name: Install local nebari conda package
         run: |
