@@ -42,6 +42,10 @@ jobs:
           conda install grayskull conda-build conda-verify conda-index
           pip install build
 
+      - name: Conda list
+        run: |
+          conda list
+
       - name: Generate sdist
         run: |
           python -m build --sdist
