@@ -29,7 +29,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup miniconda
-        uses: conda-incubator/setup-miniconda@v3.1.0
+        uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: "3.12"
@@ -69,7 +69,3 @@ jobs:
           conda create -n test-env -c file://${{ env.CONDA_BLD_PATH }} "nebari=$NEBARI_VERSION"
 
           conda run -n test-env --live-stream nebari --version
-
-      - name: Debug
-        uses: fawazahmed0/action-debug-vscode@main
-        if: always()
