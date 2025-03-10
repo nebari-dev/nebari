@@ -54,7 +54,7 @@ jobs:
         run: |
           conda build nebari
 
-      - name: Insntall local nebari conda package
+      - name: Install local nebari conda package
         run: |
           conda install --use-local nebari
 
