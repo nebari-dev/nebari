@@ -54,6 +54,9 @@ jobs:
         run: |
           conda build .
           echo "NEBARI_VERSION=$(conda search -c local --override-channels nebari --json | jq -r '.nebari[0].version')" >> $GITHUB_ENV
+          echo ${{ env.NEBARI_VERSION }}
+
+      - uses: fawazahmed0/action-debug-vscode@main
 
       - name: Test conda package
         run: |
