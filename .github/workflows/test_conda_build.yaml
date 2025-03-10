@@ -53,11 +53,12 @@ jobs:
       - name: Build conda package
         run: |
           conda build .
-          echo "NEBARI_VERSION=$(conda search --override-channels nebari --json | jq -r '.nebari[0].version')" >> $GITHUB_ENV
+          echo "NEBARI_VERSION=$(conda search -c local --override-channels nebari --json | jq -r '.nebari[0].version')" >> $GITHUB_ENV
 
       - name: Test conda package
         run: |
-          conda create -n test-env -c local "local::nebari"
+          echo "NEBARI_VERSION=${{ env.NEBARI_VERSION }}"
+          conda create -n test-env --use-local "local::nebari"
 
           conda run -n test-env --live-stream nebari --version
 
