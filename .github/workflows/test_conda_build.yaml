@@ -53,6 +53,8 @@ jobs:
       - name: Build conda package
         run: |
           conda build .
+          sleep 10
+          conda search -c local --override-channels nebari
           echo "NEBARI_VERSION=$(conda search -c local --override-channels nebari --json | jq -r '.nebari[0].version')" >> $GITHUB_ENV
 
       - name: Test conda package
