@@ -55,6 +55,8 @@ jobs:
           conda build . --output-folder ./conda-bld
           ls -lah ./conda-bld
 
+      - uses: fawazahmed0/action-debug-vscode@main
+
       - name: Test conda package
         run: |
           conda install -c file://$(pwd)/conda-bld nebari
