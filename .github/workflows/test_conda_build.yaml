@@ -56,7 +56,7 @@ jobs:
 
       - name: Install local nebari conda package
         run: |
-          conda install --use-local nebari
+          conda install --use-local --override-channels nebari
 
       - name: Check Nebari version
         run: |
