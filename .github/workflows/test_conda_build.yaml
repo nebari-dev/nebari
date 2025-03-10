@@ -53,6 +53,7 @@ jobs:
       - name: Build conda package
         run: |
           conda build . --output-folder ./conda-bld
+          ls -lah ./conda-bld
 
       - name: Test conda package
         run: |
