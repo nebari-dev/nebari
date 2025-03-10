@@ -90,7 +90,6 @@ dev = [
     "coverage[toml]",
     "dask-gateway",
     "escapism",
-    "importlib-metadata<5.0",
     "mypy==1.6.1",
     "paramiko",
     "pre-commit",
