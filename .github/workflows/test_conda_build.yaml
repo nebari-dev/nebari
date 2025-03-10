@@ -35,7 +35,7 @@ jobs:
           python-version: "3.10"
           channels: conda-forge
           activate-environment: nebari-dev
-          conda-remove-defaults: true
+          conda-remove-defaults: "true"
 
       - name: Install dependencies
         run: |
@@ -52,11 +52,12 @@ jobs:
 
       - name: Build conda package
         run: |
-          conda build nebari
+          echo "PACKAGE_DIR=$(pwd)/conda-packages" >> $GITHUB_ENV
+          conda build nebari --output-folder ${{ env.PACKAGE_DIR }}
 
       - name: Install local nebari conda package
         run: |
-          conda install --use-local local::nebari
+          conda install -c ${{ env.PACKAGE_DIR }} nebari
 
       - name: Check Nebari version
         run: |
