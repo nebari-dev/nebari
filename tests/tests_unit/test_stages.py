@@ -48,17 +48,13 @@ def test_check_immutable_fields_mutable_change(
 
 
 @patch.object(TerraformStateStage, "get_nebari_config_state")
-@patch.object(schema.Main, "model_fields")
 def test_check_immutable_fields_immutable_change(
-    mock_model_fields, mock_get_state, terraform_state_stage, mock_config
+    mock_get_state, terraform_state_stage, mock_config
 ):
     old_config = mock_config.model_copy(deep=True)
     old_config.local = None
     old_config.provider = schema.ProviderEnum.gcp
     mock_get_state.return_value = old_config.model_dump()
-
-    # Mock the provider field to be immutable
-    mock_model_fields.__getitem__.return_value.json_schema_extra = {"immutable": True}
 
     with pytest.raises(ValueError) as exc_info:
         terraform_state_stage.check_immutable_fields()
