@@ -52,15 +52,17 @@ jobs:
 
       - name: Build conda package
         run: |
-          conda build .
-          sleep 10
-          conda search -c local --override-channels nebari
-          echo "NEBARI_VERSION=$(conda search -c local --override-channels nebari --json | jq -r '.nebari[0].version')" >> $GITHUB_ENV
+          conda build . --output-folder conda-bld
+          conda index $(pwd)/conda-bld
+
+          # Store the path for the next step
+          echo "CONDA_BLD_PATH=$(pwd)/conda-bld" >> $GITHUB_ENV
 
       - name: Test conda package
         run: |
-          echo "NEBARI_VERSION=${{ env.NEBARI_VERSION }}"
-          conda create -n test-env --use-local "local::nebari"
+          NEBARI_VERSION=$(conda search -c local --override-channels nebari --json | jq -r '.nebari[0].version')
+
+          conda create -n test-env -c file://${{ env.CONDA_BLD_PATH }} "nebari=$NEBARI_VERSION"
 
           conda run -n test-env --live-stream nebari --version
 
