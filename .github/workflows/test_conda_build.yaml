@@ -35,10 +35,12 @@ jobs:
           python-version: "3.10"
           channels: conda-forge
           activate-environment: nebari-dev
+          conda-remove-defaults: true
 
       - name: Install dependencies
         run: |
-          conda install build grayskull conda-build conda-verify
+          conda install grayskull conda-build conda-verify
+          pip install build
 
       - name: Generate sdist
         run: |
@@ -52,7 +54,10 @@ jobs:
         run: |
           conda build nebari
 
-      - name: Test conda package
+      - name: Insntall local nebari conda package
         run: |
           conda install --use-local nebari
+
+      - name: Check Nebari version
+        run: |
           nebari --version
