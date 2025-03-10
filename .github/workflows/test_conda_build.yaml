@@ -49,12 +49,11 @@ jobs:
       - name: Generate meta.yaml
         run: |
           python -m grayskull pypi dist/*.tar.gz
+          echo "PACKAGE_DIR=$(pwd)/conda-packages" >> $GITHUB_ENV
 
       - name: Build conda package
         run: |
-          PACKAGE_DIR=$(pwd)/conda-packages
-          conda build nebari --output-folder $PACKAGE_DIR
-          echo "PACKAGE_DIR=$PACKAGE_DIR" >> $GITHUB_ENV
+          conda build nebari --output-folder ${{ env.PACKAGE_DIR }}
 
       - name: Install local nebari conda package
         run: |
