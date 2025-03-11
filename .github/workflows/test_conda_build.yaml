@@ -39,7 +39,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          conda install grayskull conda-build conda-verify conda-index
+          conda install grayskull conda-build conda-verify # conda-index
           pip install build
 
       - name: Conda list
@@ -57,7 +57,7 @@ jobs:
       - name: Build conda package
         run: |
           conda build . --output-folder conda-bld
-          python -m conda_index $(pwd)/conda-bld
+          # python -m conda_index $(pwd)/conda-bld
 
           # Store the path for the next step
           echo "CONDA_BLD_PATH=$(pwd)/conda-bld" >> $GITHUB_ENV
