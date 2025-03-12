@@ -21,6 +21,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 - Filter environments by user access by @soapy1 in https://github.com/nebari-dev/nebari/pull/2940
 - loosen dependency requirement pins for nebari by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2984
 
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2025.2.1...2025.3.1
 ## Release 2025.2.1 - February 7, 2025
 
 > NOTE: In this release, we have updated our maximum supported Kubernetes version from
