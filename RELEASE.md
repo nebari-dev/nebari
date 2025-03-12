@@ -9,6 +9,19 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
+## Release 2025.3.1 - March 14, 2025
+
+### What's Changed
+- fix buffer full deadlock by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2929
+- support KubeSpawner profile_options by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2937
+- fix ansi color reset bug by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2970
+- allow eks_public_access_cidrs to be optionally set in nebari-config.yaml by @dcmcand in https://github.com/nebari-dev/nebari/pull/2963
+- Add option to customize keycloak themes by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2469
+- support updated kubespawner by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2938
+- Filter environments by user access by @soapy1 in https://github.com/nebari-dev/nebari/pull/2940
+- loosen dependency requirement pins for nebari by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2984
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2025.2.1...2025.3.1
 ## Release 2025.2.1 - February 7, 2025
 
 > NOTE: In this release, we have updated our maximum supported Kubernetes version from
