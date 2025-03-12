@@ -112,7 +112,7 @@ jobs:
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
           NEBARI_HOSTNAME: ${{ steps.init.outputs.domain }}
         run: |
-          pytest tests/tests_deployment/ -v
+          pytest tests/tests_deployment/ -v -W ignore::DeprecationWarning -m "not requires_kubeconfig"
 
       ### USER-JOURNEY TESTS
       - uses: actions/setup-node@v4
