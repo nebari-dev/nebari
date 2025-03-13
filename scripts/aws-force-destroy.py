@@ -7,16 +7,34 @@ from _nebari.utils import load_yaml, timer
 
 logging.basicConfig(level=logging.INFO)
 
+RETRY_TIMES = 7
+
 
 def main():
     parser = argparse.ArgumentParser(description="Force Destroy AWS environment.")
     parser.add_argument("-c", "--config", help="nebari configuration", required=True)
     args = parser.parse_args()
 
-    handle_force_destroy(args)
+    success = False
+    retries = 0
+
+    # sometimes just need to retry
+    while retries < RETRY_TIMES and not success:
+        success = handle_force_destroy(args)
+        if not success:
+            logging.info(f"Attempt {retries+1} failed!")
+            time.sleep(7)
+            retries += 1
 
 
-def handle_force_destroy(args):
+def handle_force_destroy(args) -> bool:
+    """Force Destroy AWS environment.
+
+    If the environment is successfully destroyed, return True.
+    If the environment is not successfully destroyed, return False.
+
+    :rtype: bool
+    """
     config_filename = Path(args.config)
     if not config_filename.is_file():
         raise ValueError(
@@ -25,9 +43,14 @@ def handle_force_destroy(args):
 
     config = load_yaml(config_filename)
 
-    # Don't verify(config) in case the schema has changed - just pick out the important bits and tear down
+    # Try to destroy the AWS environment
+    try:
+        force_destroy_configuration(config)
+    except Exception as e:
+        logging.error(f"Failed to destroy AWS environment: {e}")
+        return False
 
-    force_destroy_configuration(config)
+    return True
 
 
 def parse_arn(arn):
