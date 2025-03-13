@@ -142,5 +142,7 @@ jobs:
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
         if: always()
-        working-directory: ${{ steps.init.outputs.directory }}
-        run: nebari destroy --config ${{ steps.init.outputs.config }} --disable-prompt
+        run: |
+          ls
+          ls scripts
+          python scripts/aws-force-destroy.py --config ${{ steps.init.outputs.config }}

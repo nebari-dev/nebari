@@ -3,7 +3,7 @@ import logging
 import time
 from pathlib import Path
 
-from _nebari.utils import check_cloud_credentials, load_yaml, timer
+from _nebari.utils import load_yaml, timer
 
 logging.basicConfig(level=logging.INFO)
 
@@ -55,8 +55,6 @@ def force_destroy_configuration(config):
 
     with timer(logging, "destroying nebari"):
         # 01 Check we have cloud details we need
-        check_cloud_credentials(config)
-
         if config.get("provider", "") != "aws":
             raise ValueError("force-destroy currently only available for AWS")
 
