@@ -35,10 +35,16 @@ jobs:
           python-version: "3.10"
           channels: conda-forge
           activate-environment: nebari-dev
+          conda-remove-defaults: true
 
       - name: Install dependencies
         run: |
-          conda install build grayskull conda-build conda-verify
+          conda install grayskull conda-build conda-verify
+          pip install build
+
+      - name: Conda list
+        run: |
+          conda list
 
       - name: Generate sdist
         run: |
@@ -50,9 +56,15 @@ jobs:
 
       - name: Build conda package
         run: |
-          conda build nebari
+          conda build . --output-folder conda-bld
+
+          # Store the path for the next step
+          echo "CONDA_BLD_PATH=$(pwd)/conda-bld" >> $GITHUB_ENV
 
       - name: Test conda package
         run: |
-          conda install --use-local nebari
-          nebari --version
+          NEBARI_VERSION=$(conda search -c local --override-channels nebari --json | jq -r '.nebari[0].version')
+
+          conda create -n test-env -c file://${{ env.CONDA_BLD_PATH }} "nebari=$NEBARI_VERSION"
+
+          conda run -n test-env --live-stream nebari --version

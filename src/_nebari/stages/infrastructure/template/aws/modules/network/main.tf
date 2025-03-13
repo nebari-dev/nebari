@@ -10,10 +10,9 @@ resource "aws_vpc" "main" {
 resource "aws_subnet" "main" {
   count = length(var.aws_availability_zones)
 
-  availability_zone       = var.aws_availability_zones[count.index]
-  cidr_block              = cidrsubnet(var.vpc_cidr_block, var.vpc_cidr_newbits, count.index)
-  vpc_id                  = aws_vpc.main.id
-  map_public_ip_on_launch = true
+  availability_zone = var.aws_availability_zones[count.index]
+  cidr_block        = cidrsubnet(var.vpc_cidr_block, var.vpc_cidr_newbits, count.index)
+  vpc_id            = aws_vpc.main.id
 
   tags = merge({ Name = "${var.name}-subnet-${count.index}" }, var.tags, var.subnet_tags)
 
@@ -22,30 +21,6 @@ resource "aws_subnet" "main" {
       availability_zone
     ]
   }
-}
-
-resource "aws_internet_gateway" "main" {
-  vpc_id = aws_vpc.main.id
-
-  tags = merge({ Name = var.name }, var.tags)
-}
-
-resource "aws_route_table" "main" {
-  vpc_id = aws_vpc.main.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.main.id
-  }
-
-  tags = merge({ Name = var.name }, var.tags)
-}
-
-resource "aws_route_table_association" "main" {
-  count = length(var.aws_availability_zones)
-
-  subnet_id      = aws_subnet.main[count.index].id
-  route_table_id = aws_route_table.main.id
 }
 
 resource "aws_security_group" "main" {
