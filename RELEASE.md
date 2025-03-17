@@ -9,6 +9,19 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
+## Release 2025.3.1 - March 14, 2025
+
+### What's Changed
+- fix buffer full deadlock by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2929
+- support KubeSpawner profile_options by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2937
+- fix ansi color reset bug by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2970
+- allow eks_public_access_cidrs to be optionally set in nebari-config.yaml by @dcmcand in https://github.com/nebari-dev/nebari/pull/2963
+- Add option to customize keycloak themes by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2469
+- support updated kubespawner by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2938
+- Filter environments by user access by @soapy1 in https://github.com/nebari-dev/nebari/pull/2940
+- loosen dependency requirement pins for nebari by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2984
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2025.2.1...2025.3.1
 ## Release 2025.2.1 - February 7, 2025
 
 > NOTE: In this release, we have updated our maximum supported Kubernetes version from
@@ -494,8 +507,8 @@ command and follow the instructions
 - CI: Add test coverage by @fangchenli in https://github.com/nebari-dev/nebari/pull/1959
 - nebari cli environment variable handling, support, keycloak, dev tests by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1968
 - CI: remove empty notebook to fix pre-commit json check by @fangchenli in https://github.com/nebari-dev/nebari/pull/1976
-- TYP: fix typing error in plugins by @fangchenli in https://github.com/nebari-dev/nebari/pull/1973
-- TYP: fix return class type in hookimpl by @fangchenli in https://github.com/nebari-dev/nebari/pull/1975
+- TYPO: fix typing error in plugins by @fangchenli in https://github.com/nebari-dev/nebari/pull/1973
+- TYPO: fix return class type in hookimpl by @fangchenli in https://github.com/nebari-dev/nebari/pull/1975
 - Allow users to specify Azure tags by @iameskild in https://github.com/nebari-dev/nebari/pull/1967
 - [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/1979
 - Do not try and add argo envs when disabled by @iameskild in https://github.com/nebari-dev/nebari/pull/1926
@@ -523,8 +536,8 @@ command and follow the instructions
 - [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/2047
 - fix typo in guided init for Digital Ocean by @dcmcand in https://github.com/nebari-dev/nebari/pull/2059
 - CI: add do integration by @fangchenli in https://github.com/nebari-dev/nebari/pull/2060
-- TYP: make all subfolders under kubernetes_services/template non-module by @fangchenli in https://github.com/nebari-dev/nebari/pull/2043
-- TYP: fix most typing errors in provider by @fangchenli in https://github.com/nebari-dev/nebari/pull/2038
+- TYPO: make all subfolders under kubernetes_services/template non-module by @fangchenli in https://github.com/nebari-dev/nebari/pull/2043
+- TYPO: fix most typing errors in provider by @fangchenli in https://github.com/nebari-dev/nebari/pull/2038
 - Fix link to documentation on Nebari Deployment home page by @aktech in https://github.com/nebari-dev/nebari/pull/2063
 - TST: enable timeout config in playwright notebook test by @fangchenli in https://github.com/nebari-dev/nebari/pull/1996
 - DEPS: sync supported python version by @fangchenli in https://github.com/nebari-dev/nebari/pull/2065

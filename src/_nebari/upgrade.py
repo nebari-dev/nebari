@@ -34,6 +34,7 @@ from _nebari.utils import (
     get_k8s_version_prefix,
     get_provider_config_block_name,
     load_yaml,
+    update_tfstate_file,
     yaml,
 )
 from _nebari.version import __version__, rounded_ver_parse
@@ -1649,9 +1650,79 @@ class Upgrade_2025_2_1(UpgradeStep):
             https://www.nebari.dev/docs/how-tos/kubernetes-version-upgrade
             """
         )
-
         rich.print(text)
+
+        # If the Nebari provider is Azure, we must handle a major version upgrade
+        # of the Azure Terraform provider (from 3.x to 4.x). This involves schema changes
+        # that can cause validation issues. The following steps will attempt to migrate
+        # your state file automatically. For details, see:
+        # https://github.com/nebari-dev/nebari/issues/2964
+
+        if config.get("provider", "") == "azure":
+            rich.print("\n ⚠️ Azure Provider Upgrade Notice ⚠️")
+            rich.print(
+                textwrap.dedent(
+                    """
+                    In this Nebari release, the Azure Terraform provider has been upgraded
+                    from version 3.97.1 to 4.7.0. This major update includes internal schema
+                    changes for certain resources, most notably the `azurerm_storage_account`.
+
+                    Nebari will attempt to update your Terraform state automatically to
+                    accommodate these changes. However, if you skip this automatic migration,
+                    you may encounter validation errors during redeployment.
+
+                    For detailed information on the Azure provider 4.x changes, please visit:
+                    https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/4.0-upgrade-guide
+                    """
+                )
+            )
+
+            # Prompt user for confirmation
+            continue_ = kwargs.get("attempt_fixes", False) or Confirm.ask(
+                "Nebari can automatically apply the necessary state migrations. Continue?",
+                default=False,
+            )
+
+            if not continue_:
+                rich.print(
+                    "You have chosen to skip the automatic state migration. This may lead "
+                    "to validation errors during deployment.\n\nFor instructions on manually "
+                    "updating your Terraform state, please refer to:\n"
+                    "https://github.com/nebari-dev/nebari/issues/2964"
+                )
+                exit
+            else:
+                # In this case the full path in the tfstate file is
+                # resources.instances.attributes.enable_https_traffic_only
+                MIGRATION_STATE = {
+                    "enable_https_traffic_only": "https_traffic_only_enabled"
+                }
+                state_filepath = (
+                    config_filename.parent
+                    / "stages/01-terraform-state/azure/terraform.tfstate"
+                )
+
+                # Perform the state file update
+                update_tfstate_file(state_filepath, MIGRATION_STATE)
+
         rich.print("Ready to upgrade to Nebari version [green]2025.2.1[/green].")
+
+        return config
+
+
+class Upgrade_2025_3_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2025.3.1
+    """
+
+    version = "2025.3.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+
+        rich.print("Ready to upgrade to Nebari version [green]2025.3.1[/green].")
 
         return config
 
