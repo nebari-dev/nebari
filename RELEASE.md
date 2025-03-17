@@ -507,8 +507,8 @@ command and follow the instructions
 - CI: Add test coverage by @fangchenli in https://github.com/nebari-dev/nebari/pull/1959
 - nebari cli environment variable handling, support, keycloak, dev tests by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1968
 - CI: remove empty notebook to fix pre-commit json check by @fangchenli in https://github.com/nebari-dev/nebari/pull/1976
-- TYP: fix typing error in plugins by @fangchenli in https://github.com/nebari-dev/nebari/pull/1973
-- TYP: fix return class type in hookimpl by @fangchenli in https://github.com/nebari-dev/nebari/pull/1975
+- TYPO: fix typing error in plugins by @fangchenli in https://github.com/nebari-dev/nebari/pull/1973
+- TYPO: fix return class type in hookimpl by @fangchenli in https://github.com/nebari-dev/nebari/pull/1975
 - Allow users to specify Azure tags by @iameskild in https://github.com/nebari-dev/nebari/pull/1967
 - [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/1979
 - Do not try and add argo envs when disabled by @iameskild in https://github.com/nebari-dev/nebari/pull/1926
@@ -536,8 +536,8 @@ command and follow the instructions
 - [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/2047
 - fix typo in guided init for Digital Ocean by @dcmcand in https://github.com/nebari-dev/nebari/pull/2059
 - CI: add do integration by @fangchenli in https://github.com/nebari-dev/nebari/pull/2060
-- TYP: make all subfolders under kubernetes_services/template non-module by @fangchenli in https://github.com/nebari-dev/nebari/pull/2043
-- TYP: fix most typing errors in provider by @fangchenli in https://github.com/nebari-dev/nebari/pull/2038
+- TYPO: make all subfolders under kubernetes_services/template non-module by @fangchenli in https://github.com/nebari-dev/nebari/pull/2043
+- TYPO: fix most typing errors in provider by @fangchenli in https://github.com/nebari-dev/nebari/pull/2038
 - Fix link to documentation on Nebari Deployment home page by @aktech in https://github.com/nebari-dev/nebari/pull/2063
 - TST: enable timeout config in playwright notebook test by @fangchenli in https://github.com/nebari-dev/nebari/pull/1996
 - DEPS: sync supported python version by @fangchenli in https://github.com/nebari-dev/nebari/pull/2065
