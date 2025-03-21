@@ -48,7 +48,6 @@ resource "aws_route_table_association" "main" {
   route_table_id = aws_route_table.main.id
 }
 
-
 resource "aws_security_group" "main" {
   name        = var.name
   description = "Main security group for infrastructure deployment"
