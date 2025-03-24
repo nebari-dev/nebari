@@ -1,0 +1,6 @@
+project_name: test
+certificate:
+  type: lets-encrypt
+  acme_email: admin@quansight.com
+  acme_server: https://acme-v02.api.letsencrypt.org/directory
+  acme_challenge_type: dns
