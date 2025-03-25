@@ -301,7 +301,7 @@ class KubernetesIngressStage(NebariTerraformStage):
             check_ingress_dns(stage_outputs, disable_prompt=disable_prompt)
         else:
             print(
-                f"skipping ingress DNS check for acme_challenge_type={self.config.certificate.acme_challenge_type}"
+                f"Skipping ingress DNS check for acme_challenge_type={self.config.certificate.acme_challenge_type}"
             )
 
 
