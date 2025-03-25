@@ -297,8 +297,12 @@ class KubernetesIngressStage(NebariTerraformStage):
         print(
             f"After stage={self.name} kubernetes ingress available on tcp ports={tcp_ports}"
         )
-
-        check_ingress_dns(stage_outputs, disable_prompt=disable_prompt)
+        if self.config.certificate.acme_challenge_type != AcmeChallengeType.dns.value:
+            check_ingress_dns(stage_outputs, disable_prompt=disable_prompt)
+        else:
+            print(
+                f"Skipping ingress DNS check for acme_challenge_type={self.config.certificate.acme_challenge_type}"
+            )
 
 
 @hookimpl
