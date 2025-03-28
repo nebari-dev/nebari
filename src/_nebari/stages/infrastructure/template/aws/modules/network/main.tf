@@ -23,6 +23,12 @@ resource "aws_subnet" "public" {
   }
 }
 
+moved {
+  from = aws_subnet.main
+  to   = aws_subnet.public
+}
+
+
 resource "aws_subnet" "private" {
   count = length(var.aws_availability_zones)
 
@@ -72,6 +78,11 @@ resource "aws_route_table" "public" {
   }
 
   tags = merge({ Name = var.name }, var.tags)
+}
+
+moved {
+  from = aws_route_table.main
+  to   = aws_route_table.public
 }
 
 resource "aws_route_table" "private" {
