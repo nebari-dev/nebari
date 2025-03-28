@@ -40,5 +40,11 @@ variable "vpc_cidr_block" {
 variable "vpc_cidr_newbits" {
   description = "VPC cidr number of bits to support 2^N subnets"
   type        = number
-  default     = 2
+  default     = 4 # allows 16 /20 subnets with 4094 addresses each
+}
+
+variable "region" {
+  description = "AWS region to operate infrastructure"
+  type        = string
+
 }
