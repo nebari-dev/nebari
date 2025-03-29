@@ -26,6 +26,7 @@ LOKI_GATEWAY_POD_LABELS = {
 }
 
 
+@pytest.mark.requires_kubeconfig
 @pytest.fixture(scope="module")
 def port_forward_fixture(request):
     """Pytest fixture to port forward loki backend pod to make it accessible
@@ -41,6 +42,7 @@ def port_forward(labels, port):
     return pytest.mark.parametrize("port_forward_fixture", [params], indirect=True)
 
 
+@pytest.mark.requires_kubeconfig
 @pytest.mark.parametrize(
     "endpoint_path",
     (
@@ -67,6 +69,7 @@ def test_loki_endpoint(endpoint_path: str, port_forward_fixture: V1Pod):
     response.close()
 
 
+@pytest.mark.requires_kubeconfig
 @port_forward(labels=MINIO_POD_LABELS, port=MINIO_PORT)
 def test_minio_accessible(port_forward_fixture: V1Pod):
     """This will hit liveness endpoint of minio  API and verify that we
@@ -82,6 +85,7 @@ def test_minio_accessible(port_forward_fixture: V1Pod):
     response.close()
 
 
+@pytest.mark.requires_kubeconfig
 @port_forward(labels=LOKI_GATEWAY_POD_LABELS, port=LOKI_GATEWAY_PORT)
 def test_loki_gateway(port_forward_fixture: V1Pod):
     """This will hit an endpoint of loki gateway API and verify that we
@@ -99,6 +103,7 @@ def test_loki_gateway(port_forward_fixture: V1Pod):
     response.close()
 
 
+@pytest.mark.requires_kubeconfig
 @port_forward(labels=LOKI_GATEWAY_POD_LABELS, port=LOKI_GATEWAY_PORT)
 def test_loki_gateway_fetch_logs(port_forward_fixture: V1Pod):
     """This will hit an endpoint of loki gateway API to fetch some logs
