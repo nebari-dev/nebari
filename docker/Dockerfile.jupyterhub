@@ -1,0 +1,41 @@
+# Copyright (c) Nebari Development Team.
+# Distributed under the terms of the Modified BSD License.
+# Usage:
+# ------
+#
+# To make a local build of the container, from the root directory:
+# docker build -f Dockerfile.jupyterhub -t nebari-jupyterhub:latest .
+
+FROM ubuntu:20.04
+LABEL MAINTAINER="Nebari development team"
+
+COPY scripts/install-apt-minimal.sh /opt/scripts/install-apt-minimal.sh
+RUN /opt/scripts/install-apt-minimal.sh
+
+COPY scripts/fix-permissions /opt/scripts/fix-permissions
+
+ENV MAMBAFORGE_VERSION 4.13.0-1
+ENV MAMBAFORGE_AARCH64_SHA256 69e3c90092f61916da7add745474e15317ed0dc6d48bfe4e4c90f359ba141d23
+ENV MAMBAFORGE_X86_64_SHA256 412b79330e90e49cf7e39a7b6f4752970fcdb8eb54b1a45cc91afe6777e8518c
+SHELL ["/bin/bash", "-c"]
+
+ENV PATH="/opt/conda/bin:$PATH:/opt/scripts"
+
+# ============== base install ===============
+COPY scripts/install-conda.sh /opt/scripts/install-conda.sh
+RUN /opt/scripts/install-conda.sh
+
+# ========== jupyterhub install ===========
+COPY jupyterhub/environment.yaml /opt/jupyterhub/environment.yaml
+COPY scripts/install-conda-environment.sh /opt/scripts/install-conda-environment.sh
+RUN /opt/scripts/install-conda-environment.sh /opt/jupyterhub/environment.yaml 'false'
+
+COPY jupyterhub /opt/jupyterhub
+RUN /opt/jupyterhub/postBuild
+
+WORKDIR /srv/jupyterhub
+
+# So we can actually write a db file here
+RUN fix-permissions /srv/jupyterhub
+
+CMD ["jupyterhub", "--config", "/usr/local/etc/jupyterhub/jupyterhub_config.py"]
