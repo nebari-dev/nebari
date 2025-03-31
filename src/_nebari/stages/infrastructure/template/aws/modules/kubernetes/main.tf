@@ -8,10 +8,13 @@ resource "aws_eks_cluster" "main" {
   vpc_config {
     security_group_ids = var.cluster_security_groups
     subnet_ids         = var.cluster_subnets
+    # ignored because this is set through the eks_endpoint_access variable
     #trivy:ignore:AVD-AWS-0040
     endpoint_public_access  = var.endpoint_public_access
     endpoint_private_access = var.endpoint_private_access
-    public_access_cidrs     = var.public_access_cidrs
+    # ignored because this is set through the eks_public_access_cidrs variable
+    #trivy:ignore:AVD-AWS-0041
+    public_access_cidrs = var.public_access_cidrs
   }
 
   # Only set encryption_config if eks_kms_arn is not null

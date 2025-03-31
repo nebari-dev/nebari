@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 
 import z2jh
-from tornado import gen
 
 
 def base_profile_home_mounts(username):
@@ -52,7 +51,7 @@ def base_profile_home_mounts(username):
         # Copy skel files/folders not starting with '..' to user home directory.
         # Filtering out ..* removes some unneeded folders (k8s configmap mount implementation details).
         "find /etc/skel/. -maxdepth 1 -not -name '.' -not -name '..*' -exec "
-        "cp -rL {escaped_brackets} /mnt/{path} \;"
+        "cp -rL {escaped_brackets} /mnt/{path} \\;"
     )
     command = MKDIR_OWN_DIRECTORY.format(
         # have to escape the brackets since this string will be formatted later by KubeSpawner
@@ -531,7 +530,7 @@ def render_profile(
             return None
 
     profile = copy.copy(profile)
-    profile_kubespawner_override = profile.get("kubespawner_override")
+    profile_kubespawner_override = profile.get("kubespawner_override", {})
     profile["kubespawner_override"] = functools.reduce(
         deep_merge,
         [
@@ -547,33 +546,22 @@ def render_profile(
         {},
     )
 
-    # We need to merge any env vars from the spawner with any overrides from the profile
-    # This is mainly to ensure JUPYTERHUB_ANYONE/GROUP is passed through from the spawner
-    # to control dashboard access.
-    envvars_fixed = {**(profile["kubespawner_override"].get("environment", {}))}
-
-    def preserve_envvars(spawner):
-        # This adds in JUPYTERHUB_ANYONE/GROUP rather than overwrite all env vars,
-        # if set in the spawner for a dashboard to control access.
-        return {
-            **envvars_fixed,
-            **spawner.environment,
+    profile["kubespawner_override"]["environment"].update(
+        {
             **profile_argo_token(groups),
             **profile_conda_store_viewer_token(),
         }
-
-    profile["kubespawner_override"]["environment"] = preserve_envvars
+    )
 
     return profile
 
 
-@gen.coroutine
-def render_profiles(spawner):
+async def render_profiles(spawner):
     # jupyterhub does not yet manage groups but it will soon
     # so for now we rely on auth_state from the keycloak
     # userinfo request to have the groups in the key
     # "auth_state.oauth_user.groups"
-    auth_state = yield spawner.user.get_auth_state()
+    auth_state = await spawner.user.get_auth_state()
 
     username = auth_state["oauth_user"]["preferred_username"]
 
@@ -590,7 +578,7 @@ def render_profiles(spawner):
 
     # fetch available profiles and render additional attributes
     profile_list = z2jh.get_config("custom.profiles")
-    return list(
+    rendered_profiles = list(
         filter(
             None,
             [
@@ -605,6 +593,7 @@ def render_profiles(spawner):
             ],
         )
     )
+    return rendered_profiles
 
 
 c.KubeSpawner.args = ["--debug"]

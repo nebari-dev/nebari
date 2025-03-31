@@ -266,6 +266,7 @@ class AWSInputVars(schema.Base):
         Literal["private", "public", "public_and_private"]
     ] = "public"
     eks_kms_arn: Optional[str] = None
+    eks_public_access_cidrs: Optional[List[str]] = ["0.0.0.0/0"]
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
@@ -434,7 +435,7 @@ class GoogleCloudPlatformProvider(schema.Base):
         ):
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
-            )
+            )  # noqa
 
         # check if instances are valid
         available_instances = google_cloud.instances(data["region"])
@@ -585,6 +586,7 @@ class AmazonWebServicesProvider(schema.Base):
     eks_endpoint_access: Optional[
         Literal["private", "public", "public_and_private"]
     ] = "public"
+    eks_public_access_cidrs: Optional[List[str]] = ["0.0.0.0/0"]
     eks_kms_arn: Optional[str] = None
     existing_subnet_ids: Optional[List[str]] = None
     existing_security_group_id: Optional[str] = None
@@ -654,7 +656,7 @@ class AmazonWebServicesProvider(schema.Base):
                 or available_kms_keys[key_id[0]].Arn != data["eks_kms_arn"]
             ):
                 raise ValueError(
-                    f"Amazon Web Services KMS Key with ARN {data['eks_kms_arn']} not one of available/enabled keys={[v.Arn for v in available_kms_keys.values() if v.KeyManager=='CUSTOMER' and v.KeySpec=='SYMMETRIC_DEFAULT']}"
+                    f"Amazon Web Services KMS Key with ARN {data['eks_kms_arn']} not one of available/enabled keys={ [v.Arn for v in available_kms_keys.values() if v.KeyManager == 'CUSTOMER' and v.KeySpec == 'SYMMETRIC_DEFAULT']}"
                 )
             key_id = key_id[0]
             # Raise error if key is not a customer managed key
@@ -957,6 +959,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
                 eks_endpoint_access=self.config.amazon_web_services.eks_endpoint_access,
+                eks_public_access_cidrs=self.config.amazon_web_services.eks_public_access_cidrs,
                 eks_kms_arn=self.config.amazon_web_services.eks_kms_arn,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
                 existing_security_group_id=self.config.amazon_web_services.existing_security_group_id,

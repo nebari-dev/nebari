@@ -1,5 +1,6 @@
 import enum
 import logging
+import os
 import socket
 import sys
 import time
@@ -124,6 +125,11 @@ class CertificateEnum(str, enum.Enum):
         return representer.represent_str(node.value)
 
 
+class AcmeChallengeType(str, enum.Enum):
+    tls = "tls"
+    dns = "dns"
+
+
 class Certificate(schema.Base):
     type: CertificateEnum = CertificateEnum.selfsigned
     # existing
@@ -131,6 +137,7 @@ class Certificate(schema.Base):
     # lets-encrypt
     acme_email: Optional[str] = None
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
+    acme_challenge_type: Optional[str] = AcmeChallengeType.tls.value
 
 
 class DnsProvider(schema.Base):
@@ -183,7 +190,19 @@ class KubernetesIngressStage(NebariTerraformStage):
             cert_details["certificate-secret-name"] = (
                 self.config.certificate.secret_name
             )
-
+        cert_details["acme-challenge-type"] = (
+            self.config.certificate.acme_challenge_type
+        )
+        if self.config.certificate.acme_challenge_type == AcmeChallengeType.dns.value:
+            if os.environ.get("CLOUDFLARE_TOKEN") is None:
+                raise ValueError(
+                    "Environment variable 'CLOUDFLARE_TOKEN' must be set along with "
+                    "'DNS:Edit' permission for DNS challenge type ('acme_challenge_type: dns')"
+                )
+            else:
+                cert_details["cloudflare-dns-api-token"] = os.environ.get(
+                    "CLOUDFLARE_TOKEN"
+                )
         return {
             **{
                 "traefik-image": {
@@ -278,8 +297,12 @@ class KubernetesIngressStage(NebariTerraformStage):
         print(
             f"After stage={self.name} kubernetes ingress available on tcp ports={tcp_ports}"
         )
-
-        check_ingress_dns(stage_outputs, disable_prompt=disable_prompt)
+        if self.config.certificate.acme_challenge_type != AcmeChallengeType.dns.value:
+            check_ingress_dns(stage_outputs, disable_prompt=disable_prompt)
+        else:
+            print(
+                f"Skipping ingress DNS check for acme_challenge_type={self.config.certificate.acme_challenge_type}"
+            )
 
 
 @hookimpl
