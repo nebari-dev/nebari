@@ -96,6 +96,22 @@ resource "helm_release" "grafana-promtail" {
   values = concat([
     file("${path.module}/values_promtail.yaml"),
     jsonencode({
+      tolerations = [
+        {
+          key      = "node-role.kubernetes.io/master"
+          operator = "Exists"
+          effect   = "NoSchedule"
+        },
+        {
+          key      = "node-role.kubernetes.io/control-plane"
+          operator = "Exists"
+          effect   = "NoSchedule"
+        },
+        {
+          operator = "Exists"
+          effect   = "NoSchedule"
+        },
+      ]
     })
   ], var.grafana-promtail-overrides)
 

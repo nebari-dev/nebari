@@ -39,6 +39,7 @@ module "kubernetes" {
       instance_type = config.instance
       min_size      = config.min_nodes
       max_size      = config.max_nodes
+      node_taints   = config.node_taints
     }
   ]
   vnet_subnet_id            = var.vnet_subnet_id
