@@ -248,7 +248,8 @@ class TerraformStateStage(NebariTerraformStage):
             # Return a default (mutable) extra field schema if bottom level is not a Pydantic model (such as a free-form 'overrides' block)
             if isinstance(bottom_level_schema, BaseModel):
                 extra_field_schema = schema.ExtraFieldSchema(
-                    **bottom_level_schema.model_fields[keys[-1]].json_schema_extra or {}
+                    **type(bottom_level_schema).model_fields[keys[-1]].json_schema_extra
+                    or {}
                 )
             else:
                 extra_field_schema = schema.ExtraFieldSchema()
