@@ -130,23 +130,23 @@ variable "cluster" {
   description = "dask gateway cluster defaults"
   type = object({
     # scheduler configuration
-    scheduler_cores                  = number
-    scheduler_cores_limit            = number
-    scheduler_memory                 = string
-    scheduler_memory_limit           = string
-    scheduler_extra_container_config = any
-    scheduler_extra_pod_config       = any
+    scheduler_cores                  = optional(number, 1)
+    scheduler_cores_limit            = optional(number, 1)
+    scheduler_memory                 = optional(string, "2 G")
+    scheduler_memory_limit           = optional(string, "2 G")
+    scheduler_extra_container_config = optional(any, {})
+    scheduler_extra_pod_config       = optional(any, {})
     # worker configuration
-    worker_cores                  = number
-    worker_cores_limit            = number
-    worker_memory                 = string
-    worker_memory_limit           = string
-    worker_extra_container_config = any
-    worker_extra_pod_config       = any
+    worker_cores                  = optional(number, 1)
+    worker_cores_limit            = optional(number, 1)
+    worker_memory                 = optional(string, "2 G")
+    worker_memory_limit           = optional(string, "2 G")
+    worker_extra_container_config = optional(any, {})
+    worker_extra_pod_config       = optional(any, {})
     # additional fields
-    idle_timeout      = number
-    image_pull_policy = string
-    environment       = map(string)
+    idle_timeout      = optional(number, 1800) # 30 minutes
+    image_pull_policy = optional(string, "IfNotPresent")
+    environment       = optional(map(string), {})
   })
   default = {
     # scheduler configuration
