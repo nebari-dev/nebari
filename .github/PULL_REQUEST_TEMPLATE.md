@@ -14,21 +14,27 @@ is merged. See https://github.com/blog/1506-closing-issues-via-pull-requests
 
 ## What does this implement/fix?
 
-_Put a `x` in the boxes that apply_
+_Put an `x` in the boxes that apply:_
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds a feature)
-- [ ] Breaking change (fix or feature that would cause existing features not to work as expected)
-- [ ] Documentation Update
+- [ ] Bug fix (non-breaking change that fixes an issue)
+- [ ] New feature (non-breaking change that adds functionality)
+- [ ] Enhancement (improvement to existing functionality)
+- [ ] Breaking change (modification that could affect existing behavior)
+- [ ] Documentation update
 - [ ] Code style update (formatting, renaming)
-- [ ] Refactoring (no functional changes, no API changes)
-- [ ] Build related changes
+- [ ] Refactoring (no functional or API changes)
+- [ ] Build-related changes
 - [ ] Other (please describe):
+
+## Documentation
+
+- [ ] For new features or enhancements, a corresponding PR has been opened in the documentation repository (or is not needed)
+  - Link to docs PR (if applicable):
 
 ## Testing
 
-- [ ] Did you test the pull request locally?
-- [ ] Did you add new tests?
+- [ ] Tested the pull request locally
+- [ ] Added new tests (if applicable)
 
 ## How to test this PR?
 
