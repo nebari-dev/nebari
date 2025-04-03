@@ -37,7 +37,7 @@ repos:
         exclude: "^src/_nebari/template/"
 
   - repo: https://github.com/crate-ci/typos
-    rev: typos-dict-v0.12.4
+    rev: v1.30.0
     hooks:
       - id: typos
 
@@ -61,13 +61,13 @@ repos:
         args: ["--line-length=88", "--exclude=/src/_nebari/template/"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.4
+    rev: v0.9.9
     hooks:
       - id: ruff
         args: ["--fix"]
 
   - repo: https://github.com/pycqa/isort
-    rev: 6.0.0
+    rev: 6.0.1
     hooks:
       - id: isort
         name: isort
@@ -77,7 +77,7 @@ repos:
 
   # terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.97.2
+    rev: v1.97.4
     hooks:
       - id: terraform_fmt
         args:

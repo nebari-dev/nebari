@@ -3,7 +3,10 @@ name: "Local Integration Tests"
 env:
   TEST_USERNAME: "test-user"
   TEST_PASSWORD: "P@sswo3d"
+  TEST_SUPERADMIN_USER: "test-user-2"
+  TEST_SUPERADMIN_PASSWORD: "P@sswo3d-2"
   NEBARI_IMAGE_TAG: "main"
+  PYTHON_VERSION: "3.11"
 
 on:
   pull_request:
@@ -76,7 +79,7 @@ jobs:
           CONDA: /home/runnerx/miniconda3
         with:
           auto-update-conda: true
-          python-version: "3.11"
+          python-version: ${{ env.PYTHON_VERSION }}
           miniconda-version: "latest"
 
       - name: Install JQ
@@ -102,7 +105,7 @@ jobs:
         with:
           domain: ${{ steps.init.outputs.domain }}
 
-      - name: Create example-user
+      - name: Create example-users
         working-directory: ${{ steps.init.outputs.directory }}
         run: |
           nebari keycloak add-user --user "${TEST_USERNAME}" -p "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }}
@@ -149,6 +152,57 @@ jobs:
           name: e2e-playwright
           path: |
             ./tests/tests_e2e/playwright/videos/
+
+      ### CONDA-STORE TESTS
+      - name: "Checkout conda-store"
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+          repository: conda-incubator/conda-store
+          ref: main
+          path: conda-store
+
+      - name: "Set up conda-store conda env"
+        uses: conda-incubator/setup-miniconda@v3
+        env:
+          CONDA: /home/runnerx/miniconda3
+        with:
+            environment-file: conda-store/conda-store-server/environment-dev.yaml
+            miniforge-version: latest
+            auto-activate-base: false
+            activate-environment: conda-store-server-dev
+            python-version: ${{ env.PYTHON_VERSION }}
+            conda-remove-defaults: "true"
+
+      - name: Install conda-store dependencies
+        run: |
+          which python
+          # install conda-store-server
+          python -m pip install conda-store/conda-store-server
+
+      - name: Get conda store token from login
+        id: conda-store-token
+        env:
+          BASE_URL: ${{ steps.init.outputs.domain }}
+          KEYCLOAK_USERNAME: ${{ env.TEST_SUPERADMIN_USER }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_SUPERADMIN_PASSWORD }}
+        run: |
+          echo "CONDA_STORE_TOKEN=$(python scripts/get_conda_store_token.py)" >> "$GITHUB_OUTPUT"
+
+      - name: Run conda-store-server user_journey tests
+        env:
+          CONDA_STORE_BASE_URL: https://${{ steps.init.outputs.domain }}
+          CONDA_STORE_TEST_VERIFY_SSL: 0
+          CONDA_STORE_TOKEN: ${{ steps.conda-store-token.outputs.CONDA_STORE_TOKEN }}
+        run: |
+          curl --insecure --header "Authorization: Bearer ${CONDA_STORE_TOKEN}" ${CONDA_STORE_BASE_URL}/conda-store/api/v1/permission/ | jq
+          cd conda-store/conda-store-server
+          python -m pytest -m "user_journey"
+
+      - name: Get conda-store-server logs
+        if: ${{ failure() }}
+        run: |
+          kubectl logs -n dev deployment/nebari-conda-store-server
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment

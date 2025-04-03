@@ -26,10 +26,6 @@ from typing_extensions import override
 
 from _nebari.config import backup_configuration
 from _nebari.keycloak import get_keycloak_admin
-from _nebari.stages.infrastructure import (
-    provider_enum_default_node_groups_map,
-    provider_enum_name_map,
-)
 from _nebari.utils import (
     get_k8s_version_prefix,
     get_provider_config_block_name,
@@ -38,7 +34,7 @@ from _nebari.utils import (
     yaml,
 )
 from _nebari.version import __version__, rounded_ver_parse
-from nebari.schema import ProviderEnum, is_version_accepted
+from nebari.schema import ProviderEnum, is_version_accepted, provider_enum_name_map
 
 logger = logging.getLogger(__name__)
 
@@ -1170,7 +1166,7 @@ class Upgrade_2024_4_1(UpgradeStep):
                 provider_full_name, {}
             ):
                 try:
-                    default_node_groups = provider_enum_default_node_groups_map[
+                    default_node_groups = schema.provider_enum_default_node_groups_map[
                         provider
                     ]
                     continue_ = kwargs.get("attempt_fixes", False) or Confirm.ask(
@@ -1706,6 +1702,23 @@ class Upgrade_2025_2_1(UpgradeStep):
                 update_tfstate_file(state_filepath, MIGRATION_STATE)
 
         rich.print("Ready to upgrade to Nebari version [green]2025.2.1[/green].")
+
+        return config
+
+
+class Upgrade_2025_3_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2025.3.1
+    """
+
+    version = "2025.3.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+
+        rich.print("Ready to upgrade to Nebari version [green]2025.3.1[/green].")
 
         return config
 
