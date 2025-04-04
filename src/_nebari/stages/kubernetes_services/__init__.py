@@ -295,6 +295,10 @@ class JupyterHub(schema.Base):
     overrides: Dict = {}
 
 
+class DaskGateway(schema.Base):
+    enabled: bool = True
+
+
 class IdleCuller(schema.Base):
     terminal_cull_inactive_timeout: int = 15
     terminal_cull_interval: int = 5
@@ -554,6 +558,7 @@ class JupyterhubInputVars(schema.Base):
 
 
 class DaskGatewayInputVars(schema.Base):
+    dask_gateway_enabled: bool = Field(alias="dask-gateway-enabled")
     dask_worker_image: ImageNameTag = Field(alias="dask-worker-image")
     dask_gateway_profiles: Dict[str, Any] = Field(alias="dask-gateway-profiles")
     cloud_provider: str = Field(alias="cloud-provider")
@@ -748,6 +753,7 @@ class KubernetesServicesStage(NebariTerraformStage):
         )
 
         dask_gateway_vars = DaskGatewayInputVars(
+            dask_gateway_enabled=self.config.dask_gateway.enabled,
             dask_worker_image=_split_docker_image_name(
                 self.config.default_images.dask_worker
             ),
