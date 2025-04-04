@@ -146,6 +146,12 @@ def nebari_subcommand(cli: typer.Typer):
                 help="Provide existing groups to add user to. Can be specified multiple times for multiple groups",
             ),
         ] = None,
+        email: str = typer.Option(
+            None,
+            "-e",
+            "--email",
+            help="Email address for the new user. If not provided, a default email will be generated.",
+        ),
     ):
         """Add a user to Keycloak. User will be automatically added to the [italic]analyst[/italic] group."""
         from nebari.plugins import nebari_plugin_manager
@@ -153,7 +159,18 @@ def nebari_subcommand(cli: typer.Typer):
         config_schema = nebari_plugin_manager.config_schema
         config = read_configuration(config_filename, config_schema)
 
-        keycloak_create_user(config, username=user, password=password, groups=groups)
+        if not email:
+            # Generate a default email address if not provided, since its a requirement
+            # for Grafana
+            email = f'{user}@{config.domain or "example.com"}'
+
+        keycloak_create_user(
+            config,
+            username=user,
+            password=password,
+            groups=groups,
+            email=email,
+        )
 
     @app_keycloak.command(name="list-users")
     def list_users(
