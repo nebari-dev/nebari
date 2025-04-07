@@ -1723,6 +1723,90 @@ class Upgrade_2025_3_1(UpgradeStep):
         return config
 
 
+class Upgrade_2025_4_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2025.4.1
+
+    This upgrade adds node taints to non-general node groups by default.
+    Node taints are Kubernetes mechanisms that restrict which pods can be scheduled
+    on specific nodes, improving resource isolation and utilization.
+
+    This upgrade step:
+    1. Notifies users about upcoming automatic node taints
+    2. Provides option to opt out by adding empty taint configurations
+    3. Updates node group configurations if user chooses to opt out
+    """
+
+    version = "2025.4.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        # Check if provider is one of the cloud providers that support node taints
+        provider = config.get("provider", "")
+        if provider in [
+            ProviderEnum.aws.value,
+            ProviderEnum.azure.value,
+            ProviderEnum.gcp.value,
+        ]:
+            rich.print("\n ⚠️  Node Taints Update ⚠️")
+
+            text = textwrap.dedent(
+                """
+                Starting with Nebari version 2025.4.1, node taints will be automatically applied to all non-general node groups by default.
+                Node taints help ensure that specific workloads run only on designated nodes,
+                improving resource utilization and isolation. This change will include:
+                - [green]user[/green] node groups (where JupyterLab servers and Argo Workflows run)
+                - [green]worker[/green] node groups (where Dask workers run)
+                - Any additional [green]custom node groups[/green] defined in your nebari config (e.g., GPU node groups)
+
+                If you prefer not to use node taints, you can opt out by adding `taints: []`
+                to each node group definition in your nebari-config.yaml file.
+                """
+            )
+            rich.print(text)
+
+            provider_full_name = provider_enum_name_map.get(provider)
+            if provider_full_name and provider_full_name in config:
+                # Ask if they want to opt out of taints regardless of whether node_groups is defined
+                opt_out = kwargs.get("attempt_fixes", False) or Confirm.ask(
+                    "Would you like to opt out of node taints by adding 'taints: []' to all node groups?",
+                    default=False,
+                )
+                if opt_out:
+                    rich.print("\nAdding 'taints: []' to all node groups:")
+                    from nebari.plugins import nebari_plugin_manager
+
+                    config_model = nebari_plugin_manager.config_schema(**config)
+                    provider = getattr(config_model, provider_full_name)
+                    node_groups = getattr(provider, "node_groups", None)
+
+                    config[provider_full_name]["node_groups"] = {}
+                    for node_group_name, node_group in node_groups.items():
+                        node_group.taints = []
+                        # Include a few fields, but exclude other node group fields set to the default value
+                        config[provider_full_name]["node_groups"][node_group_name] = {
+                            **node_group.model_dump(
+                                include=["instance", "min_nodes", "max_nodes", "taints"]
+                            ),
+                            **node_group.model_dump(exclude_defaults=True),
+                        }
+                        rich.print(
+                            f"  - Added taints: None to [green]{node_group_name}[/green] node group"
+                        )
+
+                    rich.print("\nNode taints have been disabled for all node groups.")
+                else:
+                    rich.print(
+                        "\nNode taints will be applied by default. You can manually disable them later by adding 'taints: []' to specific node groups."
+                    )
+
+        rich.print("\nReady to upgrade to Nebari version [green]2025.4.1[/green].")
+
+        return config
+
+
 __rounded_version__ = str(rounded_ver_parse(__version__))
 
 # Manually-added upgrade steps must go above this line
