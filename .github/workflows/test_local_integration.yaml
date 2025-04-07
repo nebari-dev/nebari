@@ -179,6 +179,7 @@ jobs:
         run: |
           which python
           # install conda-store-server
+          python -m pip install "conda-lock>=1.0.5,<3.0.0"  # Added until https://github.com/conda-incubator/conda-store/issues/1095 is solved upstream
           python -m pip install conda-store/conda-store-server
 
       - name: Get conda store token from login
