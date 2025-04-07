@@ -62,6 +62,7 @@ dependencies = [
     "bcrypt==4.0.1",
     "boto3==1.34.63",
     "cloudflare==2.11.7",
+    "conda-lock >=1.0.5,<3.0.0",  # Added until https://github.com/conda-incubator/conda-store/issues/1095 is solved upstream
     "google-auth>=2.31.0,<3.0.0",
     "google-cloud-compute==1.19.1",
     "google-cloud-container==2.49.0",
