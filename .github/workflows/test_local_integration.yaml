@@ -206,6 +206,7 @@ jobs:
           kubectl logs -n dev deployment/nebari-conda-store-server
 
       - name: Switch back to Nebari conda environment
+        if: github.ref_name == 'main' || github.event_name == 'workflow_dispatch'
         uses: conda-incubator/setup-miniconda@v3
         env:
           CONDA: /home/runnerx/miniconda3
