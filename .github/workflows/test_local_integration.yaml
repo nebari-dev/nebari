@@ -165,8 +165,7 @@ jobs:
 
       - name: Install conda-store dependencies
         run: |
-          which python
-          # install conda-store-server
+          conda env update -f conda-store/conda-store-server/environment-dev.yaml
           python -m pip install "conda-lock>=1.0.5,<3.0.0"  # Added until https://github.com/conda-incubator/conda-store/issues/1095 is solved upstream
           python -m pip install conda-store/conda-store-server
 
