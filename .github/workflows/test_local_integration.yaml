@@ -81,6 +81,7 @@ jobs:
           auto-update-conda: true
           python-version: ${{ env.PYTHON_VERSION }}
           miniconda-version: "latest"
+          activate-environment: nebari
 
       - name: Install JQ
         run: |
@@ -163,9 +164,20 @@ jobs:
           ref: main
           path: conda-store
 
+      - name: "Set up conda-store conda env"
+        uses: conda-incubator/setup-miniconda@v3
+        env:
+          CONDA: /home/runnerx/miniconda3
+        with:
+            environment-file: conda-store/conda-store-server/environment-dev.yaml
+            miniforge-version: latest
+            auto-activate-base: false
+            activate-environment: conda-store-server-dev
+            python-version: ${{ env.PYTHON_VERSION }}
+            conda-remove-defaults: "true"
+
       - name: Install conda-store dependencies
         run: |
-          conda env update -f conda-store/conda-store-server/environment-dev.yaml
           python -m pip install "conda-lock>=1.0.5,<3.0.0"  # Added until https://github.com/conda-incubator/conda-store/issues/1095 is solved upstream
           python -m pip install conda-store/conda-store-server
 
@@ -192,6 +204,13 @@ jobs:
         if: ${{ failure() }}
         run: |
           kubectl logs -n dev deployment/nebari-conda-store-server
+
+      - name: Switch back to Nebari conda environment
+        uses: conda-incubator/setup-miniconda@v3
+        env:
+          CONDA: /home/runnerx/miniconda3
+        with:
+          activate-environment: nebari
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
