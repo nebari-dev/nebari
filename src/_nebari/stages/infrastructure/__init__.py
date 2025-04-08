@@ -49,8 +49,10 @@ class NodeGroup(schema.Base):
     def validate_taint_strings(cls, taints: list[Any]):
         if taints is None:
             return taints
-
-        TAINT_STR_REGEX = re.compile(r"(\w+)=(\w+):(\w+)")
+        # Taint constraints listed at https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#taint
+        TAINT_STR_REGEX = re.compile(
+            r"^([a-zA-Z0-9][-a-zA-Z0-9_.]{0,251}[a-zA-Z0-9]?(?:/[a-zA-Z0-9][-a-zA-Z0-9_.]{0,251}[a-zA-Z0-9]?)?)=([a-zA-Z0-9][-a-zA-Z0-9_.]{0,61}[a-zA-Z0-9]?)?:(NoSchedule|PreferNoSchedule|NoExecute)$"
+        )
         return_value = []
         for taint in taints:
             if not isinstance(taint, str):
@@ -59,8 +61,9 @@ class NodeGroup(schema.Base):
                 match = TAINT_STR_REGEX.match(taint)
                 if not match:
                     raise ValueError(f"Invalid taint string: {taint}")
-                key, taints, effect = match.groups()
-                parsed_taint = schema.Taint(key=key, value=taints, effect=effect)
+
+                key, value, effect = match.groups()
+                parsed_taint = schema.Taint(key=key, value=value, effect=effect)
                 return_value.append(parsed_taint)
 
         return return_value
@@ -238,21 +241,6 @@ def construct_aws_ami_type(
         return "AL2_x86_64_GPU"
 
     return "AL2_x86_64"
-
-    @field_validator("node_taints", mode="before")
-    def convert_taints(cls, value: Optional[List[schema.Taint]]):
-        return [
-            dict(
-                key=taint.key,
-                value=taint.value,
-                effect={
-                    schema.TaintEffectEnum.NoSchedule: "NO_SCHEDULE",
-                    schema.TaintEffectEnum.PreferNoSchedule: "PREFER_NO_SCHEDULE",
-                    schema.TaintEffectEnum.NoExecute: "NO_EXECUTE",
-                }[taint.effect],
-            )
-            for taint in value
-        ]
 
 
 class AWSInputVars(schema.Base):
