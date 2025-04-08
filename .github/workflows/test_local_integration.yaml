@@ -163,18 +163,6 @@ jobs:
           ref: main
           path: conda-store
 
-      - name: "Set up conda-store conda env"
-        uses: conda-incubator/setup-miniconda@v3
-        env:
-          CONDA: /home/runnerx/miniconda3
-        with:
-            environment-file: conda-store/conda-store-server/environment-dev.yaml
-            miniforge-version: latest
-            auto-activate-base: false
-            activate-environment: conda-store-server-dev
-            python-version: ${{ env.PYTHON_VERSION }}
-            conda-remove-defaults: "true"
-
       - name: Install conda-store dependencies
         run: |
           which python
