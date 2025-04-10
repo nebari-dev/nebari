@@ -34,13 +34,13 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   kubernetes_version = var.kubernetes_version
   default_node_pool {
-    vnet_subnet_id      = var.vnet_subnet_id
-    name                = var.node_groups[0].name
-    vm_size             = var.node_groups[0].instance_type
-    enable_auto_scaling = "true"
-    min_count           = var.node_groups[0].min_size
-    max_count           = var.node_groups[0].max_size
-    max_pods            = var.max_pods
+    vnet_subnet_id       = var.vnet_subnet_id
+    name                 = var.node_groups[0].name
+    vm_size              = var.node_groups[0].instance_type
+    auto_scaling_enabled = "true"
+    min_count            = var.node_groups[0].min_size
+    max_count            = var.node_groups[0].max_size
+    max_pods             = var.max_pods
     # It's not possible to add node_taints to the default node pool. See https://github.com/hashicorp/terraform-provider-azurerm/issues/9183 for more info
 
     orchestrator_version = var.kubernetes_version
