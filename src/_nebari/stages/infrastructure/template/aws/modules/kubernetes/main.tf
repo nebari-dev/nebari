@@ -146,6 +146,39 @@ data "aws_eks_cluster_auth" "main" {
   name = aws_eks_cluster.main.name
 }
 
+data "aws_caller_identity" "current" {}
+
+locals {
+  oidc_id = regex("id/([a-zA-Z0-9]+)$", aws_eks_cluster.main.identity[0].oidc[0].issuer)[0]
+}
+
+resource "aws_iam_role" "efs_csi_driver_role" {
+  name = "${var.name}-efs-csi-driver-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/oidc.eks.${var.region}.amazonaws.com/id/${local.oidc_id}"
+        },
+        Action = "sts:AssumeRoleWithWebIdentity",
+        Condition = {
+          StringEquals = {
+            "oidc.eks.${var.region}.amazonaws.com/id/${local.oidc_id}:sub" = "system:serviceaccount:kube-system:efs-csi-controller-sa"
+          }
+        }
+      }
+    ]
+  })
+}
+
+
+resource "aws_iam_role_policy_attachment" "efs_csi_driver_policy_attachment" {
+  role       = aws_iam_role.efs_csi_driver_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"
+}
+
 resource "aws_eks_addon" "aws-ebs-csi-driver" {
   # required for Kubernetes v1.23+ on AWS
   addon_name                  = "aws-ebs-csi-driver"
@@ -163,6 +196,21 @@ resource "aws_eks_addon" "aws-ebs-csi-driver" {
       enabled = true
     }
   })
+
+  # Ensure cluster and node groups are created
+  depends_on = [
+    aws_eks_cluster.main,
+    aws_eks_node_group.main,
+  ]
+}
+
+resource "aws_eks_addon" "aws-efs-csi-driver" {
+  # required for Kubernetes v1.23+ on AWS
+  addon_name                  = "aws-efs-csi-driver"
+  cluster_name                = aws_eks_cluster.main.name
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+  service_account_role_arn    = aws_iam_role.efs_csi_driver_role.arn
 
   # Ensure cluster and node groups are created
   depends_on = [

@@ -34,3 +34,8 @@ output "oidc_provider_arn" {
   description = "The ARN of the OIDC Provider"
   value       = module.kubernetes.oidc_provider_arn
 }
+
+output "efs_id" {
+  description = "EFS ID"
+  value       = module.efs[0].efs_id
+}

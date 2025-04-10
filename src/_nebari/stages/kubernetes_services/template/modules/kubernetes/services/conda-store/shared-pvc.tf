@@ -20,11 +20,12 @@ locals {
   create-pvc               = var.conda-store-fs == "nfs"
   enable-nfs-server-worker = var.conda-store-fs == "nfs"
   pvc-name                 = var.conda-store-fs == "nfs" ? local.new-pvc-name : local.conda-store-pvc-name
-  shared-pvc = {
-    nfs  = module.conda-store-nfs-mount[0].persistent_volume_claim.pvc
-    efs  = module.efs-store-mount[0].persistent_volume_claim.pvc
-    ceph = module.conda-store-cephfs-mount[0].persistent_volume_claim.pvc
-  }[var.conda-store-fs]
+  possible_pvc = flatten([
+    try(module.conda-store-efs-mount[0].persistent_volume_claim.pvc, []),
+    try(module.conda-store-cephfs-mount[0].persistent_volume_claim.pvc, []),
+    try(module.conda-store-nfs-mount[0].persistent_volume_claim.pvc, [])
+  ])
+  shared-pvc = length(local.possible_pvc) > 0 ? one(local.possible_pvc) : null
 }
 
 
@@ -39,7 +40,7 @@ module "conda-store-cephfs-mount" {
   ceph-pvc-name = local.conda-store-pvc-name
 }
 
-module "efs-store-mount" {
+module "conda-store-efs-mount" {
   count  = var.conda-store-fs == "efs" ? 1 : 0
   source = "../../../../modules/kubernetes/efs-mount"
 
