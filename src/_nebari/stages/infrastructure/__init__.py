@@ -267,6 +267,7 @@ class AWSInputVars(schema.Base):
     ] = "public"
     eks_kms_arn: Optional[str] = None
     eks_public_access_cidrs: Optional[List[str]] = ["0.0.0.0/0"]
+    efs_storage: Optional[bool] = False
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
@@ -588,6 +589,7 @@ class AmazonWebServicesProvider(schema.Base):
     ] = "public"
     eks_public_access_cidrs: Optional[List[str]] = ["0.0.0.0/0"]
     eks_kms_arn: Optional[str] = None
+    efs_storage: Optional[bool] = False
     existing_subnet_ids: Optional[List[str]] = None
     existing_security_group_id: Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
@@ -796,6 +798,7 @@ class OutputSchema(schema.Base):
     kubernetes_credentials: KubernetesCredentials
     kubeconfig_filename: str
     nfs_endpoint: Optional[str] = None
+    efs_id: Optional[str] = None
 
 
 class KubernetesInfrastructureStage(NebariTerraformStage):

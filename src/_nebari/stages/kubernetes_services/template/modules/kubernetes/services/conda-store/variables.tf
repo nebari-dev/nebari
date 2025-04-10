@@ -82,7 +82,7 @@ variable "conda-store-fs" {
   description = "Use NFS or Ceph"
 
   validation {
-    condition     = contains(["cephfs", "nfs"], var.conda-store-fs)
-    error_message = "Allowed values for input_parameter are \"cephfs\", or \"nfs\"."
+    condition     = contains(["cephfs", "nfs", "efs"], var.conda-store-fs)
+    error_message = "Allowed values for input_parameter are \"cephfs\", or \"nfs\" or \"efs\"."
   }
 }

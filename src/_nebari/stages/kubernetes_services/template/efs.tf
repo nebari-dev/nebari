@@ -2,6 +2,7 @@
 variable "shared_fs_id" {
   description = "ID of the shared filesystem"
   type        = string
+  default     = ""
 }
 
 locals {
@@ -9,7 +10,7 @@ locals {
 }
 # ====================== RESOURCES =======================
 module "efs" {
-  count        = local.enable-ceph-cluster ? 1 : 0
-  source       = "./modules/kubernetes/services/efs"
+  count        = local.enable-efs ? 1 : 0
+  source       = "./modules/kubernetes/efs"
   shared_fs_id = var.shared_fs_id
 }

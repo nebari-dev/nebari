@@ -471,6 +471,10 @@ class RookCephInputVars(schema.Base):
     rook_ceph_storage_class_name: None | str = None
 
 
+class EFSStorageInputVars(schema.Base):
+    shared_fs_id: str = Field(alias="shared_fs_id")
+
+
 class CondaStoreInputVars(schema.Base):
     conda_store_environments: Dict[str, CondaEnvironment] = Field(
         alias="conda-store-environments"
@@ -604,6 +608,14 @@ class KubernetesServicesStage(NebariTerraformStage):
             NebariHelmProvider(self.config),
         ]
 
+    def _get_storage_type_default_value(self):
+        if self.config.provider == schema.ProviderEnum.aws:
+            if self.config.amazon_web_services.efs_storage:
+                return SharedFsEnum.efs
+        if self.config.storage.type == SharedFsEnum.efs:
+            return SharedFsEnum.efs
+        return self.config.storage.type
+
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
         domain = stage_outputs["stages/04-kubernetes-ingress"]["domain"]
         final_logout_uri = f"https://{domain}/hub/login"
@@ -700,6 +712,10 @@ class KubernetesServicesStage(NebariTerraformStage):
 
         rook_ceph_vars = RookCephInputVars()
 
+        efs_vars = EFSStorageInputVars(
+            shared_fs_id=stage_outputs["stages/02-infrastructure"]["efs_id"]["value"]
+        )
+
         conda_store_vars = CondaStoreInputVars(
             conda_store_environments={
                 k: v.model_dump() for k, v in self.config.environments.items()
@@ -739,12 +755,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             jupyterlab_gallery_settings=self.config.jupyterlab.gallery_settings,
             jupyterlab_preferred_dir=self.config.jupyterlab.preferred_dir,
             user_taint_tolerations=_node_taint_tolerations(node_group_name="user"),
-            shared_fs_type=(
-                # efs is equivalent to nfs in these modules
-                SharedFsEnum.nfs
-                if self.config.storage.type == SharedFsEnum.efs
-                else self.config.storage.type
-            ),
+            shared_fs_type=self._get_storage_type_default_value(),
         )
 
         dask_gateway_vars = DaskGatewayInputVars(
@@ -784,6 +795,7 @@ class KubernetesServicesStage(NebariTerraformStage):
         return {
             **kubernetes_services_vars.model_dump(by_alias=True),
             **rook_ceph_vars.model_dump(by_alias=True),
+            **efs_vars.model_dump(by_alias=True),
             **conda_store_vars.model_dump(by_alias=True),
             **jupyterhub_vars.model_dump(by_alias=True),
             **dask_gateway_vars.model_dump(by_alias=True),

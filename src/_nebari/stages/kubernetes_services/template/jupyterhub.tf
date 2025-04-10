@@ -97,10 +97,10 @@ variable "node-taint-tolerations" {
 
 variable "shared_fs_type" {
   type        = string
-  description = "Use NFS or Ceph"
+  description = "Use NFS or Ceph or EFS"
 
   validation {
-    condition     = contains(["cephfs", "nfs"], var.shared_fs_type)
+    condition     = contains(["cephfs", "nfs", "efs"], var.shared_fs_type)
     error_message = "Allowed values for input_parameter are \"cephfs\" or \"nfs\"."
   }
 
@@ -109,8 +109,13 @@ variable "shared_fs_type" {
 locals {
   jupyterhub-fs       = var.shared_fs_type
   jupyterhub-pvc-name = "jupyterhub-${var.environment}-share"
-  jupyterhub-pvc      = local.jupyterhub-fs == "nfs" ? module.jupyterhub-nfs-mount[0].persistent_volume_claim.pvc : module.jupyterhub-cephfs-mount[0].persistent_volume_claim.pvc
   enable-nfs-server   = var.jupyterhub-shared-endpoint == null && (local.jupyterhub-fs == "nfs" || local.conda-store-fs == "nfs")
+  possible-pvc = flatten([
+    try(module.jupyterhub-efs-mount[0].persistent_volume_claim.pvc, []),
+    try(module.jupyterhub-cephfs-mount[0].persistent_volume_claim.pvc, []),
+    try(module.jupyterhub-nfs-mount[0].persistent_volume_claim.pvc, [])
+  ])
+  jupyterhub-pvc = length(local.possible-pvc) > 0 ? one(local.possible-pvc) : null
 }
 
 
@@ -159,6 +164,20 @@ module "jupyterhub-cephfs-mount" {
   depends_on = [
     module.kubernetes-nfs-server,
     module.rook-ceph
+  ]
+}
+
+module "jupyterhub-efs-mount" {
+  count  = local.jupyterhub-fs == "efs" ? 1 : 0
+  source = "./modules/kubernetes/efs-mount"
+
+  name         = "jupyterhub"
+  namespace    = var.environment
+  fs_capacity  = var.jupyterhub-shared-storage
+  efs-pvc-name = local.jupyterhub-pvc-name
+
+  depends_on = [
+    module.efs
   ]
 }
 
