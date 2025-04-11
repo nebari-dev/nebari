@@ -9,7 +9,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
-## Release 2025.4.1 - April 10, 2025
+## Release 2025.4.1 - April 11, 2025
 
 ### What's Changed
 - [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/2969
