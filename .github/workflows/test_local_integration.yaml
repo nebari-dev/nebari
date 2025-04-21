@@ -81,6 +81,7 @@ jobs:
           auto-update-conda: true
           python-version: ${{ env.PYTHON_VERSION }}
           miniconda-version: "latest"
+          activate-environment: nebari
 
       - name: Install JQ
         run: |
@@ -108,9 +109,9 @@ jobs:
       - name: Create example-users
         working-directory: ${{ steps.init.outputs.directory }}
         run: |
-          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }}
-          nebari keycloak adduser --user "${TEST_SUPERADMIN_USER}" "${TEST_SUPERADMIN_PASSWORD}" --config ${{ steps.init.outputs.config }} --groups superadmin
-          nebari keycloak listusers --config ${{ steps.init.outputs.config }}
+          nebari keycloak add-user --user "${TEST_USERNAME}" -p "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }}
+          nebari keycloak add-user --user "${TEST_SUPERADMIN_USER}" -p "${TEST_SUPERADMIN_PASSWORD}" --config ${{ steps.init.outputs.config }} --groups superadmin
+          nebari keycloak list-users --config ${{ steps.init.outputs.config }}
 
       - name: Await Workloads
         uses: jupyterhub/action-k8s-await-workloads@v3
@@ -177,8 +178,7 @@ jobs:
 
       - name: Install conda-store dependencies
         run: |
-          which python
-          # install conda-store-server
+          python -m pip install "conda-lock>=1.0.5,<3.0.0"  # Added until https://github.com/conda-incubator/conda-store/issues/1095 is solved upstream
           python -m pip install conda-store/conda-store-server
 
       - name: Get conda store token from login
@@ -212,4 +212,6 @@ jobs:
         # up feedback cycle
         if: github.ref_name == 'main' || github.event_name == 'workflow_dispatch'
         working-directory: ${{ steps.init.outputs.directory }}
-        run: nebari destroy --config ${{ steps.init.outputs.config }} --disable-prompt
+        # We need to use the conda environment to run the nebari command as the current environment
+        # is the one that was created to run the conda-store user journey tests
+        run: conda run -n nebari nebari destroy --config ${{ steps.init.outputs.config }} --disable-prompt
