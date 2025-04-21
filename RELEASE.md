@@ -9,6 +9,29 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
+## Release 2025.4.1 - April 11, 2025
+
+### What's Changed
+- [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/2969
+- Add extra services checks to kuberhealthy by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2978
+- Add workflow to run conda-store user journey tests by @soapy1 in https://github.com/nebari-dev/nebari/pull/2895
+- Add support for generating ssl certs via DNS challenge (via Cloudflare) by @aktech in https://github.com/nebari-dev/nebari/pull/2957
+- Skip ingress check when using DNS certs by @aktech in https://github.com/nebari-dev/nebari/pull/3002
+- update deprecated pydantic function by @dcmcand in https://github.com/nebari-dev/nebari/pull/3010
+- Add taint to user and worker nodes by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2605
+- add node taint upgrade step by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/3009
+- Include documentation requirement for new ENH under PR template by @viniciusdc in https://github.com/nebari-dev/nebari/pull/3018
+- refactor keycloak cli command code by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2968
+- [AUTO] Update CLI doc by @nebari-sensei in https://github.com/nebari-dev/nebari/pull/2999
+- Pin conda-lock < 3.0.0 to fix conda-store user journey test failures by @marcelovilla in https://github.com/nebari-dev/nebari/pull/3020
+- Update usage of `create_user` within pytest fixture call by @viniciusdc in https://github.com/nebari-dev/nebari/pull/3023
+- Revert aks cluster argument to auto_scaling_enabled by @marcelovilla in https://github.com/nebari-dev/nebari/pull/3022
+- ensure default node group taints are used in deployment tests by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/3028
+- Use ubuntu-latest instead of 20.04 in the Code Scanning (Trivy) GHA workflow by @marcelovilla in https://github.com/nebari-dev/nebari/pull/3030
+- Run nebari destroy using conda in local integration tests by @marcelovilla in https://github.com/nebari-dev/nebari/pull/3031
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2025.3.1...2025.4.1
+
 ## Release 2025.3.1 - March 14, 2025
 
 ### What's Changed
@@ -22,6 +45,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 - loosen dependency requirement pins for nebari by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2984
 
 **Full Changelog**: https://github.com/nebari-dev/nebari/compare/2025.2.1...2025.3.1
+
 ## Release 2025.2.1 - February 7, 2025
 
 > NOTE: In this release, we have updated our maximum supported Kubernetes version from

@@ -104,3 +104,29 @@ def is_version_accepted(v):
     for deployment with the current Nebari package.
     """
     return Main.is_version_accepted(v)
+
+
+@yaml_object(yaml)
+class TaintEffectEnum(str, enum.Enum):
+    NoSchedule: str = "NoSchedule"
+    PreferNoSchedule: str = "PreferNoSchedule"
+    NoExecute: str = "NoExecute"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
+
+
+class Taint(Base):
+    key: str
+    value: str
+    effect: TaintEffectEnum
+
+
+provider_enum_name_map: dict[ProviderEnum, str] = {
+    ProviderEnum.local: "local",
+    ProviderEnum.existing: "existing",
+    ProviderEnum.gcp: "google_cloud_platform",
+    ProviderEnum.aws: "amazon_web_services",
+    ProviderEnum.azure: "azure",
+}

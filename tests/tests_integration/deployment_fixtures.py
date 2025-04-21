@@ -80,11 +80,10 @@ def _set_nebari_creds_in_environment(config):
 def _create_nebari_user(config):
     import keycloak
 
-    from _nebari.keycloak import create_user, get_keycloak_admin_from_config
+    from _nebari.keycloak import create_user
 
-    keycloak_admin = get_keycloak_admin_from_config(config)
     try:
-        user = create_user(keycloak_admin, "pytest", "pytest-password")
+        user = create_user(config, username="pytest", password="pytest-password")
         return user
     except keycloak.KeycloakPostError as e:
         if e.response_code == 409:
