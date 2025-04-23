@@ -5,7 +5,8 @@ env:
   TEST_PASSWORD: "P@sswo3d"
   TEST_SUPERADMIN_USER: "test-user-2"
   TEST_SUPERADMIN_PASSWORD: "P@sswo3d-2"
-  NEBARI_IMAGE_TAG: "main"
+  # TODO: restore changes after testing
+  NEBARI_IMAGE_TAG: "upgrade-ubuntu-ebb8d06-20250403"
   PYTHON_VERSION: "3.11"
 
 on:
