@@ -75,6 +75,14 @@ runs:
                 size: 1Gi
         EOM
 
+        # TODO: remove after testing
+        cat >> '${{ steps.metadata.outputs.config }}' <<- EOM
+        default_images:
+          jupyterhub: "quay.io/nebari/nebari-jupyterhub:upgrade-ubuntu-ebb8d06-20250403"
+          jupyterlab: "quay.io/nebari/nebari-jupyterlab:upgrade-ubuntu-ebb8d06-20250403"
+          dask_worker: "quay.io/nebari/nebari-dask-worker:upgrade-ubuntu-ebb8d06-20250403"
+        EOM
+
     - shell: bash
       run: |
         # Display Nebari config
