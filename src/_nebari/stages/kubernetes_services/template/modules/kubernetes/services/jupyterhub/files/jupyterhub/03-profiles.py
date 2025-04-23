@@ -390,8 +390,11 @@ def configure_user(username, groups, uid=1000, gid=100):
         [
             # nss_wrapper
             # https://cwrap.org/nss_wrapper.html
-            f"echo '{etc_passwd}' > /tmp/passwd",
-            f"echo '{etc_group}' > /tmp/group",
+            # copy originals first to avoid missing group IDs lookups
+            "cp /etc/passwd /tmp/passwd && cp /etc/group /tmp/group"
+            # append synthetic groups
+            f"echo '{etc_passwd}' >> /tmp/passwd",
+            f"echo '{etc_group}' >> /tmp/group",
             # mount the shared directories for user only if there are
             # shared folders (groups) that the user is a member of
             # else ensure that the `shared` folder symlink does not exist
