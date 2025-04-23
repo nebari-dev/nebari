@@ -46,7 +46,7 @@ jobs:
           cp _build/html/cli.html cli.html
 
       - name: Look for changes to generated docs
-        uses: tj-actions/verify-changed-files@v12
+        uses: tj-actions/verify-changed-files@v17
         id: verify-changed-files
         with:
           files: |
