@@ -102,6 +102,7 @@ def test_upgrade_4_0(
             return False
         elif prompt == TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION:
             return attempt_fixes
+        # All other prompts will be answered with "y"
         else:
             return True
 
