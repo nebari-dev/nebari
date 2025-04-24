@@ -174,6 +174,17 @@ def test_upgrade_4_0(
         monkey_patch_get_keycloak_admin,
     )
 
+    # In 2025.4.1, upgrade unit tests are failing in the following line of the upgrade logic:
+    # https://github.com/nebari-dev/nebari/blob/6bf35baf8d6c8650ffa6839445cd7c70b0ee5ada/src/_nebari/upgrade.py#L1781
+    # This is because when installing Nebari from source, the version is different from
+    # 2025.4.1, resulting in a Pydantic validation error. Thus, we mock the check_default
+    # validator to skip it during the upgrade tests.
+    # Note that this error is not present when installing Nebari from the release version,
+    # so fixing it here seems appropriate.
+    from nebari.schema import Main
+
+    monkeypatch.setattr(Main, "check_default", lambda _: None)
+
     old_qhub_config_path = Path(__file__).parent / old_qhub_config_path_str
 
     tmp_qhub_config = Path(tmp_path, old_qhub_config_path.name)
