@@ -9,6 +9,17 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
+## Release 2025.4.2 - April 25, 2025
+
+> NOTE: You may notice messages like groups: cannot find name for group ID <number> when using the terminal. These warnings are harmless and do not affect system functionality or permissions. We're aware of the issue and it will be resolved in the next version.
+
+### What's Changed
+- Upgrade verify-changed-files action by @marcelovilla in https://github.com/nebari-dev/nebari/pull/3037
+- Monkeypatch version validator to avoid failing tests by @marcelovilla in https://github.com/nebari-dev/nebari/pull/3039
+- Upgrade azure-identity by @marcelovilla in https://github.com/nebari-dev/nebari/pull/3038
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2025.4.1...2025.4.2
+
 ## Release 2025.4.1 - April 11, 2025
 
 ### What's Changed
