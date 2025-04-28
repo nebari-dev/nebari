@@ -1,4 +1,9 @@
 # ===================== VARIABLES ====================
+variable "dask-gateway-enabled" {
+  description = "Enable deployment of Dask Gateway service and resources"
+  type        = bool
+}
+
 variable "dask-worker-image" {
   description = "Dask worker image"
   type = object({
@@ -23,6 +28,8 @@ variable "worker-taint-tolerations" {
 
 # =================== RESOURCES =====================
 module "dask-gateway" {
+  count = var.dask-gateway-enabled ? 1 : 0
+
   source = "./modules/kubernetes/services/dask-gateway"
 
   namespace            = var.environment
