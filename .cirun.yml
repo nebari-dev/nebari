@@ -5,7 +5,7 @@ runners:
     # Cloud Provider: AWS
     cloud: aws
     # Instance Type has 16 vcpu, 64 GiB memory, Up to 5 Gbps Network Performance
-    instance_type: m6a.4xlarge
+    instance_type: m6a.8xlarge
     # Custom Ubuntu 24.04 AMI with docker/hub pre-installed
     machine_image: ami-01b494943951b97c7
     # Region: Oregon
