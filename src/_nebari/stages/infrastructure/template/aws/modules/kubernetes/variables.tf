@@ -93,3 +93,8 @@ variable "permissions_boundary" {
   type        = string
   default     = null
 }
+variable "efs_filesystem_id" {
+  description = "EFS filesystem id"
+  type        = string
+  default     = null
+}

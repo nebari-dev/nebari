@@ -102,4 +102,5 @@ module "kubernetes" {
   eks_kms_arn             = var.eks_kms_arn
   public_access_cidrs     = var.eks_public_access_cidrs
   permissions_boundary    = var.permissions_boundary
+  efs_filesystem_id       = module.efs[0].efs_id
 }

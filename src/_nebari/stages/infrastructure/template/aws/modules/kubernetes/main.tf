@@ -192,9 +192,6 @@ resource "aws_eks_addon" "aws-ebs-csi-driver" {
         "eks.amazonaws.com/nodegroup" = "general"
       }
     }
-    defaultStorageClass = {
-      enabled = true
-    }
   })
 
   # Ensure cluster and node groups are created
@@ -211,6 +208,14 @@ resource "aws_eks_addon" "aws-efs-csi-driver" {
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
   service_account_role_arn    = aws_iam_role.efs_csi_driver_role.arn
+
+  configuration_values = jsonencode({
+    controller = {
+      nodeSelector = {
+        "eks.amazonaws.com/nodegroup" = "general"
+      }
+    }
+  })
 
   # Ensure cluster and node groups are created
   depends_on = [
