@@ -36,6 +36,8 @@ jobs:
         uses: astral-sh/setup-uv@v6
         if: matrix.scan-type == 'fs'
 
+      # Trivy does not work on the pyproject.toml file itself, so we need
+      # to lock the requirements using uv first.
       - name: Lock requirements
         run: uv pip compile --universal pyproject.toml > requirements.txt
         if: matrix.scan-type == 'fs'
