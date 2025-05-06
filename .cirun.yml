@@ -16,3 +16,5 @@ runners:
       - false
     labels:
       - cirun-runner
+    extra_config:
+      monitoring: true
