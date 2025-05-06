@@ -188,7 +188,10 @@ class AWSNodeLaunchTemplate(schema.Base):
 
 class AWSNodeGroupInputVars(schema.Base):
     name: str
-    instance_type: str
+    instance_types: List[str]
+    capacity: Optional[
+        Literal["ON_DEMAND", "SPOT"]
+    ] = "ON_DEMAND"
     gpu: bool = False
     min_size: int
     desired_size: int
@@ -540,6 +543,10 @@ class AzureProvider(schema.Base):
 
 
 class AWSNodeGroup(NodeGroup):
+    instance: List[str] = []
+    capacity: Optional[
+        Literal["ON_DEMAND", "SPOT"]
+    ] = "ON_DEMAND"
     gpu: bool = False
     single_subnet: bool = False
     permissions_boundary: Optional[str] = None
@@ -557,18 +564,18 @@ class AWSNodeGroup(NodeGroup):
 
 DEFAULT_AWS_NODE_GROUPS = {
     "general": AWSNodeGroup(
-        instance="m5.2xlarge",
+        instance=["m5.2xlarge"],
         min_nodes=1,
         max_nodes=1,
     ),
     "user": AWSNodeGroup(
-        instance="m5.xlarge",
+        instance=["m5.xlarge"],
         min_nodes=0,
         max_nodes=5,
         single_subnet=False,
     ),
     "worker": AWSNodeGroup(
-        instance="m5.xlarge",
+        instance=["m5.xlarge"],
         min_nodes=0,
         max_nodes=5,
         single_subnet=False,
@@ -968,7 +975,8 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 node_groups=[
                     AWSNodeGroupInputVars(
                         name=name,
-                        instance_type=node_group.instance,
+                        instance_types=node_group.instance,
+                        capacity=node_group.capacity,
                         gpu=node_group.gpu,
                         min_size=node_group.min_nodes,
                         desired_size=node_group.min_nodes,
