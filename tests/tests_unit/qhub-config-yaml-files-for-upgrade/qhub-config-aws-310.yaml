@@ -56,6 +56,7 @@ amazon_web_services:
       gpu: false
       single_subnet: false
       permissions_boundary:
+      capacity_type: "SPOT"
     user:
       instance: m5.xlarge
       min_nodes: 0

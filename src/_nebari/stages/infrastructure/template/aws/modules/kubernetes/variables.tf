@@ -46,6 +46,7 @@ variable "node_groups" {
   type = list(object({
     name            = string
     instance_type   = string
+    capacity_type   = optional(string)
     gpu             = bool
     min_size        = number
     desired_size    = number
