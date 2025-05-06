@@ -983,7 +983,11 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                             gpu_enabled=node_group.gpu,
                             launch_template=None,
                         ),
-                        capacity_type = node_group.capacity_type.strip() if node_group.capacity_type else "ON_DEMAND"
+                        capacity_type=(
+                            node_group.capacity_type.strip()
+                            if node_group.capacity_type
+                            else "ON_DEMAND"
+                        ),
                     )
                     for name, node_group in self.config.amazon_web_services.node_groups.items()
                 ],

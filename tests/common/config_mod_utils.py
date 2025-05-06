@@ -94,7 +94,7 @@ def add_gpu_config(config, cloud="aws"):
             single_subnet=gpu_config.extra_config["single_subnet"],
             gpu=gpu_config.extra_config["gpu"],
             taints=DEFAULT_NODE_GROUP_TAINTS,
-            capacity_type=gpu_config.extra_config["capacity_type"]
+            capacity_type=gpu_config.extra_config["capacity_type"],
         )
         kubespawner_overrides = KubeSpawner(
             image=gpu_config.docker_image,
@@ -137,7 +137,7 @@ def add_preemptible_node_group(config, cloud="aws"):
             max_nodes=5,
             single_subnet=False,
             taints=DEFAULT_NODE_GROUP_TAINTS,
-            capacity_type=config.capacity_type
+            capacity_type=config.capacity_type,
         )
     elif cloud == "gcp":
         cloud_name = "google_cloud_platform"
