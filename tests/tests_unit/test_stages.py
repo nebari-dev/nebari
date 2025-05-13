@@ -141,7 +141,7 @@ def test_check_immutable_fields_change_dict_any(
 )
 def test_node_group_taints(taints, keys, values, effects):
     ng = NodeGroup(instance="t3.medium", min_nodes=1, max_nodes=1, taints=taints)
-    # assert the taints are set correctly
+
     assert [t.key for t in ng.taints] == keys
     assert [t.value for t in ng.taints] == values
     assert [t.effect for t in ng.taints] == effects
