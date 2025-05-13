@@ -50,9 +50,10 @@ class NodeGroup(schema.Base):
         if taints is None:
             return taints
         # Taint constraints listed at https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#taint
-        TAINT_STR_REGEX = re.compile(
-            r"^([a-zA-Z0-9][-a-zA-Z0-9_.]{0,251}[a-zA-Z0-9]?(?:/[a-zA-Z0-9][-a-zA-Z0-9_.]{0,251}[a-zA-Z0-9]?)?)=([a-zA-Z0-9][-a-zA-Z0-9_.]{0,61}[a-zA-Z0-9]?)?:(NoSchedule|PreferNoSchedule|NoExecute)$"
-        )
+        KEY_REGEX = r"([a-zA-Z0-9][-a-zA-Z0-9_.]{0,251}[a-zA-Z0-9]?(?:/[a-zA-Z0-9][-a-zA-Z0-9_.]{0,251}[a-zA-Z0-9]?)?)"
+        VALUE_REGEX = r"([a-zA-Z0-9][-a-zA-Z0-9_.]{0,61}[a-zA-Z0-9]?)?"
+        EFFECT_REGEX = r"(NoSchedule|PreferNoSchedule|NoExecute)"
+        TAINT_STR_REGEX = re.compile(rf"^{KEY_REGEX}={VALUE_REGEX}:{EFFECT_REGEX}$")
         return_value = []
         for taint in taints:
             if not isinstance(taint, str):
