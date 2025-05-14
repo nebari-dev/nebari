@@ -49,18 +49,12 @@ class NodeGroup(schema.Base):
     def validate_taint_strings(cls, taints: list[Any]):
         if taints is None:
             return taints
-
-        TAINT_STR_REGEX = re.compile(r"(\w+)=(\w+):(\w+)")
         return_value = []
         for taint in taints:
             if not isinstance(taint, str):
                 return_value.append(taint)
             else:
-                match = TAINT_STR_REGEX.match(taint)
-                if not match:
-                    raise ValueError(f"Invalid taint string: {taint}")
-                key, taints, effect = match.groups()
-                parsed_taint = schema.Taint(key=key, value=taints, effect=effect)
+                parsed_taint = schema.Taint.from_string(taint)
                 return_value.append(parsed_taint)
 
         return return_value
@@ -73,7 +67,6 @@ DEFAULT_NODE_GROUP_TAINTS = [
 
 
 def set_missing_taints_to_default_taints(node_groups: NodeGroup) -> NodeGroup:
-
     for node_group_name, node_group in node_groups.items():
         if node_group.taints is None:
             if node_group_name == "general":
@@ -238,21 +231,6 @@ def construct_aws_ami_type(
         return "AL2_x86_64_GPU"
 
     return "AL2_x86_64"
-
-    @field_validator("node_taints", mode="before")
-    def convert_taints(cls, value: Optional[List[schema.Taint]]):
-        return [
-            dict(
-                key=taint.key,
-                value=taint.value,
-                effect={
-                    schema.TaintEffectEnum.NoSchedule: "NO_SCHEDULE",
-                    schema.TaintEffectEnum.PreferNoSchedule: "PREFER_NO_SCHEDULE",
-                    schema.TaintEffectEnum.NoExecute: "NO_EXECUTE",
-                }[taint.effect],
-            )
-            for taint in value
-        ]
 
 
 class AWSInputVars(schema.Base):
@@ -656,7 +634,7 @@ class AmazonWebServicesProvider(schema.Base):
                 or available_kms_keys[key_id[0]].Arn != data["eks_kms_arn"]
             ):
                 raise ValueError(
-                    f"Amazon Web Services KMS Key with ARN {data['eks_kms_arn']} not one of available/enabled keys={ [v.Arn for v in available_kms_keys.values() if v.KeyManager == 'CUSTOMER' and v.KeySpec == 'SYMMETRIC_DEFAULT']}"
+                    f"Amazon Web Services KMS Key with ARN {data['eks_kms_arn']} not one of available/enabled keys={[v.Arn for v in available_kms_keys.values() if v.KeyManager == 'CUSTOMER' and v.KeySpec == 'SYMMETRIC_DEFAULT']}"
                 )
             key_id = key_id[0]
             # Raise error if key is not a customer managed key
