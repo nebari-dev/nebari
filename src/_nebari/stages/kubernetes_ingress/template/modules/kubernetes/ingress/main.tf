@@ -45,6 +45,35 @@ resource "kubernetes_service_account" "main" {
   }
 }
 
+resource "kubernetes_storage_class" "traefik_hostpath" {
+  metadata {
+    name = "traefik-hostpath-storage"
+  }
+  storage_provisioner = "kubernetes.io/no-provisioner"
+  volume_binding_mode = "WaitForFirstConsumer"
+  reclaim_policy      = "Retain"
+}
+
+resource "kubernetes_persistent_volume" "traefik_certs_pv" {
+  metadata {
+    name = "traefik-ingress-certs-pv"
+  }
+  spec {
+    capacity = {
+      storage = "5Gi"
+    }
+    access_modes = ["ReadWriteOnce"]
+    persistent_volume_source {
+      host_path {
+        path = "/mnt/traefik-certificates"
+        type = "DirectoryOrCreate"
+      }
+    }
+    storage_class_name               = kubernetes_storage_class.traefik_hostpath.metadata[0].name
+    persistent_volume_reclaim_policy = "Retain"
+  }
+}
+
 resource "kubernetes_persistent_volume_claim" "traefik_certs_pvc" {
   metadata {
     name      = "traefik-ingress-certs"
@@ -57,6 +86,8 @@ resource "kubernetes_persistent_volume_claim" "traefik_certs_pvc" {
         storage = "5Gi"
       }
     }
+    storage_class_name = kubernetes_storage_class.traefik_hostpath.metadata[0].name
+    volume_name        = kubernetes_persistent_volume.traefik_certs_pv.metadata[0].name
   }
   wait_until_bound = false
 }

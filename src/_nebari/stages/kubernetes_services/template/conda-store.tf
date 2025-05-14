@@ -64,8 +64,7 @@ module "kubernetes-conda-store-server" {
   conda-store-fs = var.shared_fs_type
 
   depends_on = [
-    module.rook-ceph,
-    module.efs
+    module.rook-ceph
   ]
 }
 

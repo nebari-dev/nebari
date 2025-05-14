@@ -176,9 +176,6 @@ module "jupyterhub-efs-mount" {
   fs_capacity  = var.jupyterhub-shared-storage
   efs-pvc-name = local.jupyterhub-pvc-name
 
-  depends_on = [
-    module.efs
-  ]
 }
 
 

@@ -33,7 +33,7 @@ resource "helm_release" "postgresql" {
       primary = {
         nodeSelector = {
           "${var.node-group.key}" = var.node-group.value
-        }
+        },
       }
     })
   ], var.overrides)

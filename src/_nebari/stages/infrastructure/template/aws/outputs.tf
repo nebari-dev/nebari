@@ -39,3 +39,13 @@ output "efs_id" {
   description = "EFS ID"
   value       = module.efs[0].efs_id
 }
+
+output "efs_storage_class_name" {
+  description = "EFS storage class name"
+  value       = module.storage-class.efs_storage_class_name
+}
+
+output "efs_storage_class_retain_name" {
+  description = "EFS storage class name"
+  value       = module.storage-class.efs_storage_class_retain_name
+}

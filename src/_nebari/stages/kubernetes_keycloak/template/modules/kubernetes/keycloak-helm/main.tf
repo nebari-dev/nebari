@@ -15,10 +15,17 @@ resource "helm_release" "keycloak" {
       }
       postgresql = {
         primary = {
+          podSecurityContext = {
+            fsGroup   = 100
+            runAsUser = 1000
+          }
           nodeSelector = {
             "${var.node_group.key}" = var.node_group.value
           }
         }
+      }
+      podSecurityContext = {
+        fsGroup = 1000
       }
       customThemes = var.themes
     })

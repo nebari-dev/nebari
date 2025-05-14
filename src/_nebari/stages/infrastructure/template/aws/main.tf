@@ -104,3 +104,14 @@ module "kubernetes" {
   permissions_boundary    = var.permissions_boundary
   efs_filesystem_id       = module.efs[0].efs_id
 }
+
+# ==================== STORAGE CLASS ==========================
+module "storage-class" {
+  source = "./modules/storage-class"
+
+  efs_filesystem_id = module.efs[0].efs_id
+
+  token                  = module.kubernetes.credentials.token
+  cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+  endpoint               = module.kubernetes.credentials.endpoint
+}
