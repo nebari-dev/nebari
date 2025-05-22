@@ -73,6 +73,7 @@ amazon_web_services:
       gpu: false
       single_subnet: false
       permissions_boundary:
+      capacity_type: "SPOT"
 profiles:
   jupyterlab:
   - display_name: Small Instance
