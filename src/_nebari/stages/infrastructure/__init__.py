@@ -36,7 +36,11 @@ class LocalInputVars(schema.Base):
 
 
 class ExistingInputVars(schema.Base):
-    kube_context: str
+    kube_context: Optional[str] = "default"
+    kubeconfig_path: Optional[str] = "~/.kube/config"
+    metallb_ip_min: Optional[str] = None
+    metallb_ip_max: Optional[str] = None
+    metallb_enabled: bool = True
 
 
 class NodeGroup(schema.Base):
@@ -405,7 +409,6 @@ class GoogleCloudPlatformProvider(schema.Base):
             raise ValueError(
                 f"Google Cloud region={data['region']} is not one of {available_regions}"
             )
-
         available_kubernetes_versions = google_cloud.kubernetes_versions(data["region"])
         if not any(
             v.startswith(str(data["kubernetes_version"]))
@@ -670,8 +673,29 @@ class LocalProvider(schema.Base):
     }
 
 
+class MetalLBConfig(schema.Base):
+    enabled: bool = True
+    ip_min: Optional[str] = None
+    ip_max: Optional[str] = None
+
+    # validate that ip_min and ip_max are set when enabled is True
+    @model_validator(mode="before")
+    @classmethod
+    def check_ip_fields(cls, data):
+        enabled = data.get("enabled", False)
+        ip_min = data.get("ip_min", None)
+        ip_max = data.get("ip_max", None)
+        if enabled and (ip_min is None or ip_max is None):
+            raise ValueError(
+                f"Both ip_min ({ip_min}) and ip_max ({ip_max}) must be set when enabled is True"
+            )
+        return data
+
+
 class ExistingProvider(schema.Base):
-    kube_context: Optional[str] = None
+    kube_context: Optional[str] = "default"
+    kubeconfig_path: Optional[str] = "~/.kube/config"
+    metallb: MetalLBConfig = MetalLBConfig()
     node_selectors: Dict[str, KeyValueDict] = {
         "general": KeyValueDict(key="kubernetes.io/os", value="linux"),
         "user": KeyValueDict(key="kubernetes.io/os", value="linux"),
@@ -860,7 +884,11 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             ).model_dump()
         elif self.config.provider == schema.ProviderEnum.existing:
             return ExistingInputVars(
-                kube_context=self.config.existing.kube_context
+                kube_context=self.config.existing.kube_context,
+                kubeconfig_path=self.config.existing.kubeconfig_path,
+                metallb_ip_min=self.config.existing.metallb.ip_min,
+                metallb_ip_max=self.config.existing.metallb.ip_max,
+                metallb_enabled=self.config.existing.metallb.enabled,
             ).model_dump()
         elif self.config.provider == schema.ProviderEnum.gcp:
             return GCPInputVars(
