@@ -162,6 +162,20 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
       }
     }
   }
+
+  lifecycle {
+    # force forward auth redeployment if the cert is updated
+    replace_triggered_by = [
+      kubernetes_secret_v1.cert_secret.metadata.0.uid
+    ]
+  }
+}
+
+data "kubernetes_secret_v1" "cert_secret" {
+  metadata {
+    name      = var.cert_secret_name
+    namespace = var.namespace
+  }
 }
 
 resource "kubernetes_manifest" "forwardauth-middleware" {
