@@ -134,14 +134,18 @@ def kms_key_arns(region: str) -> Dict[str, Kms_Key_Info]:
     for key in client.list_keys().get("Keys"):
         key_id = key["KeyId"]
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kms/client/describe_key.html#:~:text=Response%20Structure
-        key_data = client.describe_key(KeyId=key_id).get("KeyMetadata")
-        if key_data.get("Enabled"):
-            kms_keys[key_id] = Kms_Key_Info(
-                Arn=key_data.get("Arn"),
-                KeyUsage=key_data.get("KeyUsage"),
-                KeySpec=key_data.get("KeySpec"),
-                KeyManager=key_data.get("KeyManager"),
-            )
+        try:
+            key_data = client.describe_key(KeyId=key_id).get("KeyMetadata")
+        except ClientError:
+            pass
+        else:
+            if key_data.get("Enabled"):
+                kms_keys[key_id] = Kms_Key_Info(
+                    Arn=key_data.get("Arn"),
+                    KeyUsage=key_data.get("KeyUsage"),
+                    KeySpec=key_data.get("KeySpec"),
+                    KeyManager=key_data.get("KeyManager"),
+                )
     return kms_keys
 
 
