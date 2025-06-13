@@ -131,7 +131,7 @@ def add_preemptible_node_group(config, cloud="aws"):
     if cloud == "aws":
         cloud_name = "amazon_web_services"
         node_group = AWSNodeGroup(
-            instance=config.instance_type,
+            instance="m5.xlarge",
             min_nodes=1,
             max_nodes=5,
             single_subnet=False,
