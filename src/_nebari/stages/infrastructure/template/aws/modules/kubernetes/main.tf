@@ -91,7 +91,7 @@ resource "aws_eks_node_group" "main" {
   node_role_arn   = aws_iam_role.node-group.arn
   subnet_ids      = var.node_groups[count.index].single_subnet ? [element(var.cluster_subnets, 0)] : var.cluster_subnets
 
-  instance_types = [var.node_groups[count.index].instance_type]
+  instance_types = split(",", var.node_groups[count.index].instance_type)
   ami_type       = var.node_groups[count.index].ami_type
   disk_size      = var.node_groups[count.index].launch_template == null ? 50 : null
 

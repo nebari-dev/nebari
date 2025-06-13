@@ -617,10 +617,11 @@ class AmazonWebServicesProvider(schema.Base):
                     if hasattr(node_group, "__getitem__")
                     else node_group.instance
                 )
-                if instance not in available_instances:
-                    raise ValueError(
-                        f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
-                    )
+                for instance_name in instance.split(","):
+                    if instance_name not in available_instances:
+                        raise ValueError(
+                            f"Amazon Web Services instance {instance_name} not one of available instance types={available_instances}"
+                        )
 
         # check if kms key is valid
         available_kms_keys = amazon_web_services.kms_key_arns(data["region"])
