@@ -188,7 +188,7 @@ class AWSNodeGroupInputVars(schema.Base):
     max_size: int
     single_subnet: bool
     permissions_boundary: Optional[str] = None
-    capacity_type: Optional[Literal["SPOT", "ON_DEMAND"]] = None
+    spot: bool = False
     ami_type: Optional[AWSAmiTypes] = None
     launch_template: Optional[AWSNodeLaunchTemplate] = None
     node_taints: list[dict]
@@ -522,7 +522,7 @@ class AWSNodeGroup(NodeGroup):
     gpu: bool = False
     single_subnet: bool = False
     permissions_boundary: Optional[str] = None
-    capacity_type: Optional[Literal["SPOT", "ON_DEMAND"]] = None
+    spot: bool = False
     # Disabled as part of 2024.11.1 until #2832 is resolved
     # launch_template: Optional[AWSNodeLaunchTemplate] = None
 
@@ -961,11 +961,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                             gpu_enabled=node_group.gpu,
                             launch_template=None,
                         ),
-                        capacity_type=(
-                            node_group.capacity_type.strip()
-                            if node_group.capacity_type
-                            else "ON_DEMAND"
-                        ),
+                        spot=node_group.spot,
                     )
                     for name, node_group in self.config.amazon_web_services.node_groups.items()
                 ],
