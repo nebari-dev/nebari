@@ -130,13 +130,13 @@ def add_preemptible_node_group(config, cloud="aws"):
     node_group = None
     if cloud == "aws":
         cloud_name = "amazon_web_services"
-        # TODO: how to make preemptible?
         node_group = AWSNodeGroup(
             instance="m5.xlarge",
             min_nodes=1,
             max_nodes=5,
             single_subnet=False,
             taints=DEFAULT_NODE_GROUP_TAINTS,
+            spot=True,
         )
     elif cloud == "gcp":
         cloud_name = "google_cloud_platform"

@@ -92,6 +92,7 @@ resource "aws_eks_node_group" "main" {
   subnet_ids      = var.node_groups[count.index].single_subnet ? [element(var.cluster_subnets, 0)] : var.cluster_subnets
 
   instance_types = [var.node_groups[count.index].instance_type]
+  capacity_type  = var.node_groups[count.index].spot ? "SPOT" : "ON_DEMAND"
   ami_type       = var.node_groups[count.index].ami_type
   disk_size      = var.node_groups[count.index].launch_template == null ? 50 : null
 
