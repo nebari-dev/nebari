@@ -17,4 +17,6 @@ module "kubernetes-keycloak-helm" {
   overrides = var.overrides
 
   node_group = var.node_group
+
+  themes = var.themes
 }

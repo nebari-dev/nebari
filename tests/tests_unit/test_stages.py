@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
+from _nebari.stages.infrastructure import NodeGroup
 from _nebari.stages.terraform_state import TerraformStateStage
 from _nebari.utils import yaml
 from _nebari.version import __version__
@@ -48,17 +49,13 @@ def test_check_immutable_fields_mutable_change(
 
 
 @patch.object(TerraformStateStage, "get_nebari_config_state")
-@patch.object(schema.Main, "model_fields")
 def test_check_immutable_fields_immutable_change(
-    mock_model_fields, mock_get_state, terraform_state_stage, mock_config
+    mock_get_state, terraform_state_stage, mock_config
 ):
     old_config = mock_config.model_copy(deep=True)
     old_config.local = None
     old_config.provider = schema.ProviderEnum.gcp
     mock_get_state.return_value = old_config.model_dump()
-
-    # Mock the provider field to be immutable
-    mock_model_fields.__getitem__.return_value.json_schema_extra = {"immutable": True}
 
     with pytest.raises(ValueError) as exc_info:
         terraform_state_stage.check_immutable_fields()
@@ -119,3 +116,32 @@ def test_check_immutable_fields_change_dict_any(
 
     # This should not raise an exception
     terraform_state_stage.check_immutable_fields()
+
+
+@pytest.mark.parametrize(
+    "taints,keys,values,effects",
+    [
+        (["key1=value1:NoSchedule"], ["key1"], ["value1"], ["NoSchedule"]),
+        (["key1=value1:PreferNoSchedule"], ["key1"], ["value1"], ["PreferNoSchedule"]),
+        (["key1=value1:NoExecute"], ["key1"], ["value1"], ["NoExecute"]),
+        (
+            ["dedicated=special-user:NoSchedule"],
+            ["dedicated"],
+            ["special-user"],
+            ["NoSchedule"],
+        ),
+        (["dedicated:NoSchedule"], ["dedicated"], [None], ["NoSchedule"]),
+        (
+            ["key1=value1:NoExecute", "key2=value2:NoExecute"],
+            ["key1", "key2"],
+            ["value1", "value2"],
+            ["NoExecute", "NoExecute"],
+        ),
+    ],
+)
+def test_node_group_taints(taints, keys, values, effects):
+    ng = NodeGroup(instance="t3.medium", min_nodes=1, max_nodes=1, taints=taints)
+
+    assert [t.key for t in ng.taints] == keys
+    assert [t.value for t in ng.taints] == values
+    assert [t.effect for t in ng.taints] == effects

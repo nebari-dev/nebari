@@ -65,7 +65,7 @@ Below is an example of how you might update the **Setup** and **Running the Play
    If you need to create a user for testing, you can do so with:
 
    ```bash
-   nebari keycloak adduser --user <username> <password> --config <NEBARI_CONFIG_PATH>
+   nebari keycloak add-user --user <username> -p <password> --config <NEBARI_CONFIG_PATH>
    ```
 
 *Note:* If you see the warning:

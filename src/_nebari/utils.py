@@ -5,6 +5,7 @@ import json
 import os
 import re
 import secrets
+import selectors
 import signal
 import string
 import subprocess
@@ -15,6 +16,7 @@ import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Set
 
+import rich
 from ruamel.yaml import YAML
 
 from _nebari import constants
@@ -46,6 +48,87 @@ def change_directory(directory):
     os.chdir(current_directory)
 
 
+def strip_ansi_errors(line):
+    """Strips ANSI escape codes from a string."""
+    ansi_escape = re.compile(rb"\x1b\[[0-9;]*[mK]")
+    return ansi_escape.sub(b"", line)
+
+
+def process_streams(
+    process, line_prefix, strip_errors, print_stdout=True, print_stderr=True
+):
+    sel = selectors.DefaultSelector()
+    sel.register(process.stdout, selectors.EVENT_READ, data="stdout")
+    if process.stderr and process.stderr != process.stdout:
+        sel.register(process.stderr, selectors.EVENT_READ, data="stderr")
+
+    outputs = {"stdout": [], "stderr": []}
+    partial = {"stdout": b"", "stderr": b""}
+    reset_code = b"\x1b[0m"  # ANSI reset code
+
+    try:
+        while True:
+            events = sel.select(timeout=0.1)
+            if not events and process.poll() is not None:
+                # Handle any remaining partial output
+                for stream_name in ["stdout", "stderr"]:
+                    if partial[stream_name]:
+                        line = partial[stream_name]
+                        if strip_errors:
+                            line = strip_ansi_errors(line)
+                        outputs[stream_name].append(line)
+                break
+
+            for key, _ in events:
+                data = key.fileobj.read1(8192)
+                if not data:
+                    sel.unregister(key.fileobj)
+                    continue
+
+                stream_name = key.data
+                chunk = partial[stream_name] + data
+                lines = chunk.split(b"\n")
+                partial[stream_name] = lines[-1]
+
+                for line in lines[:-1]:
+                    line_w_newline = line + b"\n"
+                    if strip_errors:
+                        line_w_newline = strip_ansi_errors(line_w_newline)
+
+                    # Handle stdout
+                    if stream_name == "stdout":
+                        if print_stdout:
+                            sys.stdout.buffer.write(line_prefix + line_w_newline)
+                            sys.stdout.flush()
+                        else:
+                            outputs["stdout"].append(line_w_newline)
+
+                    # Handle stderr
+                    if stream_name == "stderr":
+                        if print_stderr:
+                            sys.stderr.buffer.write(line_prefix + line_w_newline)
+                            sys.stderr.flush()
+                        else:
+                            outputs["stderr"].append(line_w_newline)
+
+        # Add reset code when we're done processing output
+        if print_stdout:
+            sys.stdout.buffer.write(reset_code)
+            sys.stdout.flush()
+        if print_stderr:
+            sys.stderr.buffer.write(reset_code)
+            sys.stderr.flush()
+
+    finally:
+        sel.close()
+        if process.stdout:
+            process.stdout.close()
+        if process.stderr:
+            process.stderr.close()
+
+    return outputs["stdout"], outputs["stderr"]
+
+
 def run_subprocess_cmd(processargs, prefix=b"", capture_output=False, **kwargs):
     """Runs subprocess command with realtime stdout logging with optional line prefix."""
     if prefix:
@@ -71,6 +154,7 @@ def run_subprocess_cmd(processargs, prefix=b"", capture_output=False, **kwargs):
         stderr=stderr_stream,
         preexec_fn=os.setsid,
     )
+
     # Set timeout thread
     timeout_timer = None
     if timeout > 0:
@@ -84,25 +168,14 @@ def run_subprocess_cmd(processargs, prefix=b"", capture_output=False, **kwargs):
         timeout_timer = threading.Timer(timeout, kill_process)
         timeout_timer.start()
 
-    print_stream = process.stderr if capture_output else process.stdout
-    for line in iter(lambda: print_stream.readline(), b""):
-        full_line = line_prefix + line
-        if strip_errors:
-            full_line = full_line.decode("utf-8")
-            full_line = re.sub(
-                r"\x1b\[31m", "", full_line
-            )  # Remove red ANSI escape code
-            full_line = full_line.encode("utf-8")
-
-        sys.stdout.buffer.write(full_line)
-        sys.stdout.flush()
-    print_stream.close()
-
-    output = []
     if capture_output:
-        for line in iter(lambda: process.stdout.readline(), b""):
-            output.append(line)
-        process.stdout.close()
+        output, _ = process_streams(
+            process, line_prefix, strip_errors, print_stdout=False, print_stderr=True
+        )
+    else:
+        process_streams(
+            process, line_prefix, strip_errors, print_stdout=True, print_stderr=True
+        )
 
     if timeout_timer is not None:
         timeout_timer.cancel()
@@ -472,3 +545,49 @@ class JsonDiff:
 
     def __repr__(self):
         return f"{self.__class__.__name__}(diff={json.dumps(self.diff)})"
+
+
+def update_tfstate_file(state_filepath: Path, migration_map: dict) -> None:
+    """
+    Updates a Terraform state file by replacing deprecated attributes with their new
+    counterparts.
+
+    Originally introduced in the Nebari `2025.2.1` release to accommodate major schema
+    changes from Terraform cloud providers, this function can be extended for future
+    migrations or patches. By centralizing the replacement logic, it ensures a clean,
+    modular design that keeps upgrade steps concise.
+
+    :param state_filepath: A Path object pointing to the Terraform state file.
+    :param migration_map: A dictionary where keys are old attribute paths and values are new attribute paths.
+    """
+    if not state_filepath.exists():
+        rich.print(
+            f"[red]No Terraform state file found at {state_filepath}. Skipping migration.[/red]"
+        )
+        return
+
+    try:
+        with open(state_filepath, "r") as f:
+            state = json.load(f)
+    except json.JSONDecodeError:
+        rich.print(
+            f"[red]Invalid JSON structure in {state_filepath}. Skipping migration.[/red]"
+        )
+        return
+
+    # Traverse the resources → instances → attributes hierarchy
+    # and apply the specified attribute replacements.
+    for resource in state.get("resources", []):
+        for instance in resource.get("instances", []):
+            attributes = instance.get("attributes", {})
+            for old_attr, new_attr in migration_map.items():
+                if old_attr in attributes:
+                    attributes[new_attr] = attributes.pop(old_attr)
+
+    # Save the modified state back to disk
+    with open(state_filepath, "w") as f:
+        json.dump(state, f, indent=2)
+
+    rich.print(
+        f" ✅ [green]Successfully updated the Terraform state file: {state_filepath}[/green]"
+    )

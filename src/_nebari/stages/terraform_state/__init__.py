@@ -219,7 +219,6 @@ class TerraformStateStage(NebariTerraformStage):
         # terraform show command, inside check_immutable_fields
         with super().deploy(stage_outputs, disable_prompt, tofu_init=False):
             env_mapping = {}
-
             with modified_environ(**env_mapping):
                 yield
 
@@ -249,7 +248,8 @@ class TerraformStateStage(NebariTerraformStage):
             # Return a default (mutable) extra field schema if bottom level is not a Pydantic model (such as a free-form 'overrides' block)
             if isinstance(bottom_level_schema, BaseModel):
                 extra_field_schema = schema.ExtraFieldSchema(
-                    **bottom_level_schema.model_fields[keys[-1]].json_schema_extra or {}
+                    **type(bottom_level_schema).model_fields[keys[-1]].json_schema_extra
+                    or {}
                 )
             else:
                 extra_field_schema = schema.ExtraFieldSchema()
@@ -262,6 +262,7 @@ class TerraformStateStage(NebariTerraformStage):
 
     def get_nebari_config_state(self) -> dict:
         directory = str(self.output_directory / self.stage_prefix)
+
         tf_state = opentofu.show(directory)
         nebari_config_state = None
 

@@ -5,7 +5,13 @@ import time
 from typing import Any, Dict, List, Optional, Type, Union
 from urllib.parse import urlencode
 
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    ConfigDict,
+    Field,
+    field_validator,
+    model_serializer,
+    model_validator,
+)
 from typing_extensions import Self
 
 from _nebari import constants
@@ -109,6 +115,42 @@ class KubeSpawner(schema.Base):
     model_config = ConfigDict(extra="allow")
 
 
+class ProfileOptionUnlistedChoice(schema.Base):
+    enabled: bool = False
+    display_name: str
+    display_name_in_choices: Optional[str] = None
+    validation_regex: Optional[str] = None
+    validation_message: Optional[str] = None
+    kubespawner_override: Dict[str, Any]
+
+
+class ProfileOptionChoice(schema.Base):
+    display_name: str
+    default: Optional[bool] = False
+    kubespawner_override: Dict[str, Any]
+
+
+class ProfileOption(schema.Base):
+    display_name: str
+    unlisted_choice: Optional[ProfileOptionUnlistedChoice] = None
+    choices: Dict[str, ProfileOptionChoice]
+
+    @field_validator("choices")
+    def validate_choices(cls, v):
+        defaults = [choice for choice in v.values() if choice.default]
+        if len(defaults) > 1:
+            raise ValueError("Only one choice can be marked as default")
+        return v
+
+    # We need to exclude unlisted_choice if not set.
+    # This was the recommended solution without affecting the parent.
+    # reference: https://github.com/pydantic/pydantic/discussions/7315
+    @model_serializer(mode="wrap")
+    def serialize_model(self, handler) -> dict[str, Any]:
+        result = handler(self)
+        return {k: v for k, v in result.items() if v is not None}
+
+
 class JupyterLabProfile(schema.Base):
     access: AccessEnum = AccessEnum.all
     display_name: str
@@ -117,6 +159,7 @@ class JupyterLabProfile(schema.Base):
     users: Optional[List[str]] = None
     groups: Optional[List[str]] = None
     kubespawner_override: Optional[KubeSpawner] = None
+    profile_options: dict[str, ProfileOption] = {}
 
     @model_validator(mode="after")
     def only_yaml_can_have_groups_and_users(self):
@@ -453,6 +496,28 @@ class CondaStoreInputVars(schema.Base):
         return byte_unit_conversion(value, "GiB")
 
 
+class TolerationOperatorEnum(str, enum.Enum):
+    Equal = "Equal"
+    Exists = "Exists"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
+
+
+class Toleration(schema.Taint):
+    operator: TolerationOperatorEnum = TolerationOperatorEnum.Equal
+
+    @classmethod
+    def from_taint(
+        cls, taint: schema.Taint, operator: None | TolerationOperatorEnum = None
+    ):
+        kwargs = {}
+        if operator:
+            kwargs["operator"] = operator
+        return cls(**taint.model_dump(), **kwargs)
+
+
 class JupyterhubInputVars(schema.Base):
     jupyterhub_theme: Dict[str, Any] = Field(alias="jupyterhub-theme")
     jupyterlab_image: ImageNameTag = Field(alias="jupyterlab-image")
@@ -478,6 +543,9 @@ class JupyterhubInputVars(schema.Base):
     cloud_provider: str = Field(alias="cloud-provider")
     jupyterlab_preferred_dir: Optional[str] = Field(alias="jupyterlab-preferred-dir")
     shared_fs_type: SharedFsEnum
+    user_taint_tolerations: Optional[List[Toleration]] = Field(
+        alias="node-taint-tolerations"
+    )
 
     @field_validator("jupyterhub_shared_storage", mode="before")
     @classmethod
@@ -490,6 +558,9 @@ class DaskGatewayInputVars(schema.Base):
     dask_gateway_profiles: Dict[str, Any] = Field(alias="dask-gateway-profiles")
     cloud_provider: str = Field(alias="cloud-provider")
     forwardauth_middleware_name: str = _forwardauth_middleware_name
+    worker_taint_tolerations: Optional[list[Toleration]] = Field(
+        alias="worker-taint-tolerations"
+    )
 
 
 class MonitoringInputVars(schema.Base):
@@ -592,6 +663,27 @@ class KubernetesServicesStage(NebariTerraformStage):
         ):
             jupyterhub_theme.update({"version": f"v{self.config.nebari_version}"})
 
+        def _node_taint_tolerations(node_group_name: str) -> List[Toleration]:
+            tolerations = []
+            provider = getattr(
+                self.config, schema.provider_enum_name_map[self.config.provider]
+            )
+            if not (
+                hasattr(provider, "node_groups")
+                and provider.node_groups.get(node_group_name, {})
+                and hasattr(provider.node_groups[node_group_name], "taints")
+            ):
+                return tolerations
+            tolerations = [
+                Toleration.from_taint(taint)
+                for taint in getattr(
+                    self.config, schema.provider_enum_name_map[self.config.provider]
+                )
+                .node_groups[node_group_name]
+                .taints
+            ]
+            return tolerations
+
         kubernetes_services_vars = KubernetesServicesInputVars(
             name=self.config.project_name,
             environment=self.config.namespace,
@@ -646,6 +738,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             jupyterlab_default_settings=self.config.jupyterlab.default_settings,
             jupyterlab_gallery_settings=self.config.jupyterlab.gallery_settings,
             jupyterlab_preferred_dir=self.config.jupyterlab.preferred_dir,
+            user_taint_tolerations=_node_taint_tolerations(node_group_name="user"),
             shared_fs_type=(
                 # efs is equivalent to nfs in these modules
                 SharedFsEnum.nfs
@@ -660,6 +753,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             ),
             dask_gateway_profiles=self.config.profiles.model_dump()["dask_worker"],
             cloud_provider=cloud_provider,
+            worker_taint_tolerations=_node_taint_tolerations(node_group_name="worker"),
         )
 
         monitoring_vars = MonitoringInputVars(

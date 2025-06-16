@@ -57,7 +57,7 @@ resource "helm_release" "jupyterhub" {
 
   repository = "https://jupyterhub.github.io/helm-chart/"
   chart      = "jupyterhub"
-  version    = "4.0.0-0.dev.git.6707.h109668fd"
+  version    = "4.2.0"
 
   values = concat([
     file("${path.module}/values.yaml"),
@@ -79,6 +79,7 @@ resource "helm_release" "jupyterhub" {
         jhub-apps-enabled             = var.jhub-apps-enabled
         jhub-apps-overrides           = var.jhub-apps-overrides
         initial-repositories          = var.initial-repositories
+        node-taint-tolerations        = var.node-taint-tolerations
         skel-mount = {
           name      = kubernetes_config_map.etc-skel.metadata.0.name
           namespace = kubernetes_config_map.etc-skel.metadata.0.namespace

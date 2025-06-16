@@ -1,7 +1,11 @@
 import dataclasses
 import typing
 
-from _nebari.stages.infrastructure import AWSNodeGroup, GCPNodeGroup
+from _nebari.stages.infrastructure import (
+    DEFAULT_NODE_GROUP_TAINTS,
+    AWSNodeGroup,
+    GCPNodeGroup,
+)
 from _nebari.stages.kubernetes_services import (
     AccessEnum,
     CondaEnvironment,
@@ -89,6 +93,7 @@ def add_gpu_config(config, cloud="aws"):
             max_nodes=gpu_config.max_nodes,
             single_subnet=gpu_config.extra_config["single_subnet"],
             gpu=gpu_config.extra_config["gpu"],
+            taints=DEFAULT_NODE_GROUP_TAINTS,
         )
         kubespawner_overrides = KubeSpawner(
             image=gpu_config.docker_image,
@@ -131,6 +136,7 @@ def add_preemptible_node_group(config, cloud="aws"):
             min_nodes=1,
             max_nodes=5,
             single_subnet=False,
+            taints=DEFAULT_NODE_GROUP_TAINTS,
         )
     elif cloud == "gcp":
         cloud_name = "google_cloud_platform"
@@ -139,6 +145,7 @@ def add_preemptible_node_group(config, cloud="aws"):
             min_nodes=1,
             max_nodes=5,
             preemptible=True,
+            taints=DEFAULT_NODE_GROUP_TAINTS,
         )
     else:
         raise ValueError("Invalid cloud for preemptible config")
