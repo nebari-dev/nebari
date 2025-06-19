@@ -68,6 +68,13 @@ resource "kubernetes_daemonset" "aws_nvidia_installer" {
           operator = "Exists"
           effect   = "NoSchedule"
         }
+
+        toleration {
+          key      = "dedicated"
+          operator = "Equal"
+          value    = "nebari"
+          effect   = "NoSchedule"
+        }
       }
     }
 
