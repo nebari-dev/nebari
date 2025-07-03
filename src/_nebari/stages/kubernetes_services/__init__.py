@@ -254,7 +254,7 @@ class CondaStore(schema.Base):
     image_tag: str = constants.DEFAULT_CONDA_STORE_IMAGE_TAG
     default_namespace: str = "nebari-git"
     object_storage: str = "200Gi"
-    worker_overrides: Optional[CondaStoreWorker] = None
+    worker_overrides: Optional[Union[CondaStoreWorker, None]] = None
 
 
 class NebariWorkflowController(schema.Base):
