@@ -94,10 +94,12 @@ resource "kubernetes_deployment" "worker" {
             required_during_scheduling_ignored_during_execution {
               node_selector_term {
                 match_expressions {
+                  // Since all node selectors use the same provider key, we can reuse
+                  // the same key even when overriding the value.
                   key      = var.node-group.key
                   operator = "In"
                   values = [
-                    var.node-group.value
+                    var.worker-overrides.node_name ? var.worker-overrides.node_name : var.node_group.value
                   ]
                 }
               }
@@ -114,6 +116,17 @@ resource "kubernetes_deployment" "worker" {
             "--config",
             "/etc/conda-store/conda_store_config.py"
           ]
+
+          resources {
+            limits = {
+              cpu    = var.worker-overrides.cpu_limit
+              memory = var.worker-overrides.memory_limit
+            }
+            requests = {
+              cpu    = var.worker-overrides.cpu_guarantee
+              memory = var.worker-overrides.memory_guarantee
+            }
+          }
 
           volume_mount {
             name       = "config"

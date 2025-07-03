@@ -239,6 +239,14 @@ class CondaEnvironment(schema.Base):
     dependencies: List[Union[str, Dict[str, List[str]]]]
 
 
+class CondaStoreWorker(schema.Base):
+    cpu_limit: float = 2.0
+    cpu_guarantee: float = 2.0
+    mem_limit: str = "6Gi"
+    mem_guarantee: str = "4Gi"
+    node_name: Optional[str] = "general"
+
+
 class CondaStore(schema.Base):
     extra_settings: Dict[str, Any] = {}
     extra_config: str = ""
@@ -246,6 +254,7 @@ class CondaStore(schema.Base):
     image_tag: str = constants.DEFAULT_CONDA_STORE_IMAGE_TAG
     default_namespace: str = "nebari-git"
     object_storage: str = "200Gi"
+    worker_overrides: Optional[CondaStoreWorker] = None
 
 
 class NebariWorkflowController(schema.Base):
@@ -489,6 +498,9 @@ class CondaStoreInputVars(schema.Base):
     conda_store_service_token_scopes: Dict[str, Dict[str, Any]] = Field(
         alias="conda-store-service-token-scopes"
     )
+    conda_store_worker_overrides: Dict[str, Any] = Field(
+        alias="conda-store-worker-overrides"
+    )
 
     @field_validator("conda_store_filesystem_storage", mode="before")
     @classmethod
@@ -712,6 +724,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             conda_store_extra_config=self.config.conda_store.extra_config,
             conda_store_image=self.config.conda_store.image,
             conda_store_image_tag=self.config.conda_store.image_tag,
+            conda_store_worker_overrides=self.config.conda_store.worker_overrides,
         )
 
         jupyterhub_vars = JupyterhubInputVars(
