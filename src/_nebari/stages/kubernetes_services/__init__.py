@@ -498,8 +498,8 @@ class CondaStoreInputVars(schema.Base):
     conda_store_service_token_scopes: Dict[str, Dict[str, Any]] = Field(
         alias="conda-store-service-token-scopes"
     )
-    conda_store_worker_overrides: Dict[str, Any] = Field(
-        alias="conda-store-worker-overrides"
+    conda_store_worker_overrides: CondaStoreWorker = Field(
+        alias="conda-store-worker-overrides",
     )
 
     @field_validator("conda_store_filesystem_storage", mode="before")
