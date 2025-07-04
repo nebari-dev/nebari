@@ -88,12 +88,19 @@ variable "conda-store-fs" {
 }
 
 variable "worker-overrides" {
-  description = "Worker-specific overrides for conda-store worker pods, including resources and node group"
+  description = "Worker-specific overrides for conda-store worker pods, including resources and node group selector."
   type = object({
-    cpu_limit        = optional(string, "2")
-    memory_limit     = optional(string, "6Gi")
-    cpu_guarantee    = optional(string, "1")
-    memory_guarantee = optional(string, "4Gi")
-    node_group       = optional(string, "general")
+    node_selector = optional(string, null)
+    max_workers   = optional(number, null)
+    worker_resources = optional(object({
+      limits = object({
+        cpu    = string
+        memory = string
+      })
+      requests = object({
+        cpu    = string
+        memory = string
+      })
+    }), null)
   })
 }

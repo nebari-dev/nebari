@@ -66,7 +66,7 @@ resource "kubernetes_deployment" "worker" {
   }
 
   spec {
-    replicas = 1
+    replicas = var.worker-overrides.max_workers != null ? var.worker-overrides.max_workers : 1
 
     selector {
       match_labels = {
@@ -99,7 +99,7 @@ resource "kubernetes_deployment" "worker" {
                   key      = var.node-group.key
                   operator = "In"
                   values = [
-                    var.worker-overrides.node_name ? var.worker-overrides.node_name : var.node_group.value
+                    var.worker-overrides.node_selector != null ? var.worker-overrides.node_selector : var.node-group.value
                   ]
                 }
               }
@@ -117,16 +117,7 @@ resource "kubernetes_deployment" "worker" {
             "/etc/conda-store/conda_store_config.py"
           ]
 
-          resources {
-            limits = {
-              cpu    = var.worker-overrides.cpu_limit
-              memory = var.worker-overrides.memory_limit
-            }
-            requests = {
-              cpu    = var.worker-overrides.cpu_guarantee
-              memory = var.worker-overrides.memory_guarantee
-            }
-          }
+          resources = var.worker-overrides.worker_resources
 
           volume_mount {
             name       = "config"

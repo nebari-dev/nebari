@@ -239,12 +239,19 @@ class CondaEnvironment(schema.Base):
     dependencies: List[Union[str, Dict[str, List[str]]]]
 
 
+class WorkerResources(schema.Base):
+    cpu_limit: Optional[Union[str, float, int]] = 2
+    mem_limit: Optional[Union[str, float, int]] = "6Gi"
+    cpu_guarantee: Optional[Union[str, float, int]] = 1
+    mem_guarantee: Optional[Union[str, float, int]] = "4Gi"
+
+
 class CondaStoreWorker(schema.Base):
-    cpu_limit: float = 2.0
-    cpu_guarantee: float = 2.0
-    mem_limit: str = "6Gi"
-    mem_guarantee: str = "4Gi"
-    node_name: Optional[str] = "general"
+    worker_resources: Optional[WorkerResources] = WorkerResources()
+    # for the rest defaults are handled in terraform,
+    # so we don't need to set it here (worker.tf)
+    node_selector: Optional[str] = None
+    max_workers: Optional[int] = None
 
 
 class CondaStore(schema.Base):
