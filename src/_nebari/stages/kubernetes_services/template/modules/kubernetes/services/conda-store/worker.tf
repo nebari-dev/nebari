@@ -66,7 +66,7 @@ resource "kubernetes_deployment" "worker" {
   }
 
   spec {
-    replicas = 1
+    replicas = var.worker-overrides.max_workers != null ? var.worker-overrides.max_workers : 1
 
     selector {
       match_labels = {
@@ -94,10 +94,12 @@ resource "kubernetes_deployment" "worker" {
             required_during_scheduling_ignored_during_execution {
               node_selector_term {
                 match_expressions {
+                  // Since all node selectors use the same provider key, we can reuse
+                  // the same key even when overriding the value.
                   key      = var.node-group.key
                   operator = "In"
                   values = [
-                    var.node-group.value
+                    var.worker-overrides.node_selector != null ? var.worker-overrides.node_selector : var.node-group.value
                   ]
                 }
               }
@@ -114,6 +116,8 @@ resource "kubernetes_deployment" "worker" {
             "--config",
             "/etc/conda-store/conda_store_config.py"
           ]
+
+          resources = var.worker-overrides.worker_resources
 
           volume_mount {
             name       = "config"
