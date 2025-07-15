@@ -18,3 +18,4 @@ runners:
       - cirun-runner
     extra_config:
       monitoring: true
+      github_actions_monitoring: true
