@@ -71,7 +71,11 @@ jobs:
           mkdir -p ${{ env.PREVIEW_DIR }}
           cd ${{ env.PREVIEW_DIR }}
           
-          nebari init local --domain ${{ env.APP_DNS }} --namespace dev --auth-provider password
+          nebari init local \
+            --project-name 'preview-pr-${{ github.event.pull_request.number }}' \
+            --domain-name '${{ env.APP_DNS }}' \
+            --auth-provider password \
+            --output 'nebari-config.yaml'
           
           echo "domain=${{ env.APP_DNS }}" >> $GITHUB_OUTPUT
           echo "directory=${{ env.PREVIEW_DIR }}" >> $GITHUB_OUTPUT
