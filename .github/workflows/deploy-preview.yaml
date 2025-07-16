@@ -1,0 +1,217 @@
+name: "Deploy Preview"
+
+env:
+  TEST_USERNAME: "preview-user"
+  TEST_PASSWORD: "P@sswo3d"
+  TEST_SUPERADMIN_USER: "preview-admin"
+  TEST_SUPERADMIN_PASSWORD: "P@sswo3d-admin"
+  NEBARI_IMAGE_TAG: "main"
+  PYTHON_VERSION: "3.11"
+
+on:
+  pull_request:
+    types: [labeled, unlabeled]
+
+concurrency:
+  group: deploy-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-preview:
+    if: github.event.action == 'labeled' && github.event.label.name == 'deploy-preview'
+    runs-on: "cirun-runner--${{ github.run_id }}"
+    defaults:
+      run:
+        shell: bash -l {0}
+    env:
+      APP_DNS: "nebari-pr-${{ github.event.pull_request.number }}.nebari.dev"
+      SSH_DNS: "nebari-pr-${{ github.event.pull_request.number }}-ssh.nebari.dev"
+      PREVIEW_DIR: "preview-pr-${{ github.event.pull_request.number }}"
+    steps:
+      - name: "Checkout Infrastructure"
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+
+      - name: "Checkout PR"
+        run: |
+          git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
+          git checkout pr-${{ github.event.pull_request.number }}
+
+      # https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
+      - name: "Update inotify ulimit"
+        run: |
+          sudo sysctl fs.inotify.max_user_watches=524288
+          sudo sysctl fs.inotify.max_user_instances=512
+
+      - name: Setup runner for local deployment
+        uses: ./.github/actions/setup-local
+
+      - name: Set up Python
+        uses: conda-incubator/setup-miniconda@v3
+        env:
+          CONDA: /home/runnerx/miniconda3
+        with:
+          auto-update-conda: true
+          python-version: ${{ env.PYTHON_VERSION }}
+          miniconda-version: "latest"
+          activate-environment: nebari
+
+      - name: Install JQ
+        run: |
+          sudo apt-get update
+          sudo apt-get install jq -y
+
+      - name: Install Nebari
+        run: pip install .[dev]
+
+      - name: Initialize Nebari config for preview deployment
+        id: init
+        run: |
+          mkdir -p ${{ env.PREVIEW_DIR }}
+          cd ${{ env.PREVIEW_DIR }}
+          
+          nebari init local --domain ${{ env.APP_DNS }} --namespace dev --auth-provider password
+          
+          echo "domain=${{ env.APP_DNS }}" >> $GITHUB_OUTPUT
+          echo "directory=${{ env.PREVIEW_DIR }}" >> $GITHUB_OUTPUT
+          echo "config=nebari-config.yaml" >> $GITHUB_OUTPUT
+
+      - name: Deploy Nebari Preview
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
+
+      - name: Health check
+        uses: ./.github/actions/health-check
+        with:
+          domain: ${{ steps.init.outputs.domain }}
+
+      - name: Create preview users
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: |
+          nebari keycloak add-user --user "${TEST_USERNAME}" -p "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }}
+          nebari keycloak add-user --user "${TEST_SUPERADMIN_USER}" -p "${TEST_SUPERADMIN_PASSWORD}" --config ${{ steps.init.outputs.config }} --groups superadmin
+          nebari keycloak list-users --config ${{ steps.init.outputs.config }}
+
+      - name: Await Workloads
+        uses: jupyterhub/action-k8s-await-workloads@v3
+        with:
+          workloads: "" # all
+          namespace: "dev"
+          timeout: 300
+          max-restarts: 3
+
+      - name: Setup FRP Tunnel
+        uses: cirunlabs/frp-tunnel-action@main
+        with:
+          timeout_minutes: 0
+          frp_client_config: |
+            serverAddr = "frp.nebari.dev"
+            serverPort = 7000
+            auth.method = "token"
+            auth.token = "${{ secrets.FRP_TOKEN }}"
+
+            [[proxies]]
+            name = "nebari-ssh--${{ github.run_id }}-${{ github.sha }}"
+            type = "tcpmux"
+            multiplexer = "httpconnect"
+            localIP = "127.0.0.1"
+            localPort = 22
+            customDomains = ["${{ env.SSH_DNS }}"]
+
+            [[proxies]]
+            name = "nebari-http--${{ github.run_id }}-${{ github.sha }}"
+            type = "https"
+            localIP = "127.0.0.1"
+            localPort = 443
+            customDomains = ["${{ env.APP_DNS }}"]
+
+      - name: Comment on PR with deployment info
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ github.event.pull_request.number }}
+            });
+            
+            const existingComment = comments.find(comment => 
+              comment.body.includes('🚀 Deploy Preview') && comment.user.login === 'github-actions[bot]'
+            );
+            
+            const body = `## 🚀 Deploy Preview Ready!
+            
+            Your Nebari preview deployment is now available:
+            
+            **🌐 Preview URL:** https://${{ env.APP_DNS }}
+            
+            **👤 Test Credentials:**
+            - **User:** \`${{ env.TEST_USERNAME }}\` / \`${{ env.TEST_PASSWORD }}\`
+            - **Admin:** \`${{ env.TEST_SUPERADMIN_USER }}\` / \`${{ env.TEST_SUPERADMIN_PASSWORD }}\`
+            
+            **🔗 SSH Access:**
+            \`\`\`bash
+            ssh ubuntu@${{ env.SSH_DNS }}
+            \`\`\`
+            
+            **🔄 Auto-cleanup:** This preview will be automatically cleaned up when the \`deploy-preview\` label is removed or the runner terminates.
+            
+            ---
+            _This preview was generated from commit ${context.sha.slice(0, 7)}_`;
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: ${{ github.event.pull_request.number }},
+                body: body
+              });
+            }
+
+  cleanup-preview:
+    if: github.event.action == 'unlabeled' && github.event.label.name == 'deploy-preview'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment on PR about cleanup
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ github.event.pull_request.number }}
+            });
+            
+            const existingComment = comments.find(comment => 
+              comment.body.includes('🚀 Deploy Preview') && comment.user.login === 'github-actions[bot]'
+            );
+            
+            const body = `## 🧹 Deploy Preview Cleaned Up
+            
+            The preview deployment for PR #${{ github.event.pull_request.number }} has been cleaned up.
+            
+            To create a new preview, add the \`deploy-preview\` label again.`;
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: ${{ github.event.pull_request.number }},
+                body: body
+              });
+            }
