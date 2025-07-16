@@ -38,6 +38,12 @@ variable "conda-store-service-token-scopes" {
   type        = map(any)
 }
 
+variable "conda-store-worker-overrides" {
+  description = "Worker-specific overrides for conda-store worker pods, including resources and node group selector."
+  type        = map(any)
+}
+
+
 # ====================== RESOURCES =======================
 module "kubernetes-conda-store-server" {
   source = "./modules/kubernetes/services/conda-store"
@@ -63,6 +69,8 @@ module "kubernetes-conda-store-server" {
   extra-config   = var.conda-store-extra-config
   conda-store-fs = var.shared_fs_type
 
+  worker-overrides = var.conda-store-worker-overrides
+
   depends_on = [
     module.rook-ceph
   ]
@@ -76,4 +84,14 @@ moved {
 
 locals {
   conda-store-fs = var.shared_fs_type
+  conda-store-worker-resources = {
+    limits = {
+      cpu    = "1"
+      memory = "2Gi"
+    }
+    requests = {
+      cpu    = "0.5"
+      memory = "1Gi"
+    }
+  }
 }
