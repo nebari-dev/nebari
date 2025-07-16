@@ -70,13 +70,13 @@ jobs:
         run: |
           mkdir -p ${{ env.PREVIEW_DIR }}
           cd ${{ env.PREVIEW_DIR }}
-          
+
           nebari init local \
             --project-name 'preview-pr-${{ github.event.pull_request.number }}' \
             --domain-name '${{ env.APP_DNS }}' \
             --auth-provider password \
             --output 'nebari-config.yaml'
-          
+
           echo "domain=${{ env.APP_DNS }}" >> $GITHUB_OUTPUT
           echo "directory=${{ env.PREVIEW_DIR }}" >> $GITHUB_OUTPUT
           echo "config=nebari-config.yaml" >> $GITHUB_OUTPUT
@@ -139,31 +139,31 @@ jobs:
               repo: context.repo.repo,
               issue_number: ${{ github.event.pull_request.number }}
             });
-            
-            const existingComment = comments.find(comment => 
+
+            const existingComment = comments.find(comment =>
               comment.body.includes('🚀 Deploy Preview') && comment.user.login === 'github-actions[bot]'
             );
-            
+
             const body = `## 🚀 Deploy Preview Ready!
-            
+
             Your Nebari preview deployment is now available:
-            
+
             **🌐 Preview URL:** https://${{ env.APP_DNS }}
-            
+
             **👤 Test Credentials:**
             - **User:** \`${{ env.TEST_USERNAME }}\` / \`${{ env.TEST_PASSWORD }}\`
             - **Admin:** \`${{ env.TEST_SUPERADMIN_USER }}\` / \`${{ env.TEST_SUPERADMIN_PASSWORD }}\`
-            
+
             **🔗 SSH Access:**
             \`\`\`bash
             ssh ubuntu@${{ env.SSH_DNS }}
             \`\`\`
-            
+
             **🔄 Auto-cleanup:** This preview will be automatically cleaned up when the \`deploy-preview\` label is removed or the runner terminates.
-            
+
             ---
             _This preview was generated from commit ${context.sha.slice(0, 7)}_`;
-            
+
             if (existingComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
@@ -193,17 +193,17 @@ jobs:
               repo: context.repo.repo,
               issue_number: ${{ github.event.pull_request.number }}
             });
-            
-            const existingComment = comments.find(comment => 
+
+            const existingComment = comments.find(comment =>
               comment.body.includes('🚀 Deploy Preview') && comment.user.login === 'github-actions[bot]'
             );
-            
+
             const body = `## 🧹 Deploy Preview Cleaned Up
-            
+
             The preview deployment for PR #${{ github.event.pull_request.number }} has been cleaned up.
-            
+
             To create a new preview, add the \`deploy-preview\` label again.`;
-            
+
             if (existingComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
