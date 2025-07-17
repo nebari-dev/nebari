@@ -57,12 +57,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
-      - name: "Update inotify ulimit"
-        run: |
-          sudo sysctl fs.inotify.max_user_watches=524288
-          sudo sysctl fs.inotify.max_user_instances=512
-
       - name: Setup runner for local deployment
         uses: ./.github/actions/setup-local
 
@@ -83,11 +77,6 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           miniconda-version: "latest"
           activate-environment: nebari
-
-      - name: Install JQ
-        run: |
-          sudo apt-get update
-          sudo apt-get install jq -y
 
       - name: Install Nebari and playwright
         run: |
