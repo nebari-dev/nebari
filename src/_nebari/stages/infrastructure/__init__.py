@@ -149,6 +149,22 @@ class AzureNodeGroupInputVars(schema.Base):
         return [f"{taint.key}={taint.value}:{taint.effect.value}" for taint in value]
 
 
+class AADAccessControl(schema.Base):
+    """
+    Represents the configuration for Azure Active Directory Role-Based Access Control
+    (RBAC) integration in a Kubernetes cluster.
+
+    Attributes:
+        enabled (bool): Indicates whether Azure AD-based Role-Based Access Control is
+        enabled.
+        admin_group_object_ids (List[str]): A list of Object IDs of Azure AD groups
+        assigned administrative roles on the cluster.
+    """
+
+    azure_rbac_enabled: bool
+    admin_group_object_ids: List[str]
+
+
 class AzureInputVars(schema.Base):
     name: str
     environment: str
@@ -166,6 +182,7 @@ class AzureInputVars(schema.Base):
     network_profile: Optional[Dict[str, str]] = None
     azure_policy_enabled: Optional[bool] = None
     workload_identity_enabled: bool = False
+    aad_access_control: Optional[AADAccessControl] = None
 
 
 class AWSAmiTypes(str, enum.Enum):
@@ -474,6 +491,7 @@ class AzureProvider(schema.Base):
     max_pods: Optional[int] = None
     workload_identity_enabled: bool = False
     azure_policy_enabled: Optional[bool] = None
+    aad_access_control: Optional[AADAccessControl] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -932,6 +950,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 network_profile=self.config.azure.network_profile,
                 max_pods=self.config.azure.max_pods,
                 workload_identity_enabled=self.config.azure.workload_identity_enabled,
+                aad_access_control=self.config.azure.aad_access_control,
                 azure_policy_enabled=self.config.azure.azure_policy_enabled,
             ).model_dump()
         elif self.config.provider == schema.ProviderEnum.aws:
