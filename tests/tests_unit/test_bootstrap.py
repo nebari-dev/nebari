@@ -1,9 +1,6 @@
 import os
 import pathlib
-import tempfile
 from unittest.mock import patch
-
-import pytest
 
 from _nebari.stages.bootstrap import gen_gitignore
 
@@ -40,7 +37,7 @@ class TestGenGitignore:
             "terraform.tfstate.backup",
             ".terraform.tfstate.lock.info",
             "# python",
-            "__pycache__"
+            "__pycache__",
         ]
 
         for pattern in expected_patterns:
