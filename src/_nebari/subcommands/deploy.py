@@ -23,12 +23,14 @@ def nebari_subcommand(cli: typer.Typer):
             "-c",
             help="nebari configuration yaml file path",
         ),
-        output_directory: pathlib.Path = typer.Option(
-            "./",
-            "-o",
-            "--output",
-            help="output directory",
-        ),
+        # TODO: Remove -o/--output argument until it is safe to use
+        # See: https://github.com/nebari-dev/nebari/issues/1716
+        # output_directory: pathlib.Path = typer.Option(
+        #     "./",
+        #     "-o",
+        #     "--output",
+        #     help="output directory",
+        # ),
         dns_provider: Optional[str] = typer.Option(
             None,
             "--dns-provider",
@@ -76,7 +78,8 @@ def nebari_subcommand(cli: typer.Typer):
         config = read_configuration(config_filename, config_schema=config_schema)
 
         if not disable_render:
-            render_template(output_directory, config, stages)
+            # Use hardcoded "./" since output_directory parameter was removed
+            render_template("./", config, stages)
 
         if skip_remote_state_provision:
             for stage in stages:
