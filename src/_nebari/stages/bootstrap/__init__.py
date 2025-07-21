@@ -13,9 +13,14 @@ from nebari.hookspecs import NebariStage, hookimpl
 
 def gen_gitignore():
     """
-    Generate `.gitignore` file.
-    Add files as needed.
+    Generate `.gitignore` file if not present.
     """
+    gitignore_path = pathlib.Path(".gitignore")
+
+    # If .gitignore already exists, don't overwrite it
+    if gitignore_path.exists():
+        return {}
+
     filestoignore = """
         # ignore terraform state
         .terraform
@@ -26,7 +31,7 @@ def gen_gitignore():
         # python
         __pycache__
     """
-    return {pathlib.Path(".gitignore"): cleandoc(filestoignore)}
+    return {gitignore_path: cleandoc(filestoignore)}
 
 
 def gen_cicd(config: schema.Main):
