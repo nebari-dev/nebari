@@ -185,7 +185,7 @@ def nebari_render(nebari_config, nebari_stages, tmp_path):
 
     # Save original cwd and change to tmp_path so files that should be generated
     # in the repo root are put in the right place
-    original_cwd = os.getcwd()
+    original_cwd = Path.cwd()
     os.chdir(tmp_path)
 
     try:
