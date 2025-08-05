@@ -39,7 +39,7 @@ variable "conda-store-service-token-scopes" {
 }
 
 variable "conda-store-worker-overrides" {
-  description = "Worker-specific overrides for conda-store worker pods, including resources and node group selector."
+  description = "Worker-specific overrides for conda-store worker pods."
   type        = map(any)
 }
 

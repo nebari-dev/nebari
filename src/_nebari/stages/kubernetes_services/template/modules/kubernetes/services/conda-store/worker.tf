@@ -99,7 +99,7 @@ resource "kubernetes_deployment" "worker" {
                   key      = var.node-group.key
                   operator = "In"
                   values = [
-                    var.worker-overrides.node_selector != null ? var.worker-overrides.node_selector : var.node-group.value
+                    var.node-group.value
                   ]
                 }
               }

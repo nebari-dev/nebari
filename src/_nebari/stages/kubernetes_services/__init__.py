@@ -250,7 +250,6 @@ class CondaStoreWorker(schema.Base):
     worker_resources: Optional[WorkerResources] = WorkerResources()
     # for the rest defaults are handled in terraform,
     # so we don't need to set it here (worker.tf)
-    node_selector: Optional[str] = None
     max_workers: Optional[int] = None
 
 
