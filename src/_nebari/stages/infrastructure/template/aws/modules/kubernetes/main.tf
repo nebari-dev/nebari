@@ -8,14 +8,29 @@ resource "aws_eks_cluster" "main" {
   vpc_config {
     security_group_ids = var.cluster_security_groups
     subnet_ids         = var.cluster_subnets
+    # ignored because this is set through the eks_endpoint_access variable
     #trivy:ignore:AVD-AWS-0040
     endpoint_public_access  = var.endpoint_public_access
     endpoint_private_access = var.endpoint_private_access
-    public_access_cidrs     = var.public_access_cidrs
+    # ignored because this is set through the eks_public_access_cidrs variable
+    #trivy:ignore:AVD-AWS-0041
+    public_access_cidrs = var.public_access_cidrs
+  }
+
+  # Only set encryption_config if eks_kms_arn is not null
+  dynamic "encryption_config" {
+    for_each = var.eks_kms_arn != null ? [1] : []
+    content {
+      provider {
+        key_arn = var.eks_kms_arn
+      }
+      resources = ["secrets"]
+    }
   }
 
   depends_on = [
     aws_iam_role_policy_attachment.cluster-policy,
+    aws_iam_role_policy_attachment.cluster_encryption,
   ]
 
   tags = merge({ Name = var.name }, var.tags)
@@ -77,6 +92,7 @@ resource "aws_eks_node_group" "main" {
   subnet_ids      = var.node_groups[count.index].single_subnet ? [element(var.cluster_subnets, 0)] : var.cluster_subnets
 
   instance_types = [var.node_groups[count.index].instance_type]
+  capacity_type  = var.node_groups[count.index].spot ? "SPOT" : "ON_DEMAND"
   ami_type       = var.node_groups[count.index].ami_type
   disk_size      = var.node_groups[count.index].launch_template == null ? 50 : null
 
@@ -84,6 +100,15 @@ resource "aws_eks_node_group" "main" {
     min_size     = var.node_groups[count.index].min_size
     desired_size = var.node_groups[count.index].desired_size
     max_size     = var.node_groups[count.index].max_size
+  }
+
+  dynamic "taint" {
+    for_each = var.node_groups[count.index].node_taints
+    content {
+      key    = taint.value.key
+      value  = taint.value.value
+      effect = taint.value.effect
+    }
   }
 
   # Only set launch_template if its node_group counterpart parameter is not null
@@ -134,6 +159,9 @@ resource "aws_eks_addon" "aws-ebs-csi-driver" {
       nodeSelector = {
         "eks.amazonaws.com/nodegroup" = "general"
       }
+    }
+    defaultStorageClass = {
+      enabled = true
     }
   })
 

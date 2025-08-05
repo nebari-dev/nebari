@@ -3,7 +3,10 @@ name: "Local Integration Tests"
 env:
   TEST_USERNAME: "test-user"
   TEST_PASSWORD: "P@sswo3d"
+  TEST_SUPERADMIN_USER: "test-user-2"
+  TEST_SUPERADMIN_PASSWORD: "P@sswo3d-2"
   NEBARI_IMAGE_TAG: "main"
+  PYTHON_VERSION: "3.11"
 
 on:
   pull_request:
@@ -18,7 +21,6 @@ on:
   push:
     branches:
       - main
-      - develop
       - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/test_local_integration.yaml"
@@ -54,6 +56,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      # https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
+      - name: "Update inotify ulimit"
+        run: |
+          sudo sysctl fs.inotify.max_user_watches=524288
+          sudo sysctl fs.inotify.max_user_instances=512
+
+      - name: Setup runner for local deployment
+        uses: ./.github/actions/setup-local
+
       - name: Checkout the branch from the PR that triggered the job
         if: ${{ github.event_name == 'issue_comment' }}
         run: |
@@ -68,90 +79,52 @@ jobs:
           CONDA: /home/runnerx/miniconda3
         with:
           auto-update-conda: true
-          python-version: "3.11"
+          python-version: ${{ env.PYTHON_VERSION }}
           miniconda-version: "latest"
+          activate-environment: nebari
+
+      - name: Install JQ
+        run: |
+          sudo apt-get update
+          sudo apt-get install jq -y
 
       - name: Install Nebari and playwright
         run: |
           pip install .[dev]
           playwright install
 
-      - uses: azure/setup-kubectl@v4.0.0
-        with:
-          version: v1.19.16
-
-      - name: Enable docker permissions for user
-        run: |
-          sudo docker ps
-          sudo usermod -aG docker $USER && newgrp docker
-
-          docker info
-          docker ps
-
-      - name: Get routing table for docker pods
-        run: |
-          ip route
-
-      - name: Initialize Nebari Cloud
-        run: |
-          mkdir -p local-deployment
-          cd local-deployment
-          nebari init local --project=thisisatest --domain github-actions.nebari.dev --auth-provider=password
-
-          # Need smaller profiles on Local Kind
-          sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
-          sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "nebari-config.yaml"
-
-          # Change default JupyterLab theme
-          cat >> nebari-config.yaml <<- EOM
-          jupyterlab:
-            default_settings:
-              "@jupyterlab/apputils-extension:themes":
-                theme: JupyterLab Dark
-          EOM
-
-          # Change default value for minio persistence size
-          cat >> nebari-config.yaml <<- EOM
-          monitoring:
-            enabled: true
-            overrides:
-              minio:
-                persistence:
-                  size: 1Gi
-          EOM
-
-          cat nebari-config.yaml
+      - name: Initialize Nebari config for local deployment
+        id: init
+        uses: ./.github/actions/init-local
 
       - name: Deploy Nebari
-        working-directory: local-deployment
-        run: |
-          nebari deploy --config nebari-config.yaml --disable-prompt
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
 
-      - name: Basic kubectl checks after deployment
-        if: always()
-        run: |
-          kubectl get all,cm,secret,pv,pvc,ing -A
+      - name: Health check
+        uses: ./.github/actions/health-check
+        with:
+          domain: ${{ steps.init.outputs.domain }}
 
-      - name: Check github-actions.nebari.dev resolves
+      - name: Create example-users
+        working-directory: ${{ steps.init.outputs.directory }}
         run: |
-          nslookup github-actions.nebari.dev
+          nebari keycloak add-user --user "${TEST_USERNAME}" -p "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }}
+          nebari keycloak add-user --user "${TEST_SUPERADMIN_USER}" -p "${TEST_SUPERADMIN_PASSWORD}" --config ${{ steps.init.outputs.config }} --groups superadmin
+          nebari keycloak list-users --config ${{ steps.init.outputs.config }}
 
-      - name: Curl jupyterhub login page
-        run: |
-          curl -k https://github-actions.nebari.dev/hub/home -i
-
-      - name: Create example-user
-        working-directory: local-deployment
-        run: |
-          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config nebari-config.yaml
-          nebari keycloak listusers --config nebari-config.yaml
-
-      - name: Get nebari-config.yaml full path
-        run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
+      - name: Await Workloads
+        uses: jupyterhub/action-k8s-await-workloads@v3
+        with:
+          workloads: "" # all
+          namespace: "dev"
+          timeout: 300
+          max-restarts: 3
 
       ### DEPLOYMENT TESTS
       - name: Deployment Pytests
         env:
+          NEBARI_CONFIG_PATH: ${{ steps.init.outputs.config }}
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
         run: |
@@ -166,7 +139,7 @@ jobs:
         env:
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-          NEBARI_FULL_URL: https://github-actions.nebari.dev/
+          NEBARI_FULL_URL: "https://${{ steps.init.outputs.domain }}/"
         working-directory: tests/tests_e2e/playwright
         run: |
           # create environment file
@@ -182,12 +155,63 @@ jobs:
           path: |
             ./tests/tests_e2e/playwright/videos/
 
+      ### CONDA-STORE TESTS
+      - name: "Checkout conda-store"
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+          repository: conda-incubator/conda-store
+          ref: main
+          path: conda-store
+
+      - name: "Set up conda-store conda env"
+        uses: conda-incubator/setup-miniconda@v3
+        env:
+          CONDA: /home/runnerx/miniconda3
+        with:
+            environment-file: conda-store/conda-store-server/environment-dev.yaml
+            miniforge-version: latest
+            auto-activate-base: false
+            activate-environment: conda-store-server-dev
+            python-version: ${{ env.PYTHON_VERSION }}
+            conda-remove-defaults: "true"
+
+      - name: Install conda-store dependencies
+        run: |
+          python -m pip install "conda-lock>=1.0.5,<3.0.0"  # Added until https://github.com/conda-incubator/conda-store/issues/1095 is solved upstream
+          python -m pip install conda-store/conda-store-server
+
+      - name: Get conda store token from login
+        id: conda-store-token
+        env:
+          BASE_URL: ${{ steps.init.outputs.domain }}
+          KEYCLOAK_USERNAME: ${{ env.TEST_SUPERADMIN_USER }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_SUPERADMIN_PASSWORD }}
+        run: |
+          echo "CONDA_STORE_TOKEN=$(python scripts/get_conda_store_token.py)" >> "$GITHUB_OUTPUT"
+
+      - name: Run conda-store-server user_journey tests
+        env:
+          CONDA_STORE_BASE_URL: https://${{ steps.init.outputs.domain }}
+          CONDA_STORE_TEST_VERIFY_SSL: 0
+          CONDA_STORE_TOKEN: ${{ steps.conda-store-token.outputs.CONDA_STORE_TOKEN }}
+        run: |
+          curl --insecure --header "Authorization: Bearer ${CONDA_STORE_TOKEN}" ${CONDA_STORE_BASE_URL}/conda-store/api/v1/permission/ | jq
+          cd conda-store/conda-store-server
+          python -m pytest -m "user_journey"
+
+      - name: Get conda-store-server logs
+        if: ${{ failure() }}
+        run: |
+          kubectl logs -n dev deployment/nebari-conda-store-server
+
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
         # Since this is not critical for most pull requests and takes more than half of the time
         # in the CI, it makes sense to only run on merge to main or workflow_dispatch to speed
         # up feedback cycle
         if: github.ref_name == 'main' || github.event_name == 'workflow_dispatch'
-        working-directory: local-deployment
-        run: |
-          nebari destroy --config nebari-config.yaml --disable-prompt
+        working-directory: ${{ steps.init.outputs.directory }}
+        # We need to use the conda environment to run the nebari command as the current environment
+        # is the one that was created to run the conda-store user journey tests
+        run: conda run -n nebari nebari destroy --config ${{ steps.init.outputs.config }} --disable-prompt

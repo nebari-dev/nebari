@@ -17,13 +17,11 @@ MOCK_KUBERNETES_VERSIONS = {
     "aws": ["1.20"],
     "azure": ["1.20"],
     "gcp": ["1.20"],
-    "do": ["1.21.5-do.0"],
 }
 MOCK_CLOUD_REGIONS = {
     "aws": ["us-east-1"],
     "azure": [AZURE_DEFAULT_REGION],
     "gcp": ["us-central1"],
-    "do": ["nyc3"],
 }
 
 
@@ -70,7 +68,7 @@ def generate_test_data_test_cli_init_happy_path():
     """
 
     test_data = []
-    for provider in ["local", "aws", "azure", "gcp", "do", "existing"]:
+    for provider in ["local", "aws", "azure", "gcp", "existing"]:
         for region in get_cloud_regions(provider):
             for project_name in ["testproject"]:
                 for domain_name in [f"{project_name}.example.com"]:
@@ -211,7 +209,7 @@ def assert_nebari_init_args(
             app, args + ["--output", tmp_file.resolve()], input=input
         )
 
-        assert not result.exception
+        assert not result.exception, result.output
         assert 0 == result.exit_code
         assert tmp_file.exists() is True
 
@@ -265,9 +263,6 @@ def get_provider_section_header(provider: str):
         return "google_cloud_platform"
     if provider == "azure":
         return "azure"
-    if provider == "do":
-        return "digital_ocean"
-
     return ""
 
 
@@ -278,8 +273,6 @@ def get_cloud_regions(provider: str):
         return MOCK_CLOUD_REGIONS["gcp"]
     if provider == "azure":
         return MOCK_CLOUD_REGIONS["azure"]
-    if provider == "do":
-        return MOCK_CLOUD_REGIONS["do"]
 
     return ""
 
@@ -291,7 +284,4 @@ def get_kubernetes_versions(provider: str):
         return MOCK_KUBERNETES_VERSIONS["gcp"]
     if provider == "azure":
         return MOCK_KUBERNETES_VERSIONS["azure"]
-    if provider == "do":
-        return MOCK_KUBERNETES_VERSIONS["do"]
-
     return ""

@@ -93,7 +93,6 @@ body:
         - "Azure"
         - "GCP"
         - "AWS"
-        - "Digital Ocean"
         - "kind"
     validations:
       required: false

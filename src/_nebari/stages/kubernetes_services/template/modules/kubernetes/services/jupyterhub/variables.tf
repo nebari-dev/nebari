@@ -124,6 +124,11 @@ variable "jhub-apps-enabled" {
   type        = bool
 }
 
+variable "jhub-apps-overrides" {
+  description = "jhub-apps configuration overrides"
+  type        = string
+}
+
 variable "conda-store-argo-workflows-jupyter-scheduler-token" {
   description = "Token for argo-workflows-jupyter-schedule to use conda-store"
   type        = string
@@ -213,4 +218,14 @@ variable "initial-repositories" {
   description = "Map of folder location and git repo url to clone"
   type        = string
   default     = "[]"
+}
+
+variable "node-taint-tolerations" {
+  description = "Node taint toleration"
+  type = list(object({
+    key      = string
+    operator = string
+    value    = string
+    effect   = string
+  }))
 }

@@ -1,11 +1,14 @@
 import json
 import logging
 import os
+from functools import wraps
+from typing import Any, Callable, Dict, List
 from urllib.parse import urljoin
 
 import keycloak
 import requests
 import rich
+import urllib3
 
 from _nebari.stages.kubernetes_ingress import CertificateEnum
 from nebari import schema
@@ -13,34 +16,39 @@ from nebari import schema
 logger = logging.getLogger(__name__)
 
 
-def do_keycloak(config: schema.Main, *args):
-    # suppress insecure warnings
-    import urllib3
+def do_keycloak() -> Callable:
+    """
+    A simple decorator *factory* to wrap functions that interact with Keycloak. Injects
+    the config parameter depending on the function signature and expects the presence of
+    the keycloak_admin parameter in the wrapped function.
 
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    Usage:
+        @do_keycloak()
+        def keycloak_list_users(keycloak_admin):
+            ...
+        user = keycloak_list_users(config)
+    """
 
-    keycloak_admin = get_keycloak_admin_from_config(config)
+    def _decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def _wrapper(config, *args, **kwargs):
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    if args[0] == "adduser":
-        if len(args) < 2:
-            raise ValueError(
-                "keycloak command 'adduser' requires `username [password]`"
-            )
+            keycloak_admin = get_keycloak_admin_from_config(config=config)
 
-        username = args[1]
-        password = args[2] if len(args) >= 3 else None
-        create_user(keycloak_admin, username, password, domain=config.domain)
-    elif args[0] == "listusers":
-        list_users(keycloak_admin)
-    else:
-        raise ValueError(f"unknown keycloak command {args[0]}")
+            return func(keycloak_admin, *args, **kwargs)
+
+        return _wrapper
+
+    return _decorator
 
 
+@do_keycloak()
 def create_user(
     keycloak_admin: keycloak.KeycloakAdmin,
     username: str,
     password: str = None,
-    groups=None,
+    groups: list = None,
     email=None,
     domain=None,
     enabled=True,
@@ -55,6 +63,10 @@ def create_user(
         payload["credentials"] = [
             {"type": "password", "value": password, "temporary": False}
         ]
+    if groups:
+        _available_group_names = [_["name"] for _ in keycloak_admin.get_groups()]
+        if not all([_ in _available_group_names for _ in groups]):
+            raise ValueError(f"Keycloak group(s) not found: {groups}")
     else:
         rich.print(
             f"Creating user=[green]{username}[/green] without password (none supplied)"
@@ -64,21 +76,55 @@ def create_user(
     return user
 
 
-def list_users(keycloak_admin: keycloak.KeycloakAdmin):
-    num_users = keycloak_admin.users_count()
-    print(f"{num_users} Keycloak Users")
+@do_keycloak()
+def list_users(keycloak_admin: keycloak.KeycloakAdmin) -> Dict[str, Any]:
+    """
+    Return a list of user info from Keycloak, including username, email, and groups.
+    """
+    return {
+        "count": keycloak_admin.users_count(),
+        "users": [
+            {
+                "username": user["username"],
+                "email": user["email"],
+                "groups": [
+                    group["name"]
+                    for group in keycloak_admin.get_user_groups(user["id"])
+                ],
+            }
+            for user in keycloak_admin.get_users()
+        ],
+    }
 
-    user_format = "{username:32} | {email:32} | {groups}"
-    print(user_format.format(username="username", email="email", groups="groups"))
-    print("-" * 120)
 
-    for user in keycloak_admin.get_users():
-        user_groups = [_["name"] for _ in keycloak_admin.get_user_groups(user["id"])]
-        print(
-            user_format.format(
-                username=user["username"], email=user["email"], groups=user_groups
-            )
+def get_expected_roles(expected_roles, group_name):
+    return [
+        role
+        for client, roles in expected_roles.items()
+        for role in roles
+        if not (client == "realm-management" and group_name != "superadmin")
+    ]
+
+
+@do_keycloak()
+def list_groups(keycloak_admin: keycloak.KeycloakAdmin) -> List[Dict[str, Any]]:
+    """Return a list of group info from Keycloak, excluding 'realm-management' roles for all groups except 'superadmin'."""
+    groups_data = []
+    for group in keycloak_admin.get_groups():
+        attrs = keycloak_admin.get_group_by_path(group["path"])
+        client_roles = attrs.get("clientRoles", {})
+
+        # Collect roles except 'realm-management' (unless group is 'superadmin')
+        roles = get_expected_roles(client_roles, group_name=group["name"])
+
+        groups_data.append(
+            {
+                "name": group["name"],
+                "roles": roles,
+            }
         )
+
+    return groups_data
 
 
 def get_keycloak_admin(server_url, username, password, verify=False):

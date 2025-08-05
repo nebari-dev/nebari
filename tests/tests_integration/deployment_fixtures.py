@@ -16,10 +16,8 @@ from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
 from _nebari.provider.cloud.amazon_web_services import aws_cleanup
 from _nebari.provider.cloud.azure_cloud import azure_cleanup
-from _nebari.provider.cloud.digital_ocean import digital_ocean_cleanup
 from _nebari.provider.cloud.google_cloud import gcp_cleanup
 from _nebari.render import render_template
-from _nebari.utils import set_do_environment
 from nebari import schema
 from tests.common.config_mod_utils import add_gpu_config, add_preemptible_node_group
 from tests.tests_unit.utils import render_config_partial
@@ -82,11 +80,10 @@ def _set_nebari_creds_in_environment(config):
 def _create_nebari_user(config):
     import keycloak
 
-    from _nebari.keycloak import create_user, get_keycloak_admin_from_config
+    from _nebari.keycloak import create_user
 
-    keycloak_admin = get_keycloak_admin_from_config(config)
     try:
-        user = create_user(keycloak_admin, "pytest", "pytest-password")
+        user = create_user(config, username="pytest", password="pytest-password")
         return user
     except keycloak.KeycloakPostError as e:
         if e.response_code == 409:
@@ -98,10 +95,7 @@ def _cleanup_nebari(config: schema.Main):
 
     cloud_provider = config.provider
 
-    if cloud_provider == schema.ProviderEnum.do.value.lower():
-        logger.info("Forcefully clean up Digital Ocean resources")
-        digital_ocean_cleanup(config)
-    elif cloud_provider == schema.ProviderEnum.aws.lower():
+    if cloud_provider == schema.ProviderEnum.aws.lower():
         logger.info("Forcefully clean up AWS resources")
         aws_cleanup(config)
     elif cloud_provider == schema.ProviderEnum.gcp.lower():
@@ -119,9 +113,6 @@ def deploy(request):
     cloud = request.config.getoption("--cloud")
 
     # initialize
-    if cloud == "do":
-        set_do_environment()
-
     deployment_dir = _get_or_create_deployment_directory(cloud)
     config = render_config_partial(
         project_name=deployment_dir.name,

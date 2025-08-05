@@ -33,6 +33,7 @@ variable "node_groups" {
   type = list(object({
     name            = string
     instance_type   = string
+    spot            = bool
     gpu             = bool
     min_size        = number
     desired_size    = number
@@ -40,6 +41,11 @@ variable "node_groups" {
     single_subnet   = bool
     launch_template = map(any)
     ami_type        = string
+    node_taints = list(object({
+      key    = string
+      value  = string
+      effect = string
+    }))
   }))
 }
 
@@ -67,6 +73,12 @@ variable "eks_endpoint_access" {
 variable "eks_endpoint_private_access" {
   type    = bool
   default = false
+}
+
+variable "eks_kms_arn" {
+  description = "kms key arn for EKS cluster encryption_config"
+  type        = string
+  default     = null
 }
 
 variable "eks_public_access_cidrs" {

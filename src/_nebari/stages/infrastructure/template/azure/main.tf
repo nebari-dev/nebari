@@ -28,6 +28,7 @@ module "kubernetes" {
   kubernetes_version       = var.kubernetes_version
   tags                     = var.tags
   max_pods                 = var.max_pods
+  authorized_ip_ranges     = var.authorized_ip_ranges
 
   network_profile = var.network_profile
 
@@ -38,9 +39,11 @@ module "kubernetes" {
       instance_type = config.instance
       min_size      = config.min_nodes
       max_size      = config.max_nodes
+      node_taints   = config.node_taints
     }
   ]
   vnet_subnet_id            = var.vnet_subnet_id
   private_cluster_enabled   = var.private_cluster_enabled
   workload_identity_enabled = var.workload_identity_enabled
+  azure_policy_enabled      = var.azure_policy_enabled
 }

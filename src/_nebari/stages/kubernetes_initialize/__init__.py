@@ -89,7 +89,9 @@ class KubernetesInitializeStage(NebariTerraformStage):
                 for node_group in self.config.amazon_web_services.node_groups.values()
             )
             input_vars.gpu_node_group_names = [
-                group for group in self.config.amazon_web_services.node_groups.keys()
+                group
+                for group in self.config.amazon_web_services.node_groups.keys()
+                if self.config.amazon_web_services.node_groups[group].gpu
             ]
             input_vars.aws_region = self.config.amazon_web_services.region
 

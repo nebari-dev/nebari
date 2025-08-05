@@ -25,6 +25,11 @@ _Put a `x` in the boxes that apply_
 - [ ] Build related changes
 - [ ] Other (please describe):
 
+## Documentation
+
+- [ ] For new features or enhancements, a corresponding PR has been opened in the [documentation repository](https://github.com/nebari-dev/nebari-docs) (if applicable)
+  - Link to docs PR:
+
 ## Testing
 
 - [ ] Did you test the pull request locally?

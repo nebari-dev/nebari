@@ -3,6 +3,10 @@ from contextlib import nullcontext
 import pytest
 from pydantic import ValidationError
 
+from _nebari.stages.infrastructure import (
+    DEFAULT_GENERAL_NODE_GROUP_TAINTS,
+    DEFAULT_NODE_GROUP_TAINTS,
+)
 from nebari import schema
 from nebari.plugins import nebari_plugin_manager
 
@@ -62,12 +66,11 @@ def test_render_schema(nebari_config):
             "fake",
             pytest.raises(
                 ValueError,
-                match="'fake' is not a valid enumeration member; permitted: local, existing, do, aws, gcp, azure",
+                match="'fake' is not a valid enumeration member; permitted: local, existing, aws, gcp, azure",
             ),
         ),
         ("aws", nullcontext()),
         ("gcp", nullcontext()),
-        ("do", nullcontext()),
         ("azure", nullcontext()),
         ("existing", nullcontext()),
         ("local", nullcontext()),
@@ -81,6 +84,51 @@ def test_provider_validation(config_schema, provider, exception):
     with exception:
         config = config_schema(**config_dict)
         assert config.provider == provider
+
+
+@pytest.mark.parametrize(
+    "provider, full_name, default_fields",
+    [
+        (
+            "aws",
+            "amazon_web_services",
+            {"region": "us-east-1", "kubernetes_version": "1.18"},
+        ),
+        (
+            "gcp",
+            "google_cloud_platform",
+            {
+                "region": "us-east1",
+                "project": "test-project",
+                "kubernetes_version": "1.18",
+            },
+        ),
+        (
+            "azure",
+            "azure",
+            {
+                "region": "eastus",
+                "kubernetes_version": "1.18",
+                "storage_account_postfix": "test",
+            },
+        ),
+    ],
+)
+def test_node_group_default_taints_set(
+    config_schema, provider, full_name, default_fields
+):
+    config_dict = {
+        "project_name": "test",
+        "provider": f"{provider}",
+        f"{full_name}": default_fields,
+    }
+    config = config_schema(**config_dict)
+    ng = getattr(config, schema.provider_enum_name_map[config.provider]).node_groups
+    for ng_name in ng:
+        if ng_name == "general":
+            assert ng[ng_name].taints == DEFAULT_GENERAL_NODE_GROUP_TAINTS
+        else:
+            assert ng[ng_name].taints == DEFAULT_NODE_GROUP_TAINTS
 
 
 @pytest.mark.parametrize(
@@ -101,11 +149,6 @@ def test_provider_validation(config_schema, provider, exception):
                 "project": "test-project",
                 "kubernetes_version": "1.18",
             },
-        ),
-        (
-            "do",
-            "digital_ocean",
-            {"region": "nyc3", "kubernetes_version": "1.19.2-do.3"},
         ),
         (
             "azure",
@@ -167,3 +210,13 @@ def test_set_provider(config_schema, provider):
     result_config_dict = config.model_dump()
     assert provider in result_config_dict
     assert result_config_dict[provider]["kube_context"] == "some_context"
+
+
+def test_provider_config_mismatch_warning(config_schema):
+    config_dict = {
+        "project_name": "test",
+        "provider": "local",
+        "existing": {"kube_context": "some_context"},  # <-- Doesn't match the provider
+    }
+    with pytest.warns(UserWarning, match="configuration defined for other providers"):
+        config_schema(**config_dict)

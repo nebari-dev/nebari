@@ -57,7 +57,7 @@ resource "helm_release" "jupyterhub" {
 
   repository = "https://jupyterhub.github.io/helm-chart/"
   chart      = "jupyterhub"
-  version    = "4.0.0-0.dev.git.6707.h109668fd"
+  version    = "4.2.0"
 
   values = concat([
     file("${path.module}/values.yaml"),
@@ -77,7 +77,9 @@ resource "helm_release" "jupyterhub" {
         conda-store-service-name      = var.conda-store-service-name
         conda-store-jhub-apps-token   = var.conda-store-jhub-apps-token
         jhub-apps-enabled             = var.jhub-apps-enabled
+        jhub-apps-overrides           = var.jhub-apps-overrides
         initial-repositories          = var.initial-repositories
+        node-taint-tolerations        = var.node-taint-tolerations
         skel-mount = {
           name      = kubernetes_config_map.etc-skel.metadata.0.name
           namespace = kubernetes_config_map.etc-skel.metadata.0.namespace
@@ -103,6 +105,11 @@ resource "helm_release" "jupyterhub" {
               kind      = "configmap"
             }
 
+            "/etc/jupyter/labconfig" = {
+              name      = kubernetes_config_map.jupyterlab-page-config.metadata.0.name
+              namespace = kubernetes_config_map.jupyterlab-page-config.metadata.0.namespace
+              kind      = "configmap"
+            }
           }
         )
         environments = var.conda-store-environments

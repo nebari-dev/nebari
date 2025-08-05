@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     kind = {
-      source  = "tehcyx/kind"
+      source  = "registry.terraform.io/tehcyx/kind"
       version = "0.4.0"
     }
     docker = {

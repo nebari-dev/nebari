@@ -55,13 +55,16 @@ resource "aws_security_group" "main" {
   vpc_id = aws_vpc.main.id
 
   ingress {
+    description = "Allow all ports and protocols to enter the security group"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = [var.vpc_cidr_block]
   }
 
+  #trivy:ignore:AVD-AWS-0104
   egress {
+    description = "Allow all ports and protocols to exit the security group"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"

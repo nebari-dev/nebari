@@ -1,5 +1,6 @@
 import enum
-from typing import Annotated
+import re
+from typing import Annotated, ClassVar
 
 import pydantic
 from pydantic import ConfigDict, Field, StringConstraints, field_validator
@@ -35,7 +36,6 @@ class Base(pydantic.BaseModel):
 class ProviderEnum(str, enum.Enum):
     local = "local"
     existing = "existing"
-    do = "do"
     aws = "aws"
     gcp = "gcp"
     azure = "azure"
@@ -105,3 +105,51 @@ def is_version_accepted(v):
     for deployment with the current Nebari package.
     """
     return Main.is_version_accepted(v)
+
+
+@yaml_object(yaml)
+class TaintEffectEnum(str, enum.Enum):
+    NoSchedule: str = "NoSchedule"
+    PreferNoSchedule: str = "PreferNoSchedule"
+    NoExecute: str = "NoExecute"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
+
+
+TAINT_KEY_REGEX = r"([a-zA-Z0-9][-a-zA-Z0-9_.]{0,251}[a-zA-Z0-9]?(?:/[a-zA-Z0-9][-a-zA-Z0-9_.]{0,251}[a-zA-Z0-9]?)?)"
+TAINT_VALUE_REGEX = r"([a-zA-Z0-9][-a-zA-Z0-9_.]{0,61}[a-zA-Z0-9]?)?"
+TAINT_STR_REGEX = rf"^{TAINT_KEY_REGEX}(?:={TAINT_VALUE_REGEX})?:({'|'.join([taint_effect.value for taint_effect in TaintEffectEnum])})$"
+
+
+class Taint(Base):
+    # Taint constraints listed at https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#taint
+    key: Annotated[str, StringConstraints(pattern=TAINT_KEY_REGEX)]
+    value: Annotated[None | str, StringConstraints(pattern=TAINT_VALUE_REGEX)]
+    effect: TaintEffectEnum
+    _TAINT_REGEX_PATTERN: ClassVar[re.Pattern] = re.compile(TAINT_STR_REGEX)
+
+    @classmethod
+    def from_string(cls, taint_string: str):
+        """
+        Given a taint string, parse it into the Taint object.
+        """
+        match = cls._TAINT_REGEX_PATTERN.match(taint_string)
+        if not match:
+            raise ValueError(f"Invalid taint string: {taint_string}")
+        key, value, effect = match.groups()
+        return Taint(
+            key=key,
+            value=value,
+            effect=effect,
+        )
+
+
+provider_enum_name_map: dict[ProviderEnum, str] = {
+    ProviderEnum.local: "local",
+    ProviderEnum.existing: "existing",
+    ProviderEnum.gcp: "google_cloud_platform",
+    ProviderEnum.aws: "amazon_web_services",
+    ProviderEnum.azure: "azure",
+}
