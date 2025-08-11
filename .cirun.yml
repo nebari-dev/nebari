@@ -7,7 +7,7 @@ runners:
     # Instance Type has 8 vcpu, 32 GiB memory, Up to 5 Gbps Network Performance
     instance_type: t3a.2xlarge
     # Custom Ubuntu 24.04 AMI with docker/hub pre-installed
-    machine_image: ami-01b494943951b97c7
+    machine_image: ami-028b291f28c6529f7
     # Region: Oregon
     region: us-west-2
     # Use Spot Instances for cost savings
