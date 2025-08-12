@@ -52,7 +52,8 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: "Checkout Infrastructure"
-        uses: actions/checkout@main
+      # Pin checkout version due to issue with node24 support on self-hosted runners
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -157,7 +158,8 @@ jobs:
 
       ### CONDA-STORE TESTS
       - name: "Checkout conda-store"
-        uses: actions/checkout@main
+        # Pin checkout version due to issue with node24 support on self-hosted runners
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           repository: conda-incubator/conda-store
