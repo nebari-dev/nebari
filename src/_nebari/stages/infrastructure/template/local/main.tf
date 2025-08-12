@@ -48,7 +48,7 @@ resource "kind_cluster" "default" {
 
     node {
       role  = "general"
-      image = "kindest/node:v1.29.2"
+      image = "kindest/node:v1.32.0"
     }
   }
 }
