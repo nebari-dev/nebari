@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -182,10 +183,19 @@ def nebari_stages():
 def nebari_render(nebari_config, nebari_stages, tmp_path):
     NEBARI_CONFIG_FN = "nebari-config.yaml"
 
-    config_filename = tmp_path / NEBARI_CONFIG_FN
-    write_configuration(config_filename, nebari_config)
-    render_template(tmp_path, nebari_config, nebari_stages)
-    return tmp_path, config_filename
+    # Save original cwd and change to tmp_path so files that should be generated
+    # in the repo root are put in the right place
+    original_cwd = Path.cwd()
+    os.chdir(tmp_path)
+
+    try:
+        config_filename = tmp_path / NEBARI_CONFIG_FN
+        write_configuration(config_filename, nebari_config)
+        render_template(tmp_path, nebari_config, nebari_stages)
+        return tmp_path, config_filename
+    finally:
+        # Always restore original cwd
+        os.chdir(original_cwd)
 
 
 @pytest.fixture
