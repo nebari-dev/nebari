@@ -357,9 +357,17 @@ def configure_user(username, groups, uid=1000, gid=100):
         "PIP_REQUIRE_VIRTUALENV": "true",
     }
 
+    # Map supplemental GIDs to dummy group names to suppress 'missing GID'
+    #  warnings at startup. This is a temporary workaround; see issue #3044
+    # for context and planned improvements.
+    additional_gids = [4, 20, 24, 25, 27, 29, 30, 44, 46]
+    group_entries = [{"groupname": "users", "gid": gid}] + [
+        {"groupname": f"nogroup{g}", "gid": g} for g in additional_gids
+    ]
+
     etc_passwd, etc_group = generate_nss_files(
         users=[{"username": username, "uid": uid, "gid": gid}],
-        groups=[{"groupname": "users", "gid": gid}],
+        groups=group_entries,
     )
 
     jupyter_config = json.dumps(
