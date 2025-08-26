@@ -5,15 +5,14 @@ conda-store backup and restore CLI tool
 
 import argparse
 import asyncio
-import json
 import os
 import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
-from conda_store.api import CondaStoreAPI, CondaStoreAPIError
 from conda_store._internal import utils
+from conda_store.api import CondaStoreAPI, CondaStoreAPIError
 
 
 # TODO(asmacdo) this could potentially be moved to upstream conda-store
@@ -158,7 +157,7 @@ async def backup_environments(
             else:
                 skip_count += 1
 
-    print(f"\n=== Backup Summary ===")
+    print("\n=== Backup Summary ===")
     print(f"Successfully backed up: {backup_count} environments")
     print(f"Skipped: {skip_count} environments")
     print(f"Backup directory: {timestamped_backup_dir.absolute()}")
@@ -270,7 +269,7 @@ async def restore_environments(
                 else:
                     error_count += 1
 
-    print(f"\n=== Restore Summary ===")
+    print("\n=== Restore Summary ===")
     print(f"Successfully restored: {restore_count} environments")
     print(f"Skipped (already exist): {skip_count} environments")
     print(f"Errors: {error_count} environments")
