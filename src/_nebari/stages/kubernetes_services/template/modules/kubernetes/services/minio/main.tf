@@ -33,6 +33,25 @@ resource "helm_release" "minio" {
     value = var.storage
   }
 
+  # TODO: Remove hardcoded image.registry, image.repository, and image.tag values after Helm chart update
+  # This is a workaround due to bitnami charts deprecation
+  # See: https://github.com/bitnami/charts/issues/35164
+  # See: https://github.com/nebari-dev/nebari/issues/3120
+  set {
+    name  = "image.registry"
+    value = "docker.io"
+  }
+
+  set {
+    name  = "image.repository"
+    value = "bitnamilegacy/minio"
+  }
+
+  set {
+    name  = "image.tag"
+    value = "2021.4.22"
+  }
+
   values = concat([
     file("${path.module}/values.yaml"),
     jsonencode({
