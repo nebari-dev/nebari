@@ -27,28 +27,18 @@ resource "helm_release" "postgresql" {
     value = var.database
   }
 
-  # TODO: Remove hardcoded image.registry, image.repository, and image.tag values after Helm chart update
-  # This is a workaround due to bitnami charts deprecation
-  # See: https://github.com/bitnami/charts/issues/35164
-  # See: https://github.com/nebari-dev/nebari/issues/3120
-  set {
-    name  = "image.registry"
-    value = "docker.io"
-  }
-
-  set {
-    name  = "image.repository"
-    value = "bitnamilegacy/postgresql"
-  }
-
-  set {
-    name  = "image.tag"
-    value = "11.14.0"
-  }
-
   values = concat([
     file("${path.module}/values.yaml"),
     jsonencode({
+      # TODO: Remove hardcoded image values after Helm chart update
+      # This is a workaround due to bitnami charts deprecation
+      # See: https://github.com/bitnami/charts/issues/35164
+      # See: https://github.com/nebari-dev/nebari/issues/3120
+      image = {
+        registry   = "docker.io"
+        repository = "bitnamilegacy/postgresql"
+        tag        = "11.14.0"
+      }
       primary = {
         nodeSelector = {
           "${var.node-group.key}" = var.node-group.value
