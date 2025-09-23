@@ -34,6 +34,25 @@ resource "helm_release" "keycloak" {
     value = var.initial_root_password
   }
 
+  # TODO: Remove hardcoded postgresql.image.registry, postgresql.image.repository, and postgresql.image.tag values after Helm chart update
+  # This is a workaround due to bitnami charts deprecation
+  # See: https://github.com/bitnami/charts/issues/35164
+  # See: https://github.com/nebari-dev/nebari/issues/3120
+  set {
+    name  = "postgresql.image.registry"
+    value = "docker.io"
+  }
+
+  set {
+    name  = "postgresql.image.repository"
+    value = "bitnamilegacy/postgresql"
+  }
+
+  set {
+    name  = "postgresql.image.tag"
+    value = "11.11.0"
+  }
+
 }
 
 
