@@ -52,3 +52,10 @@ def nebari_stage() -> List[NebariStage]:
 @hookspec
 def nebari_subcommand(cli: typer.Typer):
     """Register Typer subcommand in nebari"""
+
+
+@hookspec
+def nebari_integration_test_config_modify(
+    config: schema.Main, cloud: str
+) -> schema.Main:
+    """Modify integration test config before deployment for plugins"""

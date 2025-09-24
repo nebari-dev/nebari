@@ -157,6 +157,23 @@ def deploy(request):
         config = add_gpu_config(config, cloud=cloud)
         config = add_preemptible_node_group(config, cloud=cloud)
 
+    # Allow plugins to modify the config before deployment (applied sequentially)
+    from nebari.plugins import nebari_plugin_manager
+
+    plugin_modified_configs = (
+        nebari_plugin_manager.plugin_manager.hook.nebari_integration_test_config_modify(
+            config=config, cloud=cloud
+        )
+    )
+
+    # Apply all plugin modifications sequentially
+    if plugin_modified_configs:
+        for modified_config in plugin_modified_configs:
+            if modified_config is not None:
+                config = modified_config
+                logger.info(f"Applied plugin config modification for {cloud}")
+                # Continue to next plugin modification using the updated config
+
     print("*" * 100)
     pprint.pprint(config.model_dump())
     print("*" * 100)
