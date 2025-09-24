@@ -1,3 +1,4 @@
+import logging
 import typing
 
 import typer
@@ -27,6 +28,31 @@ def exclude_stages(ctx: typer.Context, stages: typing.List[str]):
 def exclude_default_stages(ctx: typer.Context, exclude_default_stages: bool):
     nebari_plugin_manager.exclude_default_stages = exclude_default_stages
     return exclude_default_stages
+
+
+def configure_logging(log_level: str):
+    """Configure logging level based on log level string."""
+    level_map = {
+        "debug": logging.DEBUG,
+        "info": logging.INFO,
+        "warning": logging.WARNING,
+        "error": logging.ERROR,
+        "critical": logging.CRITICAL,
+    }
+
+    level = level_map.get(log_level.lower(), logging.INFO)
+
+    if level == logging.DEBUG:
+        logging.basicConfig(
+            level=level,
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            force=True,
+        )
+    else:
+        logging.basicConfig(
+            level=level, format="%(levelname)s - %(message)s", force=True
+        )
+    return log_level
 
 
 def import_plugin(plugins: typing.List[str]):
@@ -60,6 +86,13 @@ def create_cli():
             "--version",
             help="Nebari version number",
             callback=version_callback,
+        ),
+        log_level: str = typer.Option(
+            "info",
+            "-l",
+            "--log-level",
+            help="Set logging level (debug, info, warning, error, critical)",
+            callback=configure_logging,
         ),
         plugins: typing.List[str] = typer.Option(
             [],
