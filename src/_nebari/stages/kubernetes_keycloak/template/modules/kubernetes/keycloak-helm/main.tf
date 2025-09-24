@@ -21,7 +21,7 @@ resource "helm_release" "keycloak" {
         image = {
           registry   = "docker.io"
           repository = "bitnamilegacy/postgresql"
-          tag        = "11.11.0"
+          tag        = "11.14.0"
         }
         primary = {
           nodeSelector = {
