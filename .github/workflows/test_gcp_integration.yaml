@@ -60,6 +60,12 @@ jobs:
         run: |
           echo "GOOGLE_CREDENTIALS=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}" >> $GITHUB_ENV
 
+      # I don't think this is needed, but trying it out - Adam
+      - name: Verify GCP authentication
+        run: |
+          gcloud auth list
+          gcloud config list project
+
       - name: Integration Tests
         run: |
           pytest --version
