@@ -167,7 +167,7 @@ Getting help:
 
 ## Code of Conduct 📖
 
-To guarantee a welcoming and friendly community, we require all community members to follow our [Code of Conduct](https://github.com/Quansight/.github/blob/master/CODE_OF_CONDUCT.md).
+To guarantee a welcoming and friendly community, we require all community members to follow our [Code of Conduct](https://github.com/nebari-dev/.github/blob/main/CODE_OF_CONDUCT.md).
 
 ## Ongoing Support
 
