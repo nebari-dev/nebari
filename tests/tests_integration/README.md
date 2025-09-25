@@ -40,3 +40,21 @@ pytest -vvv -s --cloud azure
 
 This will deploy on Nebari on Azure, run tests on the deployment
 and then teardown the cluster.
+
+
+## Google Cloud Platform
+
+```bash
+PROJECT_ID
+GOOGLE_CREDENTIALS
+CLOUDFLARE_TOKEN
+```
+
+Assuming you're in the `tests_integration` directory, run:
+
+```bash
+pytest -vvv -s --cloud gcp
+```
+
+This will deploy on Nebari on Google Cloud Platform, run tests on the deployment
+and then teardown the cluster.
