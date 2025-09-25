@@ -137,8 +137,8 @@ For detailed step-by-step instructions on how to deploy Nebari, check the [Nebar
 
 ## Nebari HPC
 
-An HPC version of Nebari is currently not available. There is one under development for Nebari's precursor QHub.
-Curious? Check out the [QHub HPC](https://github.com/Quansight/qhub-hpc) repository.
+An HPC version of Nebari is available for SLURM-based high-performance computing environments.
+Check out the [Nebari SLURM](https://github.com/nebari-dev/nebari-slurm) repository.
 
 ## Contributing to Nebari 👩🏻‍💻
 
