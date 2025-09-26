@@ -181,6 +181,8 @@ jobs:
       - name: Install conda-store dependencies
         run: |
           python -m pip install "conda-lock>=1.0.5,<3.0.0"  # Added until https://github.com/conda-incubator/conda-store/issues/1095 is solved upstream
+          # Below added because conda-lock uses an old version of jsonschema that doesn't have Draft202012Validator
+          python -m pip install "jsonschema>=4.18.0"
           python -m pip install conda-store/conda-store-server
 
       - name: Get conda store token from login
