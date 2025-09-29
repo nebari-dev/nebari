@@ -42,9 +42,9 @@ module "redis" {
   overrides = [
     jsonencode({
       image = {
-        registry = "docker.io"
+        registry   = "docker.io"
         repository = "bitnamilegacy/redis"
-        tag = "7.0.4-debian-11-r4"
+        tag        = "7.0.4-debian-11-r4"
       }
     })
   ]
