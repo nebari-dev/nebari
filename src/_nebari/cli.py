@@ -31,8 +31,11 @@ def exclude_default_stages(ctx: typer.Context, exclude_default_stages: bool):
     return exclude_default_stages
 
 
-def configure_logging(log_level: str):
+def configure_logging(log_level: None | str) -> None:
     """Configure logging level based on log level string."""
+    if not log_level:
+        return
+
     level_map = {
         "trace": logging.DEBUG,
         "debug": logging.DEBUG,
@@ -68,7 +71,7 @@ def configure_logging(log_level: str):
         logging.basicConfig(
             level=level, format="%(levelname)s - %(message)s", force=True
         )
-    return log_level
+    return
 
 
 def import_plugin(plugins: typing.List[str]):
@@ -104,7 +107,7 @@ def create_cli():
             callback=version_callback,
         ),
         log_level: str = typer.Option(
-            "warning",
+            None,
             "-l",
             "--log-level",
             help="Set logging level (trace, debug, info, warning, error, critical)",
