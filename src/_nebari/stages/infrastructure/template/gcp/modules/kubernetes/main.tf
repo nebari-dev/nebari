@@ -57,6 +57,10 @@ resource "google_container_cluster" "main" {
     }
   }
 
+  workload_identity_config {
+    workload_pool = "${var.project_id}.svc.id.goog"
+  }
+
   lifecycle {
     ignore_changes = [
       node_locations
