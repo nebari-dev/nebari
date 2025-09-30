@@ -1,4 +1,5 @@
 import logging
+import os
 import typing
 
 import typer
@@ -33,6 +34,7 @@ def exclude_default_stages(ctx: typer.Context, exclude_default_stages: bool):
 def configure_logging(log_level: str):
     """Configure logging level based on log level string."""
     level_map = {
+        "trace": logging.DEBUG,
         "debug": logging.DEBUG,
         "info": logging.INFO,
         "warning": logging.WARNING,
@@ -40,7 +42,21 @@ def configure_logging(log_level: str):
         "critical": logging.CRITICAL,
     }
 
-    level = level_map.get(log_level.lower(), logging.INFO)
+    # Map Python logging levels to Terraform log levels
+    tf_log_map = {
+        "trace": "TRACE",
+        "debug": "DEBUG",
+        "info": "INFO",
+        "warning": "WARN",
+        "error": "ERROR",
+        "critical": "ERROR",
+    }
+
+    level = level_map.get(log_level.lower(), logging.WARNING)
+
+    # Set TF_LOG environment variable if not already set
+    if "TF_LOG" not in os.environ:
+        os.environ["TF_LOG"] = tf_log_map.get(log_level.lower(), "WARN")
 
     if level == logging.DEBUG:
         logging.basicConfig(
@@ -88,10 +104,10 @@ def create_cli():
             callback=version_callback,
         ),
         log_level: str = typer.Option(
-            "info",
+            "warning",
             "-l",
             "--log-level",
-            help="Set logging level (debug, info, warning, error, critical)",
+            help="Set logging level (trace, debug, info, warning, error, critical)",
             callback=configure_logging,
         ),
         plugins: typing.List[str] = typer.Option(
