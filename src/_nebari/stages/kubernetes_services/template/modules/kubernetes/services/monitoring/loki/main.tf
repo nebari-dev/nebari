@@ -42,6 +42,15 @@ resource "helm_release" "loki-minio" {
   values = concat([
     file("${path.module}/values_minio.yaml"),
     jsonencode({
+      # TODO: Remove hardcoded image values after Helm chart update
+      # This is a workaround due to bitnami charts deprecation
+      # See: https://github.com/bitnami/charts/issues/35164
+      # See: https://github.com/nebari-dev/nebari/issues/3120
+      image = {
+        registry   = "docker.io"
+        repository = "bitnamilegacy/minio"
+        tag        = "2021.4.22"
+      }
       nodeSelector : local.node-selector
     })
   ], var.grafana-loki-minio-overrides)
