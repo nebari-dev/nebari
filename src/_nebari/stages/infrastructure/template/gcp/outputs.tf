@@ -19,3 +19,13 @@ output "kubeconfig_filename" {
   description = "filename for nebari kubeconfig"
   value       = var.kubeconfig_filename
 }
+
+output "cluster_oidc_issuer_url" {
+  description = "The OpenID Connect issuer URL that is associated with the GKE cluster"
+  value       = module.kubernetes.cluster_oidc_issuer_url
+}
+
+output "project_id" {
+  description = "The GCP project ID"
+  value       = var.project_id
+}
