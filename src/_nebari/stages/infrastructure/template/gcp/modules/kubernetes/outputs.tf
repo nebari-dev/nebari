@@ -23,3 +23,8 @@ output "kubeconfig" {
     token                  = data.google_client_config.provider.access_token
   })
 }
+
+output "cluster_oidc_issuer_url" {
+  description = "The OpenID Connect issuer URL that is associated with the GKE cluster"
+  value       = "https://container.googleapis.com/v1/projects/${var.project_id}/locations/${google_container_cluster.main.location}/clusters/${google_container_cluster.main.name}"
+}
