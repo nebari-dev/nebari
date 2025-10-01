@@ -112,12 +112,16 @@ def download_opentofu_binary(version=constants.OPENTOFU_VERSION):
     return filename_path
 
 
-def run_tofu_subprocess(processargs, **kwargs):
+def run_tofu_subprocess(processargs, exit_on_error=True, **kwargs):
     tofu_path = download_opentofu_binary()
     logger.info(f" tofu at {tofu_path}")
     exit_code, output = run_subprocess_cmd([tofu_path] + processargs, **kwargs)
     if exit_code != 0:
-        raise OpenTofuException("OpenTofu returned an error")
+        if exit_on_error:
+            logger.error("Error: OpenTofu command failed")
+            sys.exit(1)
+        else:
+            raise OpenTofuException("OpenTofu returned an error")
     return output
 
 
@@ -174,6 +178,7 @@ def tfimport(addr, id, directory=None, var_files=None, exist_ok=False):
         try:
             run_tofu_subprocess(
                 command,
+                exit_on_error=False,
                 cwd=directory,
                 prefix="tofu",
                 strip_errors=True,
@@ -196,6 +201,7 @@ def show(directory=None, tofu_init: bool = True) -> dict:
             output = json.loads(
                 run_tofu_subprocess(
                     command,
+                    exit_on_error=False,
                     cwd=directory,
                     prefix="tofu",
                     strip_errors=True,
