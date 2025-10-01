@@ -1840,6 +1840,21 @@ class Upgrade_2025_6_1(UpgradeStep):
 
         return config
 
+class Upgrade_2025_10_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2025.10.1
+    """
+
+    version = "2025.10.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+
+        rich.print("Ready to upgrade to Nebari version [green]2025.10.1[/green].")
+
+        return config
 
 __rounded_version__ = str(rounded_ver_parse(__version__))
 
