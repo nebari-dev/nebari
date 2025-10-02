@@ -1855,86 +1855,119 @@ class Upgrade_2025_10_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        # Define the deprecated Bitnami images that need to be patched
-        # Format: (deployment_name, container_name, old_image, new_image, namespace_key)
-        deprecated_images = [
+        # Define the deprecated Bitnami images that need to be patched via Helm
+        # Format: release_name, chart_repo, chart_name, set_values (list of --set flags)
+        deprecated_helm_releases = [
             {
-                "deployment": "keycloak-postgresql",
-                "container": "keycloak-postgresql",
-                "old_image": "docker.io/bitnamilegacy/postgresql:11.14.0",
-                "new_image": "docker.io/bitnami/postgresql:17.2.0",
-                "namespace": config.get("namespace", "dev"),
+                "name": "keycloak",
+                "description": "Keycloak PostgreSQL",
+                "set_values": [
+                    "postgresql.image.registry=docker.io",
+                    "postgresql.image.repository=bitnamilegacy/postgresql",
+                    "postgresql.image.tag=11.14.0",
+                ],
             },
             {
-                "deployment": f"{config.get('namespace', 'dev')}-conda-store-postgresql-postgresql",
-                "container": "postgresql",
-                "old_image": "docker.io/bitnamilegacy/postgresql:11.14.0",
-                "new_image": "docker.io/bitnami/postgresql:17.2.0",
-                "namespace": config.get("namespace", "dev"),
+                "name": "nebari-conda-store-postgresql",
+                "description": "Conda-store PostgreSQL",
+                "set_values": [
+                    "image.registry=docker.io",
+                    "image.repository=bitnamilegacy/postgresql",
+                    "image.tag=11.14.0",
+                ],
             },
             {
-                "deployment": f"{config.get('namespace', 'dev')}-conda-store-minio",
-                "container": "minio",
-                "old_image": "docker.io/bitnamilegacy/minio:2021.4.22",
-                "new_image": "docker.io/bitnami/minio:2025.1.23",
-                "namespace": config.get("namespace", "dev"),
+                "name": "nebari-conda-store-minio",
+                "description": "Conda-store MinIO",
+                "set_values": [
+                    "image.registry=docker.io",
+                    "image.repository=bitnamilegacy/minio",
+                    "image.tag=2021.4.22",
+                ],
             },
             {
-                "deployment": f"{config.get('namespace', 'dev')}-loki-minio",
-                "container": "minio",
-                "old_image": "docker.io/bitnamilegacy/minio:2021.4.22",
-                "new_image": "docker.io/bitnami/minio:2025.1.23",
-                "namespace": config.get("namespace", "dev"),
+                "name": "nebari-conda-store-redis",
+                "description": "Conda-store Redis",
+                "set_values": [
+                    "image.registry=docker.io",
+                    "image.repository=bitnamilegacy/redis",
+                    "image.tag=7.0.4-debian-11-r4",
+                ],
             },
         ]
 
-        # Filter images based on enabled services
-        images_to_patch = []
+        loki_minio_release = {
+            "name": None,  # Will be determined from config
+            "description": "Loki MinIO",
+            "set_values": [
+                "image.registry=docker.io",
+                "image.repository=bitnamilegacy/minio",
+                "image.tag=2021.4.22",
+            ],
+        }
+
+        # Filter releases based on enabled services
+        releases_to_patch = []
 
         # PostgreSQL for Keycloak is always enabled if keycloak is enabled
         if config.get("security", {}).get("keycloak", {}).get("enabled", True):
-            images_to_patch.append(deprecated_images[0])
+            releases_to_patch.append(deprecated_helm_releases[0])
 
-        # PostgreSQL and MinIO for conda-store
+        # PostgreSQL, MinIO, and Redis for conda-store
         if config.get("conda_store", {}).get("enabled", True):
-            images_to_patch.append(deprecated_images[1])
-            images_to_patch.append(deprecated_images[2])
+            releases_to_patch.append(deprecated_helm_releases[1])
+            releases_to_patch.append(deprecated_helm_releases[2])
+            releases_to_patch.append(deprecated_helm_releases[3])
 
         # MinIO for Loki (monitoring)
         if config.get("monitoring", {}).get("enabled", True):
-            images_to_patch.append(deprecated_images[3])
+            # Get the minio release name from config (defaults to "nebari-loki-minio")
+            loki_minio_name = (
+                config.get("monitoring", {})
+                .get("overrides", {})
+                .get("minio-release-name", "nebari-loki-minio")
+            )
+            loki_minio_release["name"] = loki_minio_name
+            releases_to_patch.append(loki_minio_release)
 
-        if images_to_patch:
+        if releases_to_patch:
             namespace = config.get("namespace", "dev")
 
             rich.print(
                 "\n ⚠️  Warning ⚠️"
                 "\n-> [red bold]Nebari version 2025.10.1 updates Bitnami images that have been deprecated.[/red bold]"
-                "\n-> [red bold]Before upgrading, the following images need to be patched to avoid deployment issues during Helm chart upgrades.[/red bold]"
+                "\n-> [red bold]Before upgrading, the following Helm releases need to be patched to avoid deployment issues during Helm chart upgrades.[/red bold]"
+                "\n-> For more information, see: [link=https://github.com/nebari-dev/nebari/issues/3137]https://github.com/nebari-dev/nebari/issues/3137[/link]"
             )
 
-            # Display images to be patched
-            rich.print("\n[cyan bold]Images to be patched:[/cyan bold]")
-            for img in images_to_patch:
-                rich.print(
-                    f"  • {img['deployment']}: [red]{img['old_image']}[/red] → [green]{img['new_image']}[/green]"
-                )
+            # Display releases to be patched
+            rich.print("\n[cyan bold]Helm releases to be patched:[/cyan bold]")
+            for release in releases_to_patch:
+                rich.print(f"  • {release['description']} ({release['name']})")
 
             run_patches = kwargs.get("attempt_fixes", False) or Confirm.ask(
-                "\nDo you want Nebari to patch these images for you? If not, you'll have to do it manually.",
+                "\nDo you want Nebari to run the Helm upgrade commands for you? (You'll confirm each command individually)",
                 default=False,
             )
 
-            # Prepare kubectl commands for manual execution
+            # Prepare helm commands for manual execution
             commands = "[cyan bold]"
-            for img in images_to_patch:
-                commands += f"kubectl set image deployment/{img['deployment']} {img['container']}={img['new_image']} --namespace {namespace}\n"
+            for release in releases_to_patch:
+                set_flags = " ".join([f"--set {val}" for val in release["set_values"]])
+                commands += f"helm upgrade {release['name']} --reuse-values {set_flags} --namespace {namespace}\n"
             commands += "[/cyan bold]"
 
             # Use a rich console with a larger width to print commands without wrapping
             console = rich.console.Console(width=220)
 
             if run_patches:
+                from _nebari.provider.helm import (
+                    download_helm_binary,
+                    run_helm_subprocess,
+                )
+
+                download_helm_binary()
+
                 try:
                     kubernetes.config.load_kube_config()
                 except kubernetes.config.config_exception.ConfigException:
@@ -1946,59 +1979,72 @@ class Upgrade_2025_10_1(UpgradeStep):
                 current_kube_context = kubernetes.config.list_kube_config_contexts()[1]
                 cluster_name = current_kube_context["context"]["cluster"]
                 rich.print(
-                    f"The following commands will be run for the [cyan bold]{cluster_name}[/cyan bold] cluster"
-                )
-                _ = kwargs.get("attempt_fixes", False) or Prompt.ask(
-                    "Hit enter to show the commands"
-                )
-                console.print(commands)
-
-                _ = kwargs.get("attempt_fixes", False) or Prompt.ask(
-                    "Hit enter to continue"
+                    f"\nThe following Helm upgrade commands will be run for the [cyan bold]{cluster_name}[/cyan bold] cluster.\n"
+                    "You'll be asked to confirm each command individually before it runs.\n"
                 )
 
-                # Patch the images using Kubernetes API
-                api_instance = kubernetes.client.AppsV1Api()
-                for img in images_to_patch:
+                # Patch the images using Helm upgrade --reuse-values
+                for release in releases_to_patch:
+                    # Build the command for display
+                    set_flags = " ".join(
+                        [f"--set {val}" for val in release["set_values"]]
+                    )
+                    command_str = f"helm upgrade {release['name']} --reuse-values {set_flags} --namespace {namespace}"
+
+                    rich.print(
+                        f"\n[cyan bold]Next command for {release['description']}:[/cyan bold]"
+                    )
+                    console.print(f"[cyan]{command_str}[/cyan]")
+
+                    if not kwargs.get("attempt_fixes", False):
+                        run_command = Confirm.ask(
+                            f"\nRun this command for {release['description']}?",
+                            default=True,
+                        )
+                        if not run_command:
+                            rich.print(
+                                f"[yellow]⊘[/yellow] Skipped {release['description']} ({release['name']})"
+                            )
+                            continue
+
                     try:
-                        # Read the deployment
-                        deployment = api_instance.read_namespaced_deployment(
-                            name=img["deployment"], namespace=namespace
-                        )
+                        helm_args = [
+                            "upgrade",
+                            release["name"],
+                            "--reuse-values",
+                            "--namespace",
+                            namespace,
+                        ]
+                        for set_value in release["set_values"]:
+                            helm_args.extend(["--set", set_value])
 
-                        # Update the container image
-                        for container in deployment.spec.template.spec.containers:
-                            if container.name == img["container"]:
-                                container.image = img["new_image"]
-
-                        # Patch the deployment
-                        api_instance.patch_namespaced_deployment(
-                            name=img["deployment"], namespace=namespace, body=deployment
-                        )
-                        rich.print(f"[green]✓[/green] Patched {img['deployment']}")
-                    except kubernetes.client.exceptions.ApiException as e:
+                        run_helm_subprocess(helm_args)
                         rich.print(
-                            f"[yellow]⚠[/yellow] Could not patch {img['deployment']}: {e.reason}"
+                            f"[green]✓[/green] Patched {release['description']} ({release['name']})"
+                        )
+                    except Exception as e:
+                        rich.print(
+                            f"[yellow]⚠[/yellow] Could not patch {release['description']} ({release['name']}): {e}"
                         )
 
                 rich.print(
-                    "\n[green]Image patching complete.[/green] The deployments will restart with the new images."
+                    "\n[green]Helm release patching complete.[/green] The pods will restart with the new images."
                 )
             else:
                 rich.print(
-                    "[red bold]Before upgrading, you need to manually patch the deprecated Bitnami images. To do that, please run the following commands.[/red bold]"
+                    "[red bold]Before upgrading, you need to manually patch the deprecated Bitnami images using Helm. To do that, please run the following commands.[/red bold]"
                 )
                 _ = Prompt.ask("Hit enter to show the commands")
                 console.print(commands)
 
                 _ = Prompt.ask("Hit enter to continue")
                 continue_ = Confirm.ask(
-                    "Have you patched the deprecated Bitnami images?",
+                    "Have you patched the deprecated Bitnami images using the Helm commands above?",
                     default=False,
                 )
                 if not continue_:
                     rich.print(
-                        f"[red bold]You must patch the deprecated Bitnami images before upgrading to [green]{self.version}[/green] (or later).[/bold red]"
+                        f"[red bold]You must patch the deprecated Bitnami images using Helm before upgrading to [green]{self.version}[/green].[/bold red]"
                     )
                     exit()
 
