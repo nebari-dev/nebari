@@ -1856,10 +1856,12 @@ class Upgrade_2025_10_1(UpgradeStep):
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         # Define the deprecated Bitnami images that need to be patched via Helm
-        # Format: release_name, chart_repo, chart_name, set_values (list of --set flags)
+        # Format: release_name, chart (direct .tgz URL), set_values (list of --set flags)
+        # Note: Using direct URLs to .tgz files to avoid needing to add repos
         deprecated_helm_releases = [
             {
                 "name": "keycloak",
+                "chart": "https://github.com/codecentric/helm-charts/releases/download/keycloak-15.0.2/keycloak-15.0.2.tgz",
                 "description": "Keycloak PostgreSQL",
                 "set_values": [
                     "postgresql.image.registry=docker.io",
@@ -1869,6 +1871,7 @@ class Upgrade_2025_10_1(UpgradeStep):
             },
             {
                 "name": "nebari-conda-store-postgresql",
+                "chart": "https://charts.bitnami.com/bitnami/postgresql-10.13.12.tgz",
                 "description": "Conda-store PostgreSQL",
                 "set_values": [
                     "image.registry=docker.io",
@@ -1878,6 +1881,7 @@ class Upgrade_2025_10_1(UpgradeStep):
             },
             {
                 "name": "nebari-conda-store-minio",
+                "chart": "https://charts.bitnami.com/bitnami/minio-6.7.4.tgz",
                 "description": "Conda-store MinIO",
                 "set_values": [
                     "image.registry=docker.io",
@@ -1887,6 +1891,7 @@ class Upgrade_2025_10_1(UpgradeStep):
             },
             {
                 "name": "nebari-conda-store-redis",
+                "chart": "https://charts.bitnami.com/bitnami/redis-17.0.6.tgz",
                 "description": "Conda-store Redis",
                 "set_values": [
                     "image.registry=docker.io",
@@ -1898,6 +1903,7 @@ class Upgrade_2025_10_1(UpgradeStep):
 
         loki_minio_release = {
             "name": None,  # Will be determined from config
+            "chart": "https://charts.bitnami.com/bitnami/minio-6.7.4.tgz",
             "description": "Loki MinIO",
             "set_values": [
                 "image.registry=docker.io",
@@ -1950,23 +1956,18 @@ class Upgrade_2025_10_1(UpgradeStep):
                 default=False,
             )
 
-            # Prepare helm commands for manual execution
+            # Prepare helm commands for manual execution (all using direct .tgz URLs)
             commands = "[cyan bold]"
             for release in releases_to_patch:
                 set_flags = " ".join([f"--set {val}" for val in release["set_values"]])
-                commands += f"helm upgrade {release['name']} --reuse-values {set_flags} --namespace {namespace}\n"
+                commands += f"helm upgrade {release['name']} {release['chart']} --reuse-values {set_flags} --namespace {namespace}\n"
             commands += "[/cyan bold]"
 
             # Use a rich console with a larger width to print commands without wrapping
             console = rich.console.Console(width=220)
 
             if run_patches:
-                from _nebari.provider.helm import (
-                    download_helm_binary,
-                    run_helm_subprocess,
-                )
-
-                download_helm_binary()
+                from _nebari.provider.helm import run_helm_subprocess
 
                 try:
                     kubernetes.config.load_kube_config()
@@ -1980,16 +1981,15 @@ class Upgrade_2025_10_1(UpgradeStep):
                 cluster_name = current_kube_context["context"]["cluster"]
                 rich.print(
                     f"\nThe following Helm upgrade commands will be run for the [cyan bold]{cluster_name}[/cyan bold] cluster.\n"
-                    "You'll be asked to confirm each command individually before it runs.\n"
                 )
 
-                # Patch the images using Helm upgrade --reuse-values
+                # Patch the images using Helm upgrade --reuse-values with direct chart URLs
                 for release in releases_to_patch:
                     # Build the command for display
                     set_flags = " ".join(
                         [f"--set {val}" for val in release["set_values"]]
                     )
-                    command_str = f"helm upgrade {release['name']} --reuse-values {set_flags} --namespace {namespace}"
+                    command_str = f"helm upgrade {release['name']} {release['chart']} --reuse-values {set_flags} --namespace {namespace}"
 
                     rich.print(
                         f"\n[cyan bold]Next command for {release['description']}:[/cyan bold]"
@@ -2011,6 +2011,7 @@ class Upgrade_2025_10_1(UpgradeStep):
                         helm_args = [
                             "upgrade",
                             release["name"],
+                            release["chart"],
                             "--reuse-values",
                             "--namespace",
                             namespace,
@@ -2032,10 +2033,9 @@ class Upgrade_2025_10_1(UpgradeStep):
                 )
             else:
                 rich.print(
-                    "[red bold]Before upgrading, you need to manually patch the deprecated Bitnami images using Helm. To do that, please run the following commands.[/red bold]"
+                    "[red bold]Before upgrading, you need to manually patch the deprecated Bitnami images using Helm. To do that, please run the following commands:[/red bold]"
                 )
-                _ = Prompt.ask("Hit enter to show the commands")
-                console.print(commands)
+                console.print(textwrap.indent(commands, prefix="\t"))
 
                 _ = Prompt.ask("Hit enter to continue")
                 continue_ = Confirm.ask(
