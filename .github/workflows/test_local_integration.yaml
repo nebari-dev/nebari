@@ -52,7 +52,8 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: "Checkout Infrastructure"
-        uses: actions/checkout@main
+      # Pin checkout version due to issue with node24 support on self-hosted runners
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -157,7 +158,8 @@ jobs:
 
       ### CONDA-STORE TESTS
       - name: "Checkout conda-store"
-        uses: actions/checkout@main
+        # Pin checkout version due to issue with node24 support on self-hosted runners
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           repository: conda-incubator/conda-store
@@ -179,6 +181,8 @@ jobs:
       - name: Install conda-store dependencies
         run: |
           python -m pip install "conda-lock>=1.0.5,<3.0.0"  # Added until https://github.com/conda-incubator/conda-store/issues/1095 is solved upstream
+          # Below added until https://github.com/nebari-dev/nebari/issues/3118 is resolved upstream
+          conda install constructor==3.11.3
           python -m pip install conda-store/conda-store-server
 
       - name: Get conda store token from login
