@@ -1844,6 +1844,9 @@ class Upgrade_2025_6_1(UpgradeStep):
 class Upgrade_2025_10_1(UpgradeStep):
     """
     Upgrade step for Nebari version 2025.10.1
+
+    This upgrade includes:
+    - Patching deprecated Bitnami images to avoid deployment issues during Helm chart upgrades
     """
 
     version = "2025.10.1"
@@ -1852,8 +1855,154 @@ class Upgrade_2025_10_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
+        # Define the deprecated Bitnami images that need to be patched
+        # Format: (deployment_name, container_name, old_image, new_image, namespace_key)
+        deprecated_images = [
+            {
+                "deployment": "keycloak-postgresql",
+                "container": "keycloak-postgresql",
+                "old_image": "docker.io/bitnamilegacy/postgresql:11.14.0",
+                "new_image": "docker.io/bitnami/postgresql:17.2.0",
+                "namespace": config.get("namespace", "dev"),
+            },
+            {
+                "deployment": f"{config.get('namespace', 'dev')}-conda-store-postgresql-postgresql",
+                "container": "postgresql",
+                "old_image": "docker.io/bitnamilegacy/postgresql:11.14.0",
+                "new_image": "docker.io/bitnami/postgresql:17.2.0",
+                "namespace": config.get("namespace", "dev"),
+            },
+            {
+                "deployment": f"{config.get('namespace', 'dev')}-conda-store-minio",
+                "container": "minio",
+                "old_image": "docker.io/bitnamilegacy/minio:2021.4.22",
+                "new_image": "docker.io/bitnami/minio:2025.1.23",
+                "namespace": config.get("namespace", "dev"),
+            },
+            {
+                "deployment": f"{config.get('namespace', 'dev')}-loki-minio",
+                "container": "minio",
+                "old_image": "docker.io/bitnamilegacy/minio:2021.4.22",
+                "new_image": "docker.io/bitnami/minio:2025.1.23",
+                "namespace": config.get("namespace", "dev"),
+            },
+        ]
 
-        rich.print("Ready to upgrade to Nebari version [green]2025.10.1[/green].")
+        # Filter images based on enabled services
+        images_to_patch = []
+
+        # PostgreSQL for Keycloak is always enabled if keycloak is enabled
+        if config.get("security", {}).get("keycloak", {}).get("enabled", True):
+            images_to_patch.append(deprecated_images[0])
+
+        # PostgreSQL and MinIO for conda-store
+        if config.get("conda_store", {}).get("enabled", True):
+            images_to_patch.append(deprecated_images[1])
+            images_to_patch.append(deprecated_images[2])
+
+        # MinIO for Loki (monitoring)
+        if config.get("monitoring", {}).get("enabled", True):
+            images_to_patch.append(deprecated_images[3])
+
+        if images_to_patch:
+            namespace = config.get("namespace", "dev")
+
+            rich.print(
+                "\n ⚠️  Warning ⚠️"
+                "\n-> [red bold]Nebari version 2025.10.1 updates Bitnami images that have been deprecated.[/red bold]"
+                "\n-> [red bold]Before upgrading, the following images need to be patched to avoid deployment issues during Helm chart upgrades.[/red bold]"
+            )
+
+            # Display images to be patched
+            rich.print("\n[cyan bold]Images to be patched:[/cyan bold]")
+            for img in images_to_patch:
+                rich.print(
+                    f"  • {img['deployment']}: [red]{img['old_image']}[/red] → [green]{img['new_image']}[/green]"
+                )
+
+            run_patches = kwargs.get("attempt_fixes", False) or Confirm.ask(
+                "\nDo you want Nebari to patch these images for you? If not, you'll have to do it manually.",
+                default=False,
+            )
+
+            # Prepare kubectl commands for manual execution
+            commands = "[cyan bold]"
+            for img in images_to_patch:
+                commands += f"kubectl set image deployment/{img['deployment']} {img['container']}={img['new_image']} --namespace {namespace}\n"
+            commands += "[/cyan bold]"
+
+            # Use a rich console with a larger width to print commands without wrapping
+            console = rich.console.Console(width=220)
+
+            if run_patches:
+                try:
+                    kubernetes.config.load_kube_config()
+                except kubernetes.config.config_exception.ConfigException:
+                    rich.print(
+                        "[red bold]No default kube configuration file was found. Make sure to [link=https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig]have one pointing to your Nebari cluster[/link] before upgrading.[/red bold]"
+                    )
+                    exit()
+
+                current_kube_context = kubernetes.config.list_kube_config_contexts()[1]
+                cluster_name = current_kube_context["context"]["cluster"]
+                rich.print(
+                    f"The following commands will be run for the [cyan bold]{cluster_name}[/cyan bold] cluster"
+                )
+                _ = kwargs.get("attempt_fixes", False) or Prompt.ask(
+                    "Hit enter to show the commands"
+                )
+                console.print(commands)
+
+                _ = kwargs.get("attempt_fixes", False) or Prompt.ask(
+                    "Hit enter to continue"
+                )
+
+                # Patch the images using Kubernetes API
+                api_instance = kubernetes.client.AppsV1Api()
+                for img in images_to_patch:
+                    try:
+                        # Read the deployment
+                        deployment = api_instance.read_namespaced_deployment(
+                            name=img["deployment"], namespace=namespace
+                        )
+
+                        # Update the container image
+                        for container in deployment.spec.template.spec.containers:
+                            if container.name == img["container"]:
+                                container.image = img["new_image"]
+
+                        # Patch the deployment
+                        api_instance.patch_namespaced_deployment(
+                            name=img["deployment"], namespace=namespace, body=deployment
+                        )
+                        rich.print(f"[green]✓[/green] Patched {img['deployment']}")
+                    except kubernetes.client.exceptions.ApiException as e:
+                        rich.print(
+                            f"[yellow]⚠[/yellow] Could not patch {img['deployment']}: {e.reason}"
+                        )
+
+                rich.print(
+                    "\n[green]Image patching complete.[/green] The deployments will restart with the new images."
+                )
+            else:
+                rich.print(
+                    "[red bold]Before upgrading, you need to manually patch the deprecated Bitnami images. To do that, please run the following commands.[/red bold]"
+                )
+                _ = Prompt.ask("Hit enter to show the commands")
+                console.print(commands)
+
+                _ = Prompt.ask("Hit enter to continue")
+                continue_ = Confirm.ask(
+                    "Have you patched the deprecated Bitnami images?",
+                    default=False,
+                )
+                if not continue_:
+                    rich.print(
+                        f"[red bold]You must patch the deprecated Bitnami images before upgrading to [green]{self.version}[/green] (or later).[/bold red]"
+                    )
+                    exit()
+
+        rich.print("\nReady to upgrade to Nebari version [green]2025.10.1[/green].")
 
         return config
 
