@@ -1994,7 +1994,7 @@ class Upgrade_2025_10_1(UpgradeStep):
                     rich.print(
                         f"\n[cyan bold]Next command for {release['description']}:[/cyan bold]"
                     )
-                    console.print(f"[cyan]{command_str}[/cyan]")
+                    console.print(f"\t[cyan]{command_str}[/cyan]")
 
                     if not kwargs.get("attempt_fixes", False):
                         run_command = Confirm.ask(
