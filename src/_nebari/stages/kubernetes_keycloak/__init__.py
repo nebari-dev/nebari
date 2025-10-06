@@ -315,6 +315,49 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
         print("Keycloak service successfully started")
 
+    def post_deploy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
+        """Create nebari-bot user after Keycloak is deployed."""
+        from keycloak import KeycloakAdmin
+        from keycloak.exceptions import KeycloakError
+
+        keycloak_url = f"{stage_outputs['stages/' + self.name]['keycloak_credentials']['value']['url']}/auth/"
+        nebari_bot_password = stage_outputs["stages/" + self.name]["keycloak_nebari_bot_password"]["value"]
+
+        print("Creating nebari-bot user in Keycloak master realm...")
+
+        try:
+            # Connect as root user
+            admin = KeycloakAdmin(
+                keycloak_url,
+                username="root",
+                password=self.config.security.keycloak.initial_root_password,
+                realm_name="master",
+                client_id="admin-cli",
+                verify=False,
+            )
+
+            # Check if nebari-bot already exists
+            users = admin.get_users({"username": "nebari-bot"})
+
+            if users:
+                print("nebari-bot user already exists, skipping creation")
+            else:
+                # Create nebari-bot user
+                admin.create_user({
+                    "username": "nebari-bot",
+                    "enabled": True,
+                    "credentials": [{
+                        "type": "password",
+                        "value": nebari_bot_password,
+                        "temporary": False
+                    }]
+                })
+                print("Successfully created nebari-bot user")
+        except KeycloakError as e:
+            print(f"Warning: Failed to create nebari-bot user: {e}")
+
     @contextlib.contextmanager
     def deploy(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
