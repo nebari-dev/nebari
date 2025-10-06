@@ -342,10 +342,11 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             users = admin.get_users({"username": "nebari-bot"})
 
             if users:
-                print("nebari-bot user already exists, skipping creation")
+                print("nebari-bot user already exists")
+                user_id = users[0]["id"]
             else:
                 # Create nebari-bot user
-                admin.create_user({
+                user_id = admin.create_user({
                     "username": "nebari-bot",
                     "enabled": True,
                     "credentials": [{
@@ -355,8 +356,23 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                     }]
                 })
                 print("Successfully created nebari-bot user")
+
+            # Assign admin role to nebari-bot user
+            # Get the admin role from master realm
+            admin_role = admin.get_realm_role("admin")
+
+            # Check if user already has the admin role
+            user_roles = admin.get_realm_roles_of_user(user_id)
+            has_admin_role = any(role.get("name") == "admin" for role in user_roles)
+
+            if not has_admin_role:
+                admin.assign_realm_roles(user_id, [admin_role])
+                print("Assigned admin role to nebari-bot user")
+            else:
+                print("nebari-bot user already has admin role")
+
         except KeycloakError as e:
-            print(f"Warning: Failed to create nebari-bot user: {e}")
+            print(f"Warning: Failed to configure nebari-bot user: {e}")
 
     @contextlib.contextmanager
     def deploy(
