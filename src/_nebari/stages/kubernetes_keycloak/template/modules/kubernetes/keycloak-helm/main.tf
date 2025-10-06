@@ -3,8 +3,8 @@ resource "helm_release" "keycloak" {
   namespace = var.namespace
 
   repository = "https://codecentric.github.io/helm-charts"
-  chart      = "keycloak"
-  version    = "15.0.2"
+  chart      = "keycloakx"
+  version    = "7.1.3"
 
   values = concat([
     # https://github.com/codecentric/helm-charts/blob/keycloak-15.0.2/charts/keycloak/values.yaml
@@ -43,6 +43,18 @@ resource "helm_release" "keycloak" {
     value = var.initial_root_password
   }
 
+  # Force replacement when values.yaml changes
+  lifecycle {
+    replace_triggered_by = [
+      terraform_data.values_hash
+    ]
+  }
+
+}
+
+# Track changes to values.yaml
+resource "terraform_data" "values_hash" {
+  input = filesha256("${path.module}/values.yaml")
 }
 
 
@@ -62,8 +74,7 @@ resource "kubernetes_manifest" "keycloak-http" {
           match = "Host(`${var.external-url}`) && PathPrefix(`/auth`) "
           services = [
             {
-              name = "keycloak-headless"
-              # Really not sure why 8080 works here
+              name      = "keycloak-keycloakx-http"
               port      = 80
               namespace = var.namespace
             }
