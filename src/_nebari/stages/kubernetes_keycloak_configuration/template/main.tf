@@ -87,6 +87,11 @@ resource "keycloak_default_groups" "default" {
     for g in var.default_groups :
     keycloak_group.groups[g].id
   ]
+
+  depends_on = [
+    keycloak_realm.main,
+    keycloak_group.groups
+  ]
 }
 
 data "keycloak_realm" "master" {
