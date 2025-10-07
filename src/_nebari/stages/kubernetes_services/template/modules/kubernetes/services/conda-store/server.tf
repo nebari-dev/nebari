@@ -26,8 +26,8 @@ resource "kubernetes_secret" "conda-store-secret" {
       extra-settings         = var.extra-settings
       extra-config           = var.extra-config
       default-namespace      = var.default-namespace-name
-      token_url_internal     = "http://keycloak-http.${var.namespace}.svc/auth/realms/${var.realm_id}/protocol/openid-connect/token"
-      realm_api_url_internal = "http://keycloak-http.${var.namespace}.svc/auth/admin/realms/${var.realm_id}"
+      token_url_internal     = "http://keycloak-keycloakx-http.${var.namespace}.svc/auth/realms/${var.realm_id}/protocol/openid-connect/token"
+      realm_api_url_internal = "http://keycloak-keycloakx-http.${var.namespace}.svc/auth/admin/realms/${var.realm_id}"
       service-tokens = {
         for service, value in var.services : base64encode(random_password.conda_store_service_token[service].result) => value
       }
