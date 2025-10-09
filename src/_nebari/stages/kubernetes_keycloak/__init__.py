@@ -327,52 +327,65 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
         print("Creating nebari-bot user in Keycloak master realm...")
 
-        try:
-            # Connect as root user
-            admin = KeycloakAdmin(
-                keycloak_url,
-                username="root",
-                password=self.config.security.keycloak.initial_root_password,
-                realm_name="master",
-                client_id="admin-cli",
-                verify=False,
-            )
+        max_attempts = 10
+        retry_delay = 5  # seconds
 
-            # Check if nebari-bot already exists
-            users = admin.get_users({"username": "nebari-bot"})
+        for attempt in range(1, max_attempts + 1):
+            try:
+                # Connect as root user
+                admin = KeycloakAdmin(
+                    keycloak_url,
+                    username="root",
+                    password=self.config.security.keycloak.initial_root_password,
+                    realm_name="master",
+                    client_id="admin-cli",
+                    verify=False,
+                )
 
-            if users:
-                print("nebari-bot user already exists")
-                user_id = users[0]["id"]
-            else:
-                # Create nebari-bot user
-                user_id = admin.create_user({
-                    "username": "nebari-bot",
-                    "enabled": True,
-                    "credentials": [{
-                        "type": "password",
-                        "value": nebari_bot_password,
-                        "temporary": False
-                    }]
-                })
-                print("Successfully created nebari-bot user")
+                # Check if nebari-bot already exists
+                users = admin.get_users({"username": "nebari-bot"})
 
-            # Assign admin role to nebari-bot user
-            # Get the admin role from master realm
-            admin_role = admin.get_realm_role("admin")
+                if users:
+                    print("nebari-bot user already exists")
+                    user_id = users[0]["id"]
+                else:
+                    # Create nebari-bot user
+                    user_id = admin.create_user({
+                        "username": "nebari-bot",
+                        "enabled": True,
+                        "credentials": [{
+                            "type": "password",
+                            "value": nebari_bot_password,
+                            "temporary": False
+                        }]
+                    })
+                    print("Successfully created nebari-bot user")
 
-            # Check if user already has the admin role
-            user_roles = admin.get_realm_roles_of_user(user_id)
-            has_admin_role = any(role.get("name") == "admin" for role in user_roles)
+                # Assign admin role to nebari-bot user
+                # Get the admin role from master realm
+                admin_role = admin.get_realm_role("admin")
 
-            if not has_admin_role:
-                admin.assign_realm_roles(user_id, [admin_role])
-                print("Assigned admin role to nebari-bot user")
-            else:
-                print("nebari-bot user already has admin role")
+                # Check if user already has the admin role
+                user_roles = admin.get_realm_roles_of_user(user_id)
+                has_admin_role = any(role.get("name") == "admin" for role in user_roles)
 
-        except KeycloakError as e:
-            print(f"Warning: Failed to configure nebari-bot user: {e}")
+                if not has_admin_role:
+                    admin.assign_realm_roles(user_id, [admin_role])
+                    print("Assigned admin role to nebari-bot user")
+                else:
+                    print("nebari-bot user already has admin role")
+
+                # Success - break out of retry loop
+                break
+
+            except KeycloakError as e:
+                if attempt < max_attempts:
+                    print(f"Attempt {attempt}/{max_attempts} failed: {e}")
+                    print(f"Retrying in {retry_delay} seconds...")
+                    time.sleep(retry_delay)
+                else:
+                    print(f"Failed to configure nebari-bot user after {max_attempts} attempts: {e}")
+                    sys.exit(1)
 
     @contextlib.contextmanager
     def deploy(
