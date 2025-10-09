@@ -42,14 +42,6 @@ resource "helm_release" "keycloak" {
     name  = "initial_root_password"
     value = var.initial_root_password
   }
-
-  # Force replacement when values.yaml changes
-  lifecycle {
-    replace_triggered_by = [
-      terraform_data.values_hash
-    ]
-  }
-
 }
 
 # Track changes to values.yaml
