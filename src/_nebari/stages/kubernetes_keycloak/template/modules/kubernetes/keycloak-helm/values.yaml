@@ -10,6 +10,21 @@ image:
 imagePullSecrets:
   - name: "extcrcreds"
 
+# Database configuration - connect to PostgreSQL subchart
+# These settings match the default credentials from the old keycloak chart
+# to ensure smooth migration without losing users
+database:
+  vendor: postgres
+  hostname: keycloak-postgresql
+  port: 5432
+  database: keycloak
+  username: keycloak
+  password: keycloak
+
+# Enable database readiness check
+dbchecker:
+  enabled: true
+
 # Command to start Keycloak (required for Quarkus-based Keycloak)
 command:
   - "/opt/keycloak/bin/kc.sh"
