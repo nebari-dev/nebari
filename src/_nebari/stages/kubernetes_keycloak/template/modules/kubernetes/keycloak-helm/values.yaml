@@ -10,12 +10,11 @@ image:
 imagePullSecrets:
   - name: "extcrcreds"
 
-# Database configuration - connect to PostgreSQL subchart
-# These settings match the default credentials from the old keycloak chart
-# to ensure smooth migration without losing users
+# Database configuration - connect to standalone PostgreSQL
+# Points to the standalone PostgreSQL we migrated data to
 database:
   vendor: postgres
-  hostname: keycloak-postgresql
+  hostname: keycloak-postgres-standalone-postgresql
   port: 5432
   database: keycloak
   username: keycloak
