@@ -1,3 +1,33 @@
+# Standalone PostgreSQL database for Keycloak
+# Deployed separately to allow safe upgrade from keycloak to keycloakx chart
+resource "helm_release" "keycloak_postgresql" {
+  name       = "keycloak-postgres-standalone"
+  namespace  = var.namespace
+  repository = "https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami"
+  chart      = "postgresql"
+  version    = "10.16.2"
+
+  values = [
+    jsonencode({
+      image = {
+        registry   = "docker.io"
+        repository = "bitnamilegacy/postgresql"
+        tag        = "11.14.0"
+      }
+      primary = {
+        nodeSelector = {
+          "${var.node_group.key}" = var.node_group.value
+        }
+      }
+      auth = {
+        username = "keycloak"
+        password = "keycloak"
+        database = "keycloak"
+      }
+    })
+  ]
+}
+
 resource "helm_release" "keycloak" {
   name      = "keycloak"
   namespace = var.namespace
