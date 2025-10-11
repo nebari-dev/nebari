@@ -1847,6 +1847,7 @@ class Upgrade_2025_10_1(UpgradeStep):
 
     This upgrade includes:
     - Patching deprecated Bitnami images to avoid deployment issues during Helm chart upgrades
+
     """
 
     version = "2025.10.1"
@@ -2049,6 +2050,200 @@ class Upgrade_2025_10_1(UpgradeStep):
                     exit()
 
         rich.print("\nReady to upgrade to Nebari version [green]2025.10.1[/green].")
+        return config
+
+
+class Upgrade_2025_11_1(UpgradeStep):
+        namespace = config.get("namespace", "dev")
+
+        rich.print("\n ⚠️  CRITICAL UPGRADE WARNING ⚠️")
+        rich.print(
+            textwrap.dedent(
+                f"""
+                This version includes a major [bold red]Keycloak upgrade[/bold red] from the [green]keycloak[/green] chart (15.0.2)
+                to the [green]keycloakx[/green] chart (7.1.3). This upgrade changes the underlying architecture
+                from JBoss/WildFly to Quarkus.
+
+                [bold yellow]IMPORTANT:[/bold yellow] The old keycloak chart includes PostgreSQL as a subchart dependency,
+                but the new keycloakx chart does not. To prevent data loss, you [bold red]MUST[/bold red] backup your
+                Keycloak PostgreSQL database [bold red]BEFORE[/bold red] running [cyan]nebari deploy[/cyan].
+
+                [bold]Key changes:[/bold]
+                - PostgreSQL moved from subchart to standalone deployment
+                - Keycloak service name changes from [green]keycloak-headless[/green] to [green]keycloak-keycloakx-http[/green]
+                - OAuth clients now require [green]openid[/green] scope explicitly
+                - Startup scripts replaced with Python post_deploy hooks
+
+                After this upgrade step completes, you will need to:
+                1. [cyan]nebari render -c {config_filename}[/cyan] to generate updated Terraform
+                2. [cyan]nebari deploy -c {config_filename}[/cyan] to apply the changes
+                """
+            )
+        )
+
+        # Check if user has kubectl access
+        has_kubectl = False
+        try:
+            kubernetes.config.load_kube_config()
+            has_kubectl = True
+        except kubernetes.config.config_exception.ConfigException:
+            pass
+
+        backup_command = f"kubectl exec -n {namespace} keycloak-postgresql-0 -- env PGPASSWORD=keycloak pg_dump -U keycloak -d keycloak > keycloak-backup.sql"
+
+        if has_kubectl:
+            rich.print(
+                "\n[green]✓[/green] kubectl configuration detected. Nebari can help you backup the database."
+            )
+
+            # Offer to run the backup automatically
+            run_backup = kwargs.get("attempt_fixes", False) or Confirm.ask(
+                "\nWould you like Nebari to backup the Keycloak database for you now?",
+                default=True,
+            )
+
+            if run_backup:
+                rich.print(
+                    f"\n[cyan]Running backup command:[/cyan]\n{backup_command}\n"
+                )
+
+                try:
+                    # Check if the old PostgreSQL pod exists
+                    api_instance = kubernetes.client.CoreV1Api()
+                    try:
+                        api_instance.read_namespaced_pod(
+                            name="keycloak-postgresql-0", namespace=namespace
+                        )
+                    except kubernetes.client.exceptions.ApiException as e:
+                        if e.status == 404:
+                            rich.print(
+                                f"\n[yellow]Pod keycloak-postgresql-0 not found in namespace {namespace}.[/yellow]"
+                            )
+                            rich.print(
+                                "This may be normal if you're on a fresh deployment or have already migrated."
+                            )
+                            skip_backup = Confirm.ask(
+                                "\nDo you want to skip the backup and continue with the upgrade?",
+                                default=False,
+                            )
+                            if not skip_backup:
+                                rich.print(
+                                    "[red]Upgrade cancelled. Please verify your Keycloak deployment.[/red]"
+                                )
+                                exit(1)
+                            else:
+                                rich.print(
+                                    "[yellow]Skipping backup. Proceeding with upgrade...[/yellow]"
+                                )
+                                return config
+                        else:
+                            raise e
+
+                    # Run the backup command
+                    backup_file = config_filename.parent / "keycloak-backup.sql"
+                    rich.print(
+                        f"[green]Creating backup at:[/green] {backup_file}\n"
+                    )
+
+                    import subprocess
+
+                    result = subprocess.run(
+                        backup_command,
+                        shell=True,
+                        capture_output=True,
+                        text=True,
+                        cwd=config_filename.parent,
+                    )
+
+                    if result.returncode == 0:
+                        rich.print(
+                            f"[green]✓ Backup successful![/green] Saved to {backup_file}"
+                        )
+                        if backup_file.exists():
+                            file_size = backup_file.stat().st_size
+                            rich.print(
+                                f"[green]  Backup size:[/green] {file_size / 1024:.2f} KB"
+                            )
+                    else:
+                        rich.print(
+                            f"[red]✗ Backup failed with error:[/red]\n{result.stderr}"
+                        )
+                        rich.print(
+                            "\n[yellow]Please backup manually before proceeding with the upgrade.[/yellow]"
+                        )
+                        exit(1)
+
+                except Exception as e:
+                    rich.print(f"[red]Error during backup:[/red] {e}")
+                    rich.print(
+                        "\n[yellow]Please backup manually using the command below before proceeding.[/yellow]"
+                    )
+                    exit(1)
+            else:
+                rich.print(
+                    "\n[yellow]You chose not to backup automatically.[/yellow]"
+                )
+                rich.print(
+                    f"\n[bold]Please backup manually by running this command:[/bold]\n"
+                    f"[cyan]{backup_command}[/cyan]\n"
+                )
+
+                confirmed = Confirm.ask(
+                    "Have you successfully backed up your Keycloak database?",
+                    default=False,
+                )
+                if not confirmed:
+                    rich.print(
+                        f"\n[red bold]You must backup the Keycloak database before upgrading to {self.version}.[/red bold]"
+                    )
+                    exit(1)
+        else:
+            # No kubectl access - provide manual instructions
+            rich.print(
+                "\n[yellow]⚠[/yellow]  kubectl configuration not found. You must backup manually."
+            )
+            rich.print(
+                textwrap.dedent(
+                    f"""
+                    [bold]To backup your Keycloak database:[/bold]
+
+                    1. Ensure you have kubectl access to your cluster
+                       ([link=https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig]see docs[/link])
+
+                    2. Run this command in your terminal:
+                       [cyan]{backup_command}[/cyan]
+
+                    3. Verify the backup file was created:
+                       [cyan]ls -lh keycloak-backup.sql[/cyan]
+
+                    [yellow]The backup file will be saved to your current directory.[/yellow]
+                    """
+                )
+            )
+
+            confirmed = Confirm.ask(
+                "\nHave you successfully backed up your Keycloak database?",
+                default=False,
+            )
+            if not confirmed:
+                rich.print(
+                    f"\n[red bold]You must backup the Keycloak database before upgrading to {self.version}.[/red bold]"
+                )
+                rich.print(
+                    "[yellow]After completing the backup, run this upgrade command again.[/yellow]"
+                )
+                exit(1)
+
+        rich.print(
+            "\n[green]✓ Database backup confirmed.[/green] You can now proceed with:"
+        )
+        rich.print(f"  1. [cyan]nebari render -c {config_filename}[/cyan]")
+        rich.print(f"  2. [cyan]nebari deploy -c {config_filename}[/cyan]")
+        rich.print(
+            "\n[yellow]For detailed upgrade instructions, see:[/yellow] UPGRADE_STEPS.md\n"
+        )
+
+        rich.print("Ready to upgrade to Nebari version [green]2025.10.1[/green].")
 
         return config
 
