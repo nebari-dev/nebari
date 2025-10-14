@@ -3,17 +3,12 @@
 resource "helm_release" "keycloak_postgresql" {
   name       = "keycloak-postgres-standalone"
   namespace  = var.namespace
-  repository = "https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami"
+  repository = "oci://registry-1.docker.io/bitnamicharts"
   chart      = "postgresql"
-  version    = "10.16.2"
+  version    = "18.0.15"
 
   values = [
     jsonencode({
-      image = {
-        registry   = "docker.io"
-        repository = "bitnamilegacy/postgresql"
-        tag        = "11.14.0"
-      }
       primary = {
         nodeSelector = {
           "${var.node_group.key}" = var.node_group.value
@@ -36,6 +31,10 @@ resource "helm_release" "keycloak" {
   chart      = "keycloakx"
   version    = "7.1.3"
 
+  depends_on = [
+    helm_release.keycloak_postgresql
+  ]
+
   values = concat([
     # https://github.com/codecentric/helm-charts/blob/keycloak-15.0.2/charts/keycloak/values.yaml
     file("${path.module}/values.yaml"),
@@ -43,22 +42,7 @@ resource "helm_release" "keycloak" {
       nodeSelector = {
         "${var.node_group.key}" = var.node_group.value
       }
-      postgresql = {
-        # TODO: Remove hardcoded image values after Helm chart update
-        # This is a workaround due to bitnami charts deprecation
-        # See: https://github.com/bitnami/charts/issues/35164
-        # See: https://github.com/nebari-dev/nebari/issues/3120
-        image = {
-          registry   = "docker.io"
-          repository = "bitnamilegacy/postgresql"
-          tag        = "11.14.0"
-        }
-        primary = {
-          nodeSelector = {
-            "${var.node_group.key}" = var.node_group.value
-          }
-        }
-      }
+
       customThemes = var.themes
     })
   ], var.overrides)
