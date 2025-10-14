@@ -19,6 +19,7 @@ import kubernetes.client
 import kubernetes.config
 import requests
 import rich
+from kubernetes.stream import stream
 from packaging.version import Version
 from pydantic import ValidationError
 from rich.prompt import Confirm, Prompt
@@ -2139,34 +2140,75 @@ class Upgrade_2025_11_1(UpgradeStep):
                         else:
                             raise e
 
-                    # Run the backup command
+                    # Run the backup command using Kubernetes API
                     backup_file = config_filename.parent / "keycloak-backup.sql"
                     rich.print(
                         f"[green]Creating backup at:[/green] {backup_file}\n"
                     )
 
-                    import subprocess
+                    try:
+                        # Execute pg_dump command in the pod using Kubernetes API
+                        exec_command = [
+                            '/bin/sh',
+                            '-c',
+                            'env PGPASSWORD=keycloak pg_dump -U keycloak -d keycloak'
+                        ]
 
-                    result = subprocess.run(
-                        backup_command,
-                        shell=True,
-                        capture_output=True,
-                        text=True,
-                        cwd=config_filename.parent,
-                    )
-
-                    if result.returncode == 0:
-                        rich.print(
-                            f"[green]✓ Backup successful![/green] Saved to {backup_file}"
+                        resp = stream(
+                            api_instance.connect_get_namespaced_pod_exec,
+                            name='keycloak-postgresql-0',
+                            namespace=namespace,
+                            command=exec_command,
+                            stderr=True,
+                            stdin=False,
+                            stdout=True,
+                            tty=False,
+                            _preload_content=False
                         )
-                        if backup_file.exists():
+
+                        # Write the output to the backup file
+                        error_output = []
+                        with open(backup_file, 'wb') as f:
+                            while resp.is_open():
+                                resp.update(timeout=1)
+                                if resp.peek_stdout():
+                                    stdout_data = resp.read_stdout()
+                                    f.write(stdout_data.encode('utf-8'))
+                                if resp.peek_stderr():
+                                    stderr_data = resp.read_stderr()
+                                    if stderr_data:
+                                        error_output.append(stderr_data)
+
+                        resp.close()
+
+                        # Check if backup was successful
+                        if backup_file.exists() and backup_file.stat().st_size > 0:
                             file_size = backup_file.stat().st_size
+                            rich.print(
+                                f"[green]✓ Backup successful![/green] Saved to {backup_file}"
+                            )
                             rich.print(
                                 f"[green]  Backup size:[/green] {file_size / 1024:.2f} KB"
                             )
-                    else:
+
+                            # Show any warnings from stderr (pg_dump often writes info to stderr)
+                            if error_output:
+                                for err in error_output:
+                                    if 'NOTICE' in err or 'WARNING' in err:
+                                        rich.print(f"[yellow]{err.strip()}[/yellow]")
+                        else:
+                            error_msg = '\n'.join(error_output) if error_output else "Unknown error - backup file is empty or doesn't exist"
+                            rich.print(
+                                f"[red]✗ Backup failed:[/red]\n{error_msg}"
+                            )
+                            rich.print(
+                                "\n[yellow]Please backup manually before proceeding with the upgrade.[/yellow]"
+                            )
+                            exit(1)
+
+                    except kubernetes.client.exceptions.ApiException as api_err:
                         rich.print(
-                            f"[red]✗ Backup failed with error:[/red]\n{result.stderr}"
+                            f"[red]✗ Kubernetes API error during backup:[/red]\n{api_err}"
                         )
                         rich.print(
                             "\n[yellow]Please backup manually before proceeding with the upgrade.[/yellow]"
