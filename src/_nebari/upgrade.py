@@ -2081,203 +2081,159 @@ class Upgrade_2025_11_1(UpgradeStep):
                 """
             )
         )
-
-        # Check if user has kubectl access
-        has_kubectl = False
         try:
             kubernetes.config.load_kube_config()
-            has_kubectl = True
         except kubernetes.config.config_exception.ConfigException:
-            pass
-
-        backup_command = f"kubectl exec -n {namespace} keycloak-postgresql-0 -- env PGPASSWORD=keycloak pg_dump -U keycloak -d keycloak > keycloak-backup.sql"
-
-        if has_kubectl:
             rich.print(
-                "\n[green]✓[/green] kubectl configuration detected. Nebari can help you backup the database."
-            )
-
-            # Offer to run the backup automatically
-            run_backup = kwargs.get("attempt_fixes", False) or Confirm.ask(
-                "\nWould you like Nebari to backup the Keycloak database for you now?",
-                default=True,
-            )
-
-            if run_backup:
-                rich.print(
-                    f"\n[cyan]Running backup command:[/cyan]\n{backup_command}\n"
-                )
-
-                try:
-                    # Check if the old PostgreSQL pod exists
-                    api_instance = kubernetes.client.CoreV1Api()
-                    try:
-                        api_instance.read_namespaced_pod(
-                            name="keycloak-postgresql-0", namespace=namespace
-                        )
-                    except kubernetes.client.exceptions.ApiException as e:
-                        if e.status == 404:
-                            rich.print(
-                                f"\n[yellow]Pod keycloak-postgresql-0 not found in namespace {namespace}.[/yellow]"
-                            )
-                            rich.print(
-                                "This may be normal if you're on a fresh deployment or have already migrated."
-                            )
-                            skip_backup = Confirm.ask(
-                                "\nDo you want to skip the backup and continue with the upgrade?",
-                                default=False,
-                            )
-                            if not skip_backup:
-                                rich.print(
-                                    "[red]Upgrade cancelled. Please verify your Keycloak deployment.[/red]"
-                                )
-                                exit(1)
-                            else:
-                                rich.print(
-                                    "[yellow]Skipping backup. Proceeding with upgrade...[/yellow]"
-                                )
-                                return config
-                        else:
-                            raise e
-
-                    # Run the backup command using Kubernetes API
-                    backup_file = config_filename.parent / "keycloak-backup.sql"
-                    rich.print(
-                        f"[green]Creating backup at:[/green] {backup_file}\n"
+                "[red bold]No default kube configuration file was found. Make sure to [link=https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig]have one pointing to your Nebari cluster[/link] before upgrading.[/red bold]"
                     )
+            exit()
 
-                    try:
-                        # Execute pg_dump command in the pod using Kubernetes API
-                        exec_command = [
-                            '/bin/sh',
-                            '-c',
-                            'env PGPASSWORD=keycloak pg_dump -U keycloak -d keycloak'
-                        ]
+        current_kube_context = kubernetes.config.list_kube_config_contexts()[1]
+        cluster_name = current_kube_context["context"]["cluster"]
+        rich.print(
+            f"\nThe following backup will be attempted on the [cyan bold]{cluster_name}[/cyan bold] cluster.\n"
+        )
 
-                        resp = stream(
-                            api_instance.connect_get_namespaced_pod_exec,
-                            name='keycloak-postgresql-0',
-                            namespace=namespace,
-                            command=exec_command,
-                            stderr=True,
-                            stdin=False,
-                            stdout=True,
-                            tty=False,
-                            _preload_content=False
-                        )
+        # Kubernetes config available - offer automatic backup
+        rich.print(
+            "\n[green]✓[/green] Kubernetes configuration detected. Nebari can backup the database automatically."
+        )
 
-                        # Write the output to the backup file
-                        error_output = []
-                        with open(backup_file, 'wb') as f:
-                            while resp.is_open():
-                                resp.update(timeout=1)
-                                if resp.peek_stdout():
-                                    stdout_data = resp.read_stdout()
-                                    f.write(stdout_data.encode('utf-8'))
-                                if resp.peek_stderr():
-                                    stderr_data = resp.read_stderr()
-                                    if stderr_data:
-                                        error_output.append(stderr_data)
-
-                        resp.close()
-
-                        # Check if backup was successful
-                        if backup_file.exists() and backup_file.stat().st_size > 0:
-                            file_size = backup_file.stat().st_size
-                            rich.print(
-                                f"[green]✓ Backup successful![/green] Saved to {backup_file}"
-                            )
-                            rich.print(
-                                f"[green]  Backup size:[/green] {file_size / 1024:.2f} KB"
-                            )
-
-                            # Show any warnings from stderr (pg_dump often writes info to stderr)
-                            if error_output:
-                                for err in error_output:
-                                    if 'NOTICE' in err or 'WARNING' in err:
-                                        rich.print(f"[yellow]{err.strip()}[/yellow]")
-                        else:
-                            error_msg = '\n'.join(error_output) if error_output else "Unknown error - backup file is empty or doesn't exist"
-                            rich.print(
-                                f"[red]✗ Backup failed:[/red]\n{error_msg}"
-                            )
-                            rich.print(
-                                "\n[yellow]Please backup manually before proceeding with the upgrade.[/yellow]"
-                            )
-                            exit(1)
-
-                    except kubernetes.client.exceptions.ApiException as api_err:
-                        rich.print(
-                            f"[red]✗ Kubernetes API error during backup:[/red]\n{api_err}"
-                        )
-                        rich.print(
-                            "\n[yellow]Please backup manually before proceeding with the upgrade.[/yellow]"
-                        )
-                        exit(1)
-
-                except Exception as e:
-                    rich.print(f"[red]Error during backup:[/red] {e}")
-                    rich.print(
-                        "\n[yellow]Please backup manually using the command below before proceeding.[/yellow]"
-                    )
-                    exit(1)
-            else:
-                rich.print(
-                    "\n[yellow]You chose not to backup automatically.[/yellow]"
-                )
-                rich.print(
-                    f"\n[bold]Please backup manually by running this command:[/bold]\n"
-                    f"[cyan]{backup_command}[/cyan]\n"
-                )
-
-                confirmed = Confirm.ask(
-                    "Have you successfully backed up your Keycloak database?",
-                    default=False,
-                )
-                if not confirmed:
-                    rich.print(
-                        f"\n[red bold]You must backup the Keycloak database before upgrading to {self.version}.[/red bold]"
-                    )
-                    exit(1)
-        else:
-            # No kubectl access - provide manual instructions
+        if not (kwargs.get("attempt_fixes", False) or Confirm.ask(
+            "\nWould you like Nebari to backup the Keycloak database for you now?",
+            default=True,
+        )):
+            # User declined automatic backup
+            rich.print("\n[yellow]You chose not to backup automatically.[/yellow]")
             rich.print(
-                "\n[yellow]⚠[/yellow]  kubectl configuration not found. You must backup manually."
-            )
-            rich.print(
-                textwrap.dedent(
-                    f"""
-                    [bold]To backup your Keycloak database:[/bold]
-
-                    1. Ensure you have kubectl access to your cluster
-                       ([link=https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig]see docs[/link])
-
-                    2. Run this command in your terminal:
-                       [cyan]{backup_command}[/cyan]
-
-                    3. Verify the backup file was created:
-                       [cyan]ls -lh keycloak-backup.sql[/cyan]
-
-                    [yellow]The backup file will be saved to your current directory.[/yellow]
-                    """
-                )
+                "[yellow]Please ensure you have a backup before proceeding with deployment.[/yellow]"
             )
 
-            confirmed = Confirm.ask(
+            if not Confirm.ask(
                 "\nHave you successfully backed up your Keycloak database?",
                 default=False,
-            )
-            if not confirmed:
+            ):
                 rich.print(
                     f"\n[red bold]You must backup the Keycloak database before upgrading to {self.version}.[/red bold]"
                 )
-                rich.print(
-                    "[yellow]After completing the backup, run this upgrade command again.[/yellow]"
-                )
                 exit(1)
 
+            rich.print(
+                "\n[green]✓ Database backup confirmed.[/green] You can now proceed with:"
+            )
+            rich.print(f"  1. [cyan]nebari render -c {config_filename}[/cyan]")
+            rich.print(f"  2. [cyan]nebari deploy -c {config_filename}[/cyan]")
+            rich.print(
+                "\n[yellow]For detailed upgrade instructions, see:[/yellow] UPGRADE_STEPS.md\n"
+            )
+            rich.print("Ready to upgrade to Nebari version [green]2025.10.1[/green].")
+            return config
+
+        # User accepted automatic backup - proceed
         rich.print(
-            "\n[green]✓ Database backup confirmed.[/green] You can now proceed with:"
+            "\n[cyan]Backing up Keycloak database using Kubernetes API...[/cyan]\n"
+        )
+
+        api_instance = kubernetes.client.CoreV1Api()
+        backup_file = config_filename.parent / "keycloak-backup.sql"
+
+        # Check if the old PostgreSQL pod exists
+        try:
+            api_instance.read_namespaced_pod(
+                name="keycloak-postgresql-0", namespace=namespace
+            )
+        except kubernetes.client.exceptions.ApiException as e:
+            if e.status == 404:
+                rich.print(
+                    f"\n[yellow]Pod keycloak-postgresql-0 not found in namespace {namespace}.[/yellow]"
+                )
+                if not Confirm.ask(
+                    "\nDo you want to skip the backup and continue with the upgrade?",
+                    default=False,
+                ):
+                    rich.print(
+                        "[red]Upgrade cancelled. Please verify your Keycloak deployment.[/red]"
+                    )
+                    exit(1)
+
+                rich.print("[yellow]Skipping backup. Proceeding with upgrade...[/yellow]")
+                return config
+
+            # Other API errors
+            rich.print(f"[red]✗ Error checking for PostgreSQL pod:[/red] {e}")
+            exit(1)
+
+        # Execute pg_dump command in the pod
+        rich.print(f"[green]Creating backup at:[/green] {backup_file}\n")
+
+        try:
+            exec_command = [
+                '/bin/sh',
+                '-c',
+                'env PGPASSWORD=keycloak pg_dump -U keycloak -d keycloak'
+            ]
+
+            resp = stream(
+                api_instance.connect_get_namespaced_pod_exec,
+                name='keycloak-postgresql-0',
+                namespace=namespace,
+                command=exec_command,
+                stderr=True,
+                stdin=False,
+                stdout=True,
+                tty=False,
+                _preload_content=False
+            )
+
+            # Write the output to the backup file
+            error_output = []
+            with open(backup_file, 'wb') as f:
+                while resp.is_open():
+                    resp.update(timeout=1)
+                    if resp.peek_stdout():
+                        stdout_data = resp.read_stdout()
+                        f.write(stdout_data.encode('utf-8'))
+                    if resp.peek_stderr():
+                        stderr_data = resp.read_stderr()
+                        if stderr_data:
+                            error_output.append(stderr_data)
+
+            resp.close()
+
+            # Check if backup was successful
+            if not backup_file.exists() or backup_file.stat().st_size == 0:
+                error_msg = '\n'.join(error_output) if error_output else "Backup file is empty or doesn't exist"
+                rich.print(f"[red]✗ Backup failed:[/red]\n{error_msg}")
+                exit(1)
+
+            # Backup succeeded
+            file_size = backup_file.stat().st_size
+            rich.print(
+                f"[green]✓ Backup successful![/green] Saved to {backup_file}"
+            )
+            rich.print(
+                f"[green]  Backup size:[/green] {file_size / 1024:.2f} KB"
+            )
+
+            # Show any warnings from stderr (pg_dump often writes info to stderr)
+            if error_output:
+                for err in error_output:
+                    if 'NOTICE' in err or 'WARNING' in err:
+                        rich.print(f"[yellow]{err.strip()}[/yellow]")
+
+        except kubernetes.client.exceptions.ApiException as api_err:
+            rich.print(
+                f"[red]✗ Kubernetes API error during backup:[/red]\n{api_err}"
+            )
+            exit(1)
+        except Exception as e:
+            rich.print(f"[red]✗ Unexpected error during backup:[/red] {e}")
+            exit(1)
+
+        # Backup complete - provide next steps
+        rich.print(
+            "\n[green]✓ Database backup completed.[/green] You can now proceed with:"
         )
         rich.print(f"  1. [cyan]nebari render -c {config_filename}[/cyan]")
         rich.print(f"  2. [cyan]nebari deploy -c {config_filename}[/cyan]")
