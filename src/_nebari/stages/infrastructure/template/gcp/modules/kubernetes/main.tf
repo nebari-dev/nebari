@@ -116,6 +116,10 @@ resource "google_container_node_pool" "main" {
       content {
         type  = guest_accelerator.value.name
         count = guest_accelerator.value.count
+
+        gpu_driver_installation_config {
+          gpu_driver_version = "DEFAULT"
+        }
       }
     }
     tags = var.tags
