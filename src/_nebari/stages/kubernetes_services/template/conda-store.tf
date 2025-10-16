@@ -38,8 +38,8 @@ variable "conda-store-service-token-scopes" {
   type        = map(any)
 }
 
-variable "conda-store-worker-overrides" {
-  description = "Worker-specific overrides for conda-store worker pods."
+variable "conda-store-worker" {
+  description = "Worker-specific resources for conda-store worker pods."
   type        = map(any)
 }
 
@@ -69,7 +69,7 @@ module "kubernetes-conda-store-server" {
   extra-config   = var.conda-store-extra-config
   conda-store-fs = var.shared_fs_type
 
-  worker-overrides = var.conda-store-worker-overrides
+  worker-overrides = var.conda-store-worker
 
   depends_on = [
     module.rook-ceph
