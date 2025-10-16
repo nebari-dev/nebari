@@ -1,3 +1,13 @@
+> [!IMPORTANT]
+> **Nebari Deployment Issues**
+>
+> The current stable releases on PyPI and conda-forge suffer from issues related to [Bitnami image deprecation](https://github.com/bitnami/charts/issues/35164) that prevent successful deployments.
+> These issues have been resolved on the `main` branch and will be included in the upcoming `2025.10.1` release.
+>
+> If trying to deploy nebari in the meantime, please install directly from the `main` branch e.g. `pip install git+https://github.com/nebari-dev/nebari.git@main`.
+
+---
+
 <p align="center">
 <picture>
   <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup.svg">
