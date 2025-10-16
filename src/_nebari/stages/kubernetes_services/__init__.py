@@ -247,9 +247,9 @@ class WorkerResources(schema.Base):
 
 
 class CondaStoreWorker(schema.Base):
-    worker_resources: Optional[WorkerResources] = WorkerResources()
-    # for the rest defaults are handled in terraform,
-    # so we don't need to set it here (worker.tf)
+    resources: Optional[WorkerResources] = WorkerResources()
+    # for the rest defaults are handled in terraform (worker.tf),
+    # so we don't need to set it here
     max_workers: Optional[int] = None
 
 
@@ -260,7 +260,7 @@ class CondaStore(schema.Base):
     image_tag: str = constants.DEFAULT_CONDA_STORE_IMAGE_TAG
     default_namespace: str = "nebari-git"
     object_storage: str = "200Gi"
-    worker_overrides: Optional[Union[CondaStoreWorker, None]] = None
+    worker: Optional[Union[CondaStoreWorker, None]] = None
 
 
 class NebariWorkflowController(schema.Base):
@@ -504,8 +504,8 @@ class CondaStoreInputVars(schema.Base):
     conda_store_service_token_scopes: Dict[str, Dict[str, Any]] = Field(
         alias="conda-store-service-token-scopes"
     )
-    conda_store_worker_overrides: CondaStoreWorker = Field(
-        alias="conda-store-worker-overrides",
+    conda_store_worker: CondaStoreWorker | None = Field(
+        alias="conda-store-worker",
     )
 
     @field_validator("conda_store_filesystem_storage", mode="before")
@@ -730,7 +730,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             conda_store_extra_config=self.config.conda_store.extra_config,
             conda_store_image=self.config.conda_store.image,
             conda_store_image_tag=self.config.conda_store.image_tag,
-            conda_store_worker_overrides=self.config.conda_store.worker_overrides,
+            conda_store_worker=self.config.conda_store.worker,
         )
 
         jupyterhub_vars = JupyterhubInputVars(
