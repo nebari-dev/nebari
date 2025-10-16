@@ -245,14 +245,19 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
     for config_key, config_value in jhub_apps_overrides.items():
         setattr(c.JAppsConfig, config_key, config_value)
 
-    def service_for_jhub_apps(name, url):
+    def service_for_jhub_apps(
+        name, url, description=None, pinned=False, thumbnail=None
+    ):
         return {
             "name": name,
             "display": True,
             "info": {
                 "name": name,
+                "description": description,
                 "url": url,
                 "external": True,
+                "pinned": pinned,
+                "thumbnail": thumbnail,
             },
         }
 
@@ -260,7 +265,12 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
         [
             service_for_jhub_apps(name="Argo", url="/argo"),
             service_for_jhub_apps(name="Users", url="/auth/admin/nebari/console/"),
-            service_for_jhub_apps(name="Environments", url="/conda-store"),
+            service_for_jhub_apps(
+                name="Environments",
+                url="/conda-store",
+                pinned=True,
+                thumbnail="https://raw.githubusercontent.com/conda-incubator/conda-store/main/docusaurus-docs/community/assets/logos/conda-store-logo-vertical-lockup.svg",
+            ),
             service_for_jhub_apps(name="Monitoring", url="/monitoring"),
         ]
     )
