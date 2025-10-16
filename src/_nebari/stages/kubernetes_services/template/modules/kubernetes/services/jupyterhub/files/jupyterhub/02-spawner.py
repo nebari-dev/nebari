@@ -268,6 +268,7 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
             service_for_jhub_apps(
                 name="Environments",
                 url="/conda-store",
+                description="This is conda-store, your environments manager.",
                 pinned=True,
                 thumbnail="https://raw.githubusercontent.com/conda-incubator/conda-store/main/docusaurus-docs/community/assets/logos/conda-store-logo-vertical-lockup.svg",
             ),
