@@ -120,7 +120,7 @@ resource "kubernetes_deployment" "worker" {
           dynamic "resources" {
             for_each = var.conda-store-worker.resources == null ? [] : [var.conda-store-worker.resources]
             content {
-              limits   = {
+              limits = {
                 cpu    = resources.value.cpu_limit == null ? null : resources.value.cpu_limit
                 memory = resources.value.mem_limit == null ? null : resources.value.mem_limit
               }
