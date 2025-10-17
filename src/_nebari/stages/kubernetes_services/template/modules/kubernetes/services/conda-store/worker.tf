@@ -66,7 +66,7 @@ resource "kubernetes_deployment" "worker" {
   }
 
   spec {
-    replicas = var.worker-overrides.max_workers != null ? var.worker-overrides.max_workers : 1
+    replicas = var.conda-store-worker.max_workers != null ? tonumber(var.conda-store-worker.max_workers) : 1
 
     selector {
       match_labels = {
@@ -117,7 +117,19 @@ resource "kubernetes_deployment" "worker" {
             "/etc/conda-store/conda_store_config.py"
           ]
 
-          resources = var.worker-overrides.worker_resources
+          dynamic "resources" {
+            for_each = var.conda-store-worker.resources == null ? [] : [var.conda-store-worker.resources]
+            content {
+              limits   = {
+                cpu    = resources.value.cpu_limit == null ? null : resources.value.cpu_limit
+                memory = resources.value.mem_limit == null ? null : resources.value.mem_limit
+              }
+              requests = {
+                cpu    = resources.value.cpu_guarantee == null ? null : resources.value.cpu_guarantee
+                memory = resources.value.mem_guarantee == null ? null : resources.value.mem_guarantee
+              }
+            }
+          }
 
           volume_mount {
             name       = "config"

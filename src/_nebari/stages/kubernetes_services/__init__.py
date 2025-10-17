@@ -260,7 +260,7 @@ class CondaStore(schema.Base):
     image_tag: str = constants.DEFAULT_CONDA_STORE_IMAGE_TAG
     default_namespace: str = "nebari-git"
     object_storage: str = "200Gi"
-    worker: Optional[Union[CondaStoreWorker, None]] = None
+    worker: Optional[CondaStoreWorker] = None
 
 
 class NebariWorkflowController(schema.Base):
@@ -730,7 +730,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             conda_store_extra_config=self.config.conda_store.extra_config,
             conda_store_image=self.config.conda_store.image,
             conda_store_image_tag=self.config.conda_store.image_tag,
-            conda_store_worker=self.config.conda_store.worker,
+            conda_store_worker=(self.config.conda_store.worker or {}),
         )
 
         jupyterhub_vars = JupyterhubInputVars(
