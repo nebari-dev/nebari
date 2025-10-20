@@ -2,6 +2,7 @@
 
 import base64
 import json
+
 import requests
 
 TIMEOUT = 10
@@ -21,7 +22,7 @@ def decode_jwt_token(token: str) -> dict:
         The decoded token payload
     """
     # Split the token into parts
-    parts = token.split('.')
+    parts = token.split(".")
     if len(parts) != 3:
         raise ValueError("Invalid JWT token format")
 
@@ -30,7 +31,7 @@ def decode_jwt_token(token: str) -> dict:
     # Add padding if needed
     padding = len(payload) % 4
     if padding:
-        payload += '=' * (4 - padding)
+        payload += "=" * (4 - padding)
 
     decoded = base64.urlsafe_b64decode(payload)
     return json.loads(decoded)
@@ -69,7 +70,7 @@ class KeycloakAPI:
             Whether to verify SSL certificates
         """
         self.verify_ssl = verify_ssl
-        self.base_url = base_url.rstrip('/')
+        self.base_url = base_url.rstrip("/")
         self.realm = realm
         self.client_id = client_id
         self.username = username
@@ -365,7 +366,9 @@ class KeycloakAPI:
         """
         return self._make_admin_request(f"clients/{id}", method="DELETE")
 
-    def reset_user_password(self, user_id: str, password: str, temporary: bool = False) -> requests.Response:
+    def reset_user_password(
+        self, user_id: str, password: str, temporary: bool = False
+    ) -> requests.Response:
         """Reset a user's password.
 
         Parameters
@@ -382,11 +385,7 @@ class KeycloakAPI:
         requests.Response
             Response from the password reset request
         """
-        password_data = {
-            "type": "password",
-            "value": password,
-            "temporary": temporary
-        }
+        password_data = {"type": "password", "value": password, "temporary": temporary}
         return self._make_admin_request(
             f"users/{user_id}/reset-password", method="PUT", json_data=password_data
         )
@@ -511,7 +510,9 @@ class KeycloakAPI:
         """
         return self._make_admin_request(f"clients/{client_id}/roles")
 
-    def get_client_role_by_name(self, client_id: str, role_name: str) -> requests.Response:
+    def get_client_role_by_name(
+        self, client_id: str, role_name: str
+    ) -> requests.Response:
         """Get a specific client role by name.
 
         Parameters
@@ -547,7 +548,9 @@ class KeycloakAPI:
             f"clients/{client_id}/roles/{role_name}", method="DELETE"
         )
 
-    def assign_realm_roles_to_user(self, user_id: str, roles: list) -> requests.Response:
+    def assign_realm_roles_to_user(
+        self, user_id: str, roles: list
+    ) -> requests.Response:
         """Assign realm roles to a user.
 
         Parameters
@@ -581,7 +584,9 @@ class KeycloakAPI:
         """
         return self._make_admin_request(f"users/{user_id}/role-mappings/realm")
 
-    def remove_realm_roles_from_user(self, user_id: str, roles: list) -> requests.Response:
+    def remove_realm_roles_from_user(
+        self, user_id: str, roles: list
+    ) -> requests.Response:
         """Remove realm roles from a user.
 
         Parameters
@@ -793,7 +798,9 @@ class KeycloakAPI:
         """
         return self._make_admin_request(f"groups/{group_id}/members")
 
-    def assign_realm_roles_to_group(self, group_id: str, roles: list) -> requests.Response:
+    def assign_realm_roles_to_group(
+        self, group_id: str, roles: list
+    ) -> requests.Response:
         """Assign realm roles to a group.
 
         Parameters
@@ -827,7 +834,9 @@ class KeycloakAPI:
         """
         return self._make_admin_request(f"groups/{group_id}/role-mappings/realm")
 
-    def create_subgroup(self, parent_group_id: str, group_data: dict) -> requests.Response:
+    def create_subgroup(
+        self, parent_group_id: str, group_data: dict
+    ) -> requests.Response:
         """Create a subgroup under a parent group.
 
         Parameters
@@ -846,7 +855,9 @@ class KeycloakAPI:
             f"groups/{parent_group_id}/children", method="POST", json_data=group_data
         )
 
-    def oauth2_client_credentials_flow(self, client_id: str, client_secret: str) -> dict:
+    def oauth2_client_credentials_flow(
+        self, client_id: str, client_secret: str
+    ) -> dict:
         """Perform OAuth2 client credentials flow.
 
         Parameters

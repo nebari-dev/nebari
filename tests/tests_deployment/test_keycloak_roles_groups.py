@@ -1,12 +1,10 @@
 """Keycloak API tests for roles, groups, and integration workflows."""
 
-import os
 import uuid
 
 import pytest
-import requests
-from .keycloak_api_utils import KeycloakAPI, decode_jwt_token
 
+from .keycloak_api_utils import KeycloakAPI, decode_jwt_token
 
 # Import fixtures from test_keycloak_api
 pytest_plugins = ["tests.tests_deployment.test_keycloak_api"]
@@ -138,7 +136,9 @@ def test_create_client_role(
         "name": test_role_name,
         "description": "Test client role",
     }
-    role_response = authenticated_keycloak_api.create_client_role(client_internal_id, role_data)
+    role_response = authenticated_keycloak_api.create_client_role(
+        client_internal_id, role_data
+    )
     assert role_response.status_code == 201
 
     # Verify role was created
@@ -275,7 +275,9 @@ def test_assign_client_role_to_user(
     assert create_client_response.status_code == 201
 
     # Get client internal ID
-    get_client_response = authenticated_keycloak_api.get_clients(client_id=test_client_id)
+    get_client_response = authenticated_keycloak_api.get_clients(
+        client_id=test_client_id
+    )
     client_internal_id = get_client_response.json()[0]["id"]
 
     # Create a client role
@@ -515,7 +517,9 @@ def test_remove_user_from_group(
     assert add_response.status_code == 204
 
     # Remove user from group
-    remove_response = authenticated_keycloak_api.remove_user_from_group(user_id, group_id)
+    remove_response = authenticated_keycloak_api.remove_user_from_group(
+        user_id, group_id
+    )
     assert remove_response.status_code == 204
 
     # Verify user is removed from group
@@ -688,7 +692,9 @@ def test_nested_groups(
     assert create_child_response.status_code == 201
 
     # Get child group ID
-    parent_details_response = authenticated_keycloak_api.get_group_by_id(parent_group_id)
+    parent_details_response = authenticated_keycloak_api.get_group_by_id(
+        parent_group_id
+    )
     parent_details = parent_details_response.json()
     child_group = parent_details["subGroups"][0]
     child_group_id = child_group["id"]
@@ -714,7 +720,9 @@ def test_nested_groups(
     user_id = user_get_response.json()[0]["id"]
 
     # Add user to child group
-    add_user_response = authenticated_keycloak_api.add_user_to_group(user_id, child_group_id)
+    add_user_response = authenticated_keycloak_api.add_user_to_group(
+        user_id, child_group_id
+    )
     assert add_user_response.status_code == 204
 
     # Verify user inherits role from parent group
@@ -785,7 +793,9 @@ def test_group_scope_propagation(
     authenticated_keycloak_api.create_user(user_data)
 
     # Get user ID
-    user_id = authenticated_keycloak_api.get_users(username=test_username).json()[0]["id"]
+    user_id = authenticated_keycloak_api.get_users(username=test_username).json()[0][
+        "id"
+    ]
 
     # Add user to both groups
     authenticated_keycloak_api.add_user_to_group(user_id, group1_id)
@@ -850,7 +860,9 @@ def test_admin_user_workflow(
     authenticated_keycloak_api.create_realm_role(user_role_data)
 
     # Get roles
-    admin_role = authenticated_keycloak_api.get_realm_role_by_name(admin_role_name).json()
+    admin_role = authenticated_keycloak_api.get_realm_role_by_name(
+        admin_role_name
+    ).json()
     user_role = authenticated_keycloak_api.get_realm_role_by_name(user_role_name).json()
 
     # Create groups
@@ -907,7 +919,9 @@ def test_admin_user_workflow(
     authenticated_keycloak_api.create_user(user_data)
 
     # Get user ID
-    user_id = authenticated_keycloak_api.get_users(username=test_username).json()[0]["id"]
+    user_id = authenticated_keycloak_api.get_users(username=test_username).json()[0][
+        "id"
+    ]
 
     # Assign user to groups
     authenticated_keycloak_api.add_user_to_group(user_id, admin_group_id)
@@ -951,10 +965,17 @@ def test_admin_user_workflow(
     oauth_token_payload = decode_jwt_token(oauth_token_data["access_token"])
 
     # Verify token contains expected group memberships and roles
-    if "realm_access" in oauth_token_payload and "roles" in oauth_token_payload["realm_access"]:
+    if (
+        "realm_access" in oauth_token_payload
+        and "roles" in oauth_token_payload["realm_access"]
+    ):
         token_roles = oauth_token_payload["realm_access"]["roles"]
-        assert admin_role_name in token_roles, f"Admin role not found in token roles: {token_roles}"
-        assert user_role_name in token_roles, f"User role not found in token roles: {token_roles}"
+        assert (
+            admin_role_name in token_roles
+        ), f"Admin role not found in token roles: {token_roles}"
+        assert (
+            user_role_name in token_roles
+        ), f"User role not found in token roles: {token_roles}"
 
     # Verify user identity in token
     assert oauth_token_payload["preferred_username"] == test_username
