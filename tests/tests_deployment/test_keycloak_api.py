@@ -92,6 +92,13 @@ def test_username() -> str:
     return f"testuser_{uuid.uuid4().hex[:8]}"
 
 
+@pytest.fixture
+def test_client_id() -> str:
+    """Generate a unique test client ID."""
+    import uuid
+    return f"test-client-{uuid.uuid4().hex[:8]}"
+
+
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_keycloak_login_with_credentials(
     keycloak_api: KeycloakAPI,
@@ -265,3 +272,146 @@ def test_delete_user(
     # Verify the user is deleted
     verify_response = authenticated_keycloak_api.get_user_by_id(user_id)
     assert verify_response.status_code == 404, "User should not exist after deletion"
+
+
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_create_client(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_client_id: str,
+) -> None:
+    """Test creating a new client in Keycloak."""
+    client_data = {
+        "clientId": test_client_id,
+        "enabled": True,
+        "publicClient": False,
+        "protocol": "openid-connect",
+        "redirectUris": ["http://localhost:8080/*"],
+    }
+
+    response = authenticated_keycloak_api.create_client(client_data)
+
+    # Keycloak returns 201 Created for successful client creation
+    assert response.status_code == 201, f"Failed to create client: {response.text}"
+
+    # Cleanup: Delete the created client
+    get_response = authenticated_keycloak_api.get_clients(client_id=test_client_id)
+    assert get_response.status_code == 200
+    clients = get_response.json()
+    if clients:
+        client_internal_id = clients[0]["id"]
+        authenticated_keycloak_api.delete_client(client_internal_id)
+
+
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_get_clients(
+    authenticated_keycloak_api: KeycloakAPI,
+) -> None:
+    """Test getting clients from Keycloak."""
+    response = authenticated_keycloak_api.get_clients()
+
+    assert response.status_code == 200, f"Failed to get clients: {response.text}"
+    clients = response.json()
+    assert isinstance(clients, list), "Expected a list of clients"
+
+
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_get_client_by_client_id(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_client_id: str,
+) -> None:
+    """Test getting a specific client by clientId."""
+    # First, create a test client
+    client_data = {
+        "clientId": test_client_id,
+        "enabled": True,
+        "publicClient": True,
+        "protocol": "openid-connect",
+    }
+    create_response = authenticated_keycloak_api.create_client(client_data)
+    assert create_response.status_code == 201
+
+    # Get the client by clientId
+    response = authenticated_keycloak_api.get_clients(client_id=test_client_id)
+    assert response.status_code == 200, f"Failed to get client: {response.text}"
+
+    clients = response.json()
+    assert len(clients) > 0, "Client not found"
+    assert clients[0]["clientId"] == test_client_id
+
+    # Cleanup: Delete the test client
+    client_internal_id = clients[0]["id"]
+    authenticated_keycloak_api.delete_client(client_internal_id)
+
+
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_update_client(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_client_id: str,
+) -> None:
+    """Test updating a client in Keycloak."""
+    # Create a test client
+    client_data = {
+        "clientId": test_client_id,
+        "enabled": True,
+        "publicClient": True,
+        "protocol": "openid-connect",
+        "description": "Original description",
+    }
+    create_response = authenticated_keycloak_api.create_client(client_data)
+    assert create_response.status_code == 201
+
+    # Get the client internal ID
+    get_response = authenticated_keycloak_api.get_clients(client_id=test_client_id)
+    clients = get_response.json()
+    client_internal_id = clients[0]["id"]
+
+    # Update the client
+    update_data = {
+        "clientId": test_client_id,
+        "enabled": True,
+        "publicClient": False,
+        "protocol": "openid-connect",
+        "description": "Updated description",
+    }
+    update_response = authenticated_keycloak_api.update_client(client_internal_id, update_data)
+    assert update_response.status_code == 204, f"Failed to update client: {update_response.text}"
+
+    # Verify the update
+    verify_response = authenticated_keycloak_api.get_client_by_id(client_internal_id)
+    assert verify_response.status_code == 200
+    updated_client = verify_response.json()
+    assert updated_client["description"] == "Updated description"
+    assert updated_client["publicClient"] is False
+
+    # Cleanup: Delete the test client
+    authenticated_keycloak_api.delete_client(client_internal_id)
+
+
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_delete_client(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_client_id: str,
+) -> None:
+    """Test deleting a client from Keycloak."""
+    # Create a test client
+    client_data = {
+        "clientId": test_client_id,
+        "enabled": True,
+        "publicClient": True,
+        "protocol": "openid-connect",
+    }
+    create_response = authenticated_keycloak_api.create_client(client_data)
+    assert create_response.status_code == 201
+
+    # Get the client internal ID
+    get_response = authenticated_keycloak_api.get_clients(client_id=test_client_id)
+    clients = get_response.json()
+    client_internal_id = clients[0]["id"]
+
+    # Delete the client
+    delete_response = authenticated_keycloak_api.delete_client(client_internal_id)
+    assert delete_response.status_code == 204, f"Failed to delete client: {delete_response.text}"
+
+    # Verify the client is deleted
+    verify_response = authenticated_keycloak_api.get_client_by_id(client_internal_id)
+    assert verify_response.status_code == 404, "Client should not exist after deletion"

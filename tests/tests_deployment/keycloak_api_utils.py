@@ -249,3 +249,87 @@ class KeycloakAPI:
             Response from the delete request
         """
         return self._make_admin_request(f"users/{user_id}", method="DELETE")
+
+    def create_client(self, client_data: dict) -> requests.Response:
+        """Create a new client in Keycloak.
+
+        Parameters
+        ----------
+        client_data : dict
+            Client data including clientId, protocol, publicClient, etc.
+            Example: {"clientId": "test-client", "enabled": True,
+                     "publicClient": False, "protocol": "openid-connect"}
+
+        Returns
+        -------
+        requests.Response
+            Response from the create client request
+        """
+        return self._make_admin_request("clients", method="POST", json_data=client_data)
+
+    def get_clients(self, client_id: str = None) -> requests.Response:
+        """Get clients from Keycloak.
+
+        Parameters
+        ----------
+        client_id : str, optional
+            Filter clients by clientId (not the internal ID)
+
+        Returns
+        -------
+        requests.Response
+            Response containing list of clients
+        """
+        endpoint = "clients"
+        if client_id:
+            endpoint = f"clients?clientId={client_id}"
+        return self._make_admin_request(endpoint)
+
+    def get_client_by_id(self, id: str) -> requests.Response:
+        """Get a specific client by internal ID.
+
+        Parameters
+        ----------
+        id : str
+            The Keycloak client internal ID (not clientId)
+
+        Returns
+        -------
+        requests.Response
+            Response containing client data
+        """
+        return self._make_admin_request(f"clients/{id}")
+
+    def update_client(self, id: str, client_data: dict) -> requests.Response:
+        """Update a client in Keycloak.
+
+        Parameters
+        ----------
+        id : str
+            The Keycloak client internal ID
+        client_data : dict
+            Client data to update (partial updates supported)
+
+        Returns
+        -------
+        requests.Response
+            Response from the update request
+        """
+        return self._make_admin_request(
+            f"clients/{id}", method="PUT", json_data=client_data
+        )
+
+    def delete_client(self, id: str) -> requests.Response:
+        """Delete a client from Keycloak.
+
+        Parameters
+        ----------
+        id : str
+            The Keycloak client internal ID to delete
+
+        Returns
+        -------
+        requests.Response
+            Response from the delete request
+        """
+        return self._make_admin_request(f"clients/{id}", method="DELETE")
