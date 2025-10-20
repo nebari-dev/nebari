@@ -1,10 +1,11 @@
 """Keycloak API endpoint tests."""
 
 import os
+import uuid
 
 import pytest
 import requests
-from .keycloak_api_utils import KeycloakAPI
+from .keycloak_api_utils import KeycloakAPI, decode_jwt_token
 
 
 @pytest.fixture(scope="session")
@@ -88,17 +89,28 @@ def authenticated_keycloak_api(
 @pytest.fixture
 def test_username() -> str:
     """Generate a unique test username."""
-    import uuid
     return f"testuser_{uuid.uuid4().hex[:8]}"
 
 
 @pytest.fixture
 def test_client_id() -> str:
     """Generate a unique test client ID."""
-    import uuid
     return f"test-client-{uuid.uuid4().hex[:8]}"
 
 
+@pytest.fixture
+def test_role_name() -> str:
+    """Generate a unique test role name."""
+    return f"test-role-{uuid.uuid4().hex[:8]}"
+
+
+@pytest.fixture
+def test_group_name() -> str:
+    """Generate a unique test group name."""
+    return f"test-group-{uuid.uuid4().hex[:8]}"
+
+
+@pytest.mark.keycloak
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_keycloak_login_with_credentials(
     keycloak_api: KeycloakAPI,
@@ -122,6 +134,7 @@ def test_keycloak_login_with_credentials(
     assert keycloak_api.token_type == "Bearer"
 
 
+@pytest.mark.keycloak
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_keycloak_login_invalid_credentials(
     keycloak_api: KeycloakAPI,
@@ -135,6 +148,8 @@ def test_keycloak_login_invalid_credentials(
     assert exc_info.value.response.status_code == 401
 
 
+@pytest.mark.keycloak
+@pytest.mark.keycloak_users
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_create_user(
     authenticated_keycloak_api: KeycloakAPI,
@@ -164,6 +179,8 @@ def test_create_user(
         authenticated_keycloak_api.delete_user(user_id)
 
 
+@pytest.mark.keycloak
+@pytest.mark.keycloak_users
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_get_users(
     authenticated_keycloak_api: KeycloakAPI,
@@ -176,6 +193,8 @@ def test_get_users(
     assert isinstance(users, list), "Expected a list of users"
 
 
+@pytest.mark.keycloak
+@pytest.mark.keycloak_users
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_get_user_by_username(
     authenticated_keycloak_api: KeycloakAPI,
@@ -204,6 +223,8 @@ def test_get_user_by_username(
     authenticated_keycloak_api.delete_user(user_id)
 
 
+@pytest.mark.keycloak
+@pytest.mark.keycloak_users
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_update_user(
     authenticated_keycloak_api: KeycloakAPI,
@@ -245,6 +266,8 @@ def test_update_user(
     authenticated_keycloak_api.delete_user(user_id)
 
 
+@pytest.mark.keycloak
+@pytest.mark.keycloak_users
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_delete_user(
     authenticated_keycloak_api: KeycloakAPI,
@@ -274,6 +297,197 @@ def test_delete_user(
     assert verify_response.status_code == 404, "User should not exist after deletion"
 
 
+@pytest.mark.keycloak
+@pytest.mark.keycloak_users
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_list_users(
+    authenticated_keycloak_api: KeycloakAPI,
+) -> None:
+    """Test listing all users from Keycloak."""
+    response = authenticated_keycloak_api.get_users()
+
+    assert response.status_code == 200, f"Failed to list users: {response.text}"
+    users = response.json()
+    assert isinstance(users, list), "Expected a list of users"
+    # Verify each user has expected fields
+    if len(users) > 0:
+        assert "id" in users[0]
+        assert "username" in users[0]
+
+
+@pytest.mark.keycloak
+@pytest.mark.keycloak_users
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_get_user_by_id(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_username: str,
+) -> None:
+    """Test getting a specific user by ID."""
+    # Create a test user
+    user_data = {
+        "username": test_username,
+        "email": f"{test_username}@example.com",
+        "firstName": "Test",
+        "lastName": "User",
+        "enabled": True,
+    }
+    create_response = authenticated_keycloak_api.create_user(user_data)
+    assert create_response.status_code == 201
+
+    # Get the user ID
+    get_response = authenticated_keycloak_api.get_users(username=test_username)
+    users = get_response.json()
+    user_id = users[0]["id"]
+
+    # Get user by ID
+    response = authenticated_keycloak_api.get_user_by_id(user_id)
+    assert response.status_code == 200, f"Failed to get user by ID: {response.text}"
+
+    user = response.json()
+    assert user["id"] == user_id
+    assert user["username"] == test_username
+    assert user["email"] == f"{test_username}@example.com"
+
+    # Cleanup
+    authenticated_keycloak_api.delete_user(user_id)
+
+
+@pytest.mark.keycloak
+@pytest.mark.keycloak_users
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_update_user_password(
+    authenticated_keycloak_api: KeycloakAPI,
+    keycloak_api: KeycloakAPI,
+    test_username: str,
+) -> None:
+    """Test updating a user's password and verifying authentication."""
+    old_password = "OldPassword123!"
+    new_password = "NewPassword456!"
+
+    # Create a test user with initial password
+    user_data = {
+        "username": test_username,
+        "email": f"{test_username}@example.com",
+        "enabled": True,
+        "credentials": [
+            {
+                "type": "password",
+                "value": old_password,
+                "temporary": False,
+            }
+        ],
+    }
+    create_response = authenticated_keycloak_api.create_user(user_data)
+    assert create_response.status_code == 201
+
+    # Get the user ID
+    get_response = authenticated_keycloak_api.get_users(username=test_username)
+    users = get_response.json()
+    user_id = users[0]["id"]
+
+    # Verify user can authenticate with old password
+    try:
+        token_data = keycloak_api.authenticate(test_username, old_password)
+        assert "access_token" in token_data
+    except requests.exceptions.HTTPError:
+        # Some Keycloak configurations may not allow password auth immediately
+        pass
+
+    # Update the password
+    update_response = authenticated_keycloak_api.reset_user_password(
+        user_id, new_password, temporary=False
+    )
+    assert update_response.status_code == 204, f"Failed to update password: {update_response.text}"
+
+    # Verify user can authenticate with new password
+    token_data = keycloak_api.authenticate(test_username, new_password)
+    assert "access_token" in token_data
+
+    # Verify old password no longer works
+    with pytest.raises(requests.exceptions.HTTPError) as exc_info:
+        keycloak_api.authenticate(test_username, old_password)
+    assert exc_info.value.response.status_code == 401
+
+    # Cleanup
+    authenticated_keycloak_api.delete_user(user_id)
+
+
+@pytest.mark.keycloak
+@pytest.mark.keycloak_users
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_enable_disable_user(
+    authenticated_keycloak_api: KeycloakAPI,
+    keycloak_api: KeycloakAPI,
+    test_username: str,
+) -> None:
+    """Test disabling and re-enabling a user account."""
+    password = "TestPassword123!"
+
+    # Create an enabled test user with password
+    user_data = {
+        "username": test_username,
+        "email": f"{test_username}@example.com",
+        "enabled": True,
+        "credentials": [
+            {
+                "type": "password",
+                "value": password,
+                "temporary": False,
+            }
+        ],
+    }
+    create_response = authenticated_keycloak_api.create_user(user_data)
+    assert create_response.status_code == 201
+
+    # Get the user ID
+    get_response = authenticated_keycloak_api.get_users(username=test_username)
+    users = get_response.json()
+    user_id = users[0]["id"]
+
+    # Verify user can authenticate while enabled
+    try:
+        token_data = keycloak_api.authenticate(test_username, password)
+        assert "access_token" in token_data
+        user_can_auth = True
+    except requests.exceptions.HTTPError:
+        # Some configurations may not allow immediate auth
+        user_can_auth = False
+
+    # Disable the user
+    disable_response = authenticated_keycloak_api.update_user(user_id, {"enabled": False})
+    assert disable_response.status_code == 204
+
+    # Verify user is disabled
+    verify_response = authenticated_keycloak_api.get_user_by_id(user_id)
+    disabled_user = verify_response.json()
+    assert disabled_user["enabled"] is False
+
+    # Verify user cannot authenticate when disabled
+    # Keycloak may return 400 (Bad Request) or 401 (Unauthorized) for disabled users
+    with pytest.raises(requests.exceptions.HTTPError) as exc_info:
+        keycloak_api.authenticate(test_username, password)
+    assert exc_info.value.response.status_code in (400, 401)
+
+    # Re-enable the user
+    enable_response = authenticated_keycloak_api.update_user(user_id, {"enabled": True})
+    assert enable_response.status_code == 204
+
+    # Verify user is enabled
+    verify_response = authenticated_keycloak_api.get_user_by_id(user_id)
+    enabled_user = verify_response.json()
+    assert enabled_user["enabled"] is True
+
+    # Verify user can authenticate again (if they could before)
+    if user_can_auth:
+        token_data = keycloak_api.authenticate(test_username, password)
+        assert "access_token" in token_data
+
+    # Cleanup
+    authenticated_keycloak_api.delete_user(user_id)
+
+
+@pytest.mark.keycloak
+@pytest.mark.keycloak_clients
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_create_client(
     authenticated_keycloak_api: KeycloakAPI,
@@ -302,6 +516,8 @@ def test_create_client(
         authenticated_keycloak_api.delete_client(client_internal_id)
 
 
+@pytest.mark.keycloak
+@pytest.mark.keycloak_clients
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_get_clients(
     authenticated_keycloak_api: KeycloakAPI,
@@ -314,6 +530,8 @@ def test_get_clients(
     assert isinstance(clients, list), "Expected a list of clients"
 
 
+@pytest.mark.keycloak
+@pytest.mark.keycloak_clients
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_get_client_by_client_id(
     authenticated_keycloak_api: KeycloakAPI,
@@ -343,6 +561,8 @@ def test_get_client_by_client_id(
     authenticated_keycloak_api.delete_client(client_internal_id)
 
 
+@pytest.mark.keycloak
+@pytest.mark.keycloak_clients
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_update_client(
     authenticated_keycloak_api: KeycloakAPI,
@@ -387,6 +607,8 @@ def test_update_client(
     authenticated_keycloak_api.delete_client(client_internal_id)
 
 
+@pytest.mark.keycloak
+@pytest.mark.keycloak_clients
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_delete_client(
     authenticated_keycloak_api: KeycloakAPI,
@@ -415,3 +637,187 @@ def test_delete_client(
     # Verify the client is deleted
     verify_response = authenticated_keycloak_api.get_client_by_id(client_internal_id)
     assert verify_response.status_code == 404, "Client should not exist after deletion"
+
+
+@pytest.mark.keycloak
+@pytest.mark.keycloak_clients
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_list_clients(
+    authenticated_keycloak_api: KeycloakAPI,
+) -> None:
+    """Test listing all clients from Keycloak."""
+    response = authenticated_keycloak_api.get_clients()
+
+    assert response.status_code == 200, f"Failed to list clients: {response.text}"
+    clients = response.json()
+    assert isinstance(clients, list), "Expected a list of clients"
+    # Verify each client has expected fields
+    if len(clients) > 0:
+        assert "id" in clients[0]
+        assert "clientId" in clients[0]
+
+
+@pytest.mark.keycloak
+@pytest.mark.keycloak_clients
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_client_secret_regeneration(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_client_id: str,
+) -> None:
+    """Test regenerating a client secret."""
+    # Create a confidential client
+    client_data = {
+        "clientId": test_client_id,
+        "enabled": True,
+        "publicClient": False,
+        "protocol": "openid-connect",
+        "serviceAccountsEnabled": True,
+    }
+    create_response = authenticated_keycloak_api.create_client(client_data)
+    assert create_response.status_code == 201
+
+    # Get the client internal ID
+    get_response = authenticated_keycloak_api.get_clients(client_id=test_client_id)
+    clients = get_response.json()
+    client_internal_id = clients[0]["id"]
+
+    # Get the initial secret
+    secret_response = authenticated_keycloak_api.get_client_secret(client_internal_id)
+    assert secret_response.status_code == 200
+    old_secret = secret_response.json()["value"]
+
+    # Regenerate the secret
+    regen_response = authenticated_keycloak_api.regenerate_client_secret(client_internal_id)
+    assert regen_response.status_code == 200
+    new_secret = regen_response.json()["value"]
+
+    # Verify the secrets are different
+    assert old_secret != new_secret
+
+    # Verify old secret no longer works for client credentials flow
+    with pytest.raises(requests.exceptions.HTTPError) as exc_info:
+        authenticated_keycloak_api.oauth2_client_credentials_flow(test_client_id, old_secret)
+    assert exc_info.value.response.status_code == 401
+
+    # Verify new secret works
+    token_data = authenticated_keycloak_api.oauth2_client_credentials_flow(
+        test_client_id, new_secret
+    )
+    assert "access_token" in token_data
+
+    # Cleanup
+    authenticated_keycloak_api.delete_client(client_internal_id)
+
+
+@pytest.mark.keycloak
+@pytest.mark.keycloak_clients
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_client_oauth2_flow(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_client_id: str,
+    test_username: str,
+) -> None:
+    """Test OAuth2 client credentials and password flows."""
+    password = "TestPassword123!"
+
+    # Create a confidential client with service account enabled
+    client_data = {
+        "clientId": test_client_id,
+        "enabled": True,
+        "publicClient": False,
+        "protocol": "openid-connect",
+        "serviceAccountsEnabled": True,
+        "directAccessGrantsEnabled": True,
+    }
+    create_response = authenticated_keycloak_api.create_client(client_data)
+    assert create_response.status_code == 201
+
+    # Get the client internal ID and secret
+    get_response = authenticated_keycloak_api.get_clients(client_id=test_client_id)
+    clients = get_response.json()
+    client_internal_id = clients[0]["id"]
+
+    secret_response = authenticated_keycloak_api.get_client_secret(client_internal_id)
+    client_secret = secret_response.json()["value"]
+
+    # Test client credentials flow
+    token_data = authenticated_keycloak_api.oauth2_client_credentials_flow(
+        test_client_id, client_secret
+    )
+    assert "access_token" in token_data
+    assert "token_type" in token_data
+
+    # Verify token is valid by decoding it
+    access_token = token_data["access_token"]
+    token_payload = decode_jwt_token(access_token)
+    assert "exp" in token_payload  # Has expiration
+
+    # Create a test user for password flow
+    user_data = {
+        "username": test_username,
+        "email": f"{test_username}@example.com",
+        "enabled": True,
+        "credentials": [
+            {
+                "type": "password",
+                "value": password,
+                "temporary": False,
+            }
+        ],
+    }
+    user_create_response = authenticated_keycloak_api.create_user(user_data)
+    assert user_create_response.status_code == 201
+
+    # Get user ID for cleanup
+    user_get_response = authenticated_keycloak_api.get_users(username=test_username)
+    user_id = user_get_response.json()[0]["id"]
+
+    # Test password flow
+    password_token_data = authenticated_keycloak_api.oauth2_password_flow(
+        test_client_id, test_username, password, client_secret
+    )
+    assert "access_token" in password_token_data
+
+    # Verify user token contains username
+    user_token_payload = decode_jwt_token(password_token_data["access_token"])
+    assert "preferred_username" in user_token_payload
+    assert user_token_payload["preferred_username"] == test_username
+
+    # Cleanup
+    authenticated_keycloak_api.delete_user(user_id)
+    authenticated_keycloak_api.delete_client(client_internal_id)
+
+
+@pytest.mark.keycloak
+@pytest.mark.keycloak_clients
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_client_with_invalid_credentials(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_client_id: str,
+) -> None:
+    """Test OAuth2 flow with invalid client credentials."""
+    # Create a confidential client
+    client_data = {
+        "clientId": test_client_id,
+        "enabled": True,
+        "publicClient": False,
+        "protocol": "openid-connect",
+        "serviceAccountsEnabled": True,
+    }
+    create_response = authenticated_keycloak_api.create_client(client_data)
+    assert create_response.status_code == 201
+
+    # Get the client internal ID
+    get_response = authenticated_keycloak_api.get_clients(client_id=test_client_id)
+    clients = get_response.json()
+    client_internal_id = clients[0]["id"]
+
+    # Attempt OAuth2 flow with invalid secret
+    with pytest.raises(requests.exceptions.HTTPError) as exc_info:
+        authenticated_keycloak_api.oauth2_client_credentials_flow(
+            test_client_id, "invalid-secret"
+        )
+    assert exc_info.value.response.status_code == 401
+
+    # Cleanup
+    authenticated_keycloak_api.delete_client(client_internal_id)

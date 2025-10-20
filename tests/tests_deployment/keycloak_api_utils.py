@@ -1,8 +1,39 @@
 """Helper class for Keycloak API interactions."""
 
+import base64
+import json
 import requests
 
 TIMEOUT = 10
+
+
+def decode_jwt_token(token: str) -> dict:
+    """Decode a JWT token without verification (for testing purposes).
+
+    Parameters
+    ----------
+    token : str
+        The JWT token to decode
+
+    Returns
+    -------
+    dict
+        The decoded token payload
+    """
+    # Split the token into parts
+    parts = token.split('.')
+    if len(parts) != 3:
+        raise ValueError("Invalid JWT token format")
+
+    # Decode the payload (second part)
+    payload = parts[1]
+    # Add padding if needed
+    padding = len(payload) % 4
+    if padding:
+        payload += '=' * (4 - padding)
+
+    decoded = base64.urlsafe_b64decode(payload)
+    return json.loads(decoded)
 
 
 class KeycloakAPI:
@@ -333,3 +364,570 @@ class KeycloakAPI:
             Response from the delete request
         """
         return self._make_admin_request(f"clients/{id}", method="DELETE")
+
+    def reset_user_password(self, user_id: str, password: str, temporary: bool = False) -> requests.Response:
+        """Reset a user's password.
+
+        Parameters
+        ----------
+        user_id : str
+            The Keycloak user ID
+        password : str
+            The new password
+        temporary : bool
+            Whether the password is temporary (user must change on next login)
+
+        Returns
+        -------
+        requests.Response
+            Response from the password reset request
+        """
+        password_data = {
+            "type": "password",
+            "value": password,
+            "temporary": temporary
+        }
+        return self._make_admin_request(
+            f"users/{user_id}/reset-password", method="PUT", json_data=password_data
+        )
+
+    def get_client_secret(self, id: str) -> requests.Response:
+        """Get the secret for a confidential client.
+
+        Parameters
+        ----------
+        id : str
+            The Keycloak client internal ID
+
+        Returns
+        -------
+        requests.Response
+            Response containing the client secret
+        """
+        return self._make_admin_request(f"clients/{id}/client-secret")
+
+    def regenerate_client_secret(self, id: str) -> requests.Response:
+        """Regenerate the secret for a confidential client.
+
+        Parameters
+        ----------
+        id : str
+            The Keycloak client internal ID
+
+        Returns
+        -------
+        requests.Response
+            Response containing the new client secret
+        """
+        return self._make_admin_request(f"clients/{id}/client-secret", method="POST")
+
+    def create_realm_role(self, role_data: dict) -> requests.Response:
+        """Create a new realm role.
+
+        Parameters
+        ----------
+        role_data : dict
+            Role data including name and description
+            Example: {"name": "test-role", "description": "Test role"}
+
+        Returns
+        -------
+        requests.Response
+            Response from the create role request
+        """
+        return self._make_admin_request("roles", method="POST", json_data=role_data)
+
+    def get_realm_roles(self) -> requests.Response:
+        """Get all realm roles.
+
+        Returns
+        -------
+        requests.Response
+            Response containing list of realm roles
+        """
+        return self._make_admin_request("roles")
+
+    def get_realm_role_by_name(self, role_name: str) -> requests.Response:
+        """Get a specific realm role by name.
+
+        Parameters
+        ----------
+        role_name : str
+            The role name
+
+        Returns
+        -------
+        requests.Response
+            Response containing role data
+        """
+        return self._make_admin_request(f"roles/{role_name}")
+
+    def delete_realm_role(self, role_name: str) -> requests.Response:
+        """Delete a realm role.
+
+        Parameters
+        ----------
+        role_name : str
+            The role name to delete
+
+        Returns
+        -------
+        requests.Response
+            Response from the delete request
+        """
+        return self._make_admin_request(f"roles/{role_name}", method="DELETE")
+
+    def create_client_role(self, client_id: str, role_data: dict) -> requests.Response:
+        """Create a new client role.
+
+        Parameters
+        ----------
+        client_id : str
+            The Keycloak client internal ID
+        role_data : dict
+            Role data including name and description
+
+        Returns
+        -------
+        requests.Response
+            Response from the create role request
+        """
+        return self._make_admin_request(
+            f"clients/{client_id}/roles", method="POST", json_data=role_data
+        )
+
+    def get_client_roles(self, client_id: str) -> requests.Response:
+        """Get all roles for a specific client.
+
+        Parameters
+        ----------
+        client_id : str
+            The Keycloak client internal ID
+
+        Returns
+        -------
+        requests.Response
+            Response containing list of client roles
+        """
+        return self._make_admin_request(f"clients/{client_id}/roles")
+
+    def get_client_role_by_name(self, client_id: str, role_name: str) -> requests.Response:
+        """Get a specific client role by name.
+
+        Parameters
+        ----------
+        client_id : str
+            The Keycloak client internal ID
+        role_name : str
+            The role name
+
+        Returns
+        -------
+        requests.Response
+            Response containing role data
+        """
+        return self._make_admin_request(f"clients/{client_id}/roles/{role_name}")
+
+    def delete_client_role(self, client_id: str, role_name: str) -> requests.Response:
+        """Delete a client role.
+
+        Parameters
+        ----------
+        client_id : str
+            The Keycloak client internal ID
+        role_name : str
+            The role name to delete
+
+        Returns
+        -------
+        requests.Response
+            Response from the delete request
+        """
+        return self._make_admin_request(
+            f"clients/{client_id}/roles/{role_name}", method="DELETE"
+        )
+
+    def assign_realm_roles_to_user(self, user_id: str, roles: list) -> requests.Response:
+        """Assign realm roles to a user.
+
+        Parameters
+        ----------
+        user_id : str
+            The Keycloak user ID
+        roles : list
+            List of role representations (must include 'id' and 'name')
+
+        Returns
+        -------
+        requests.Response
+            Response from the assignment request
+        """
+        return self._make_admin_request(
+            f"users/{user_id}/role-mappings/realm", method="POST", json_data=roles
+        )
+
+    def get_user_realm_roles(self, user_id: str) -> requests.Response:
+        """Get realm roles assigned to a user.
+
+        Parameters
+        ----------
+        user_id : str
+            The Keycloak user ID
+
+        Returns
+        -------
+        requests.Response
+            Response containing list of user's realm roles
+        """
+        return self._make_admin_request(f"users/{user_id}/role-mappings/realm")
+
+    def remove_realm_roles_from_user(self, user_id: str, roles: list) -> requests.Response:
+        """Remove realm roles from a user.
+
+        Parameters
+        ----------
+        user_id : str
+            The Keycloak user ID
+        roles : list
+            List of role representations to remove
+
+        Returns
+        -------
+        requests.Response
+            Response from the removal request
+        """
+        return self._make_admin_request(
+            f"users/{user_id}/role-mappings/realm", method="DELETE", json_data=roles
+        )
+
+    def assign_client_roles_to_user(
+        self, user_id: str, client_id: str, roles: list
+    ) -> requests.Response:
+        """Assign client roles to a user.
+
+        Parameters
+        ----------
+        user_id : str
+            The Keycloak user ID
+        client_id : str
+            The Keycloak client internal ID
+        roles : list
+            List of role representations
+
+        Returns
+        -------
+        requests.Response
+            Response from the assignment request
+        """
+        return self._make_admin_request(
+            f"users/{user_id}/role-mappings/clients/{client_id}",
+            method="POST",
+            json_data=roles,
+        )
+
+    def get_user_client_roles(self, user_id: str, client_id: str) -> requests.Response:
+        """Get client roles assigned to a user.
+
+        Parameters
+        ----------
+        user_id : str
+            The Keycloak user ID
+        client_id : str
+            The Keycloak client internal ID
+
+        Returns
+        -------
+        requests.Response
+            Response containing list of user's client roles
+        """
+        return self._make_admin_request(
+            f"users/{user_id}/role-mappings/clients/{client_id}"
+        )
+
+    def remove_client_roles_from_user(
+        self, user_id: str, client_id: str, roles: list
+    ) -> requests.Response:
+        """Remove client roles from a user.
+
+        Parameters
+        ----------
+        user_id : str
+            The Keycloak user ID
+        client_id : str
+            The Keycloak client internal ID
+        roles : list
+            List of role representations to remove
+
+        Returns
+        -------
+        requests.Response
+            Response from the removal request
+        """
+        return self._make_admin_request(
+            f"users/{user_id}/role-mappings/clients/{client_id}",
+            method="DELETE",
+            json_data=roles,
+        )
+
+    def create_group(self, group_data: dict) -> requests.Response:
+        """Create a new group.
+
+        Parameters
+        ----------
+        group_data : dict
+            Group data including name
+            Example: {"name": "test-group"}
+
+        Returns
+        -------
+        requests.Response
+            Response from the create group request
+        """
+        return self._make_admin_request("groups", method="POST", json_data=group_data)
+
+    def get_groups(self) -> requests.Response:
+        """Get all groups.
+
+        Returns
+        -------
+        requests.Response
+            Response containing list of groups
+        """
+        return self._make_admin_request("groups")
+
+    def get_group_by_id(self, group_id: str) -> requests.Response:
+        """Get a specific group by ID.
+
+        Parameters
+        ----------
+        group_id : str
+            The Keycloak group ID
+
+        Returns
+        -------
+        requests.Response
+            Response containing group data
+        """
+        return self._make_admin_request(f"groups/{group_id}")
+
+    def delete_group(self, group_id: str) -> requests.Response:
+        """Delete a group.
+
+        Parameters
+        ----------
+        group_id : str
+            The Keycloak group ID to delete
+
+        Returns
+        -------
+        requests.Response
+            Response from the delete request
+        """
+        return self._make_admin_request(f"groups/{group_id}", method="DELETE")
+
+    def add_user_to_group(self, user_id: str, group_id: str) -> requests.Response:
+        """Add a user to a group.
+
+        Parameters
+        ----------
+        user_id : str
+            The Keycloak user ID
+        group_id : str
+            The Keycloak group ID
+
+        Returns
+        -------
+        requests.Response
+            Response from the add user request
+        """
+        return self._make_admin_request(
+            f"users/{user_id}/groups/{group_id}", method="PUT"
+        )
+
+    def remove_user_from_group(self, user_id: str, group_id: str) -> requests.Response:
+        """Remove a user from a group.
+
+        Parameters
+        ----------
+        user_id : str
+            The Keycloak user ID
+        group_id : str
+            The Keycloak group ID
+
+        Returns
+        -------
+        requests.Response
+            Response from the remove user request
+        """
+        return self._make_admin_request(
+            f"users/{user_id}/groups/{group_id}", method="DELETE"
+        )
+
+    def get_user_groups(self, user_id: str) -> requests.Response:
+        """Get groups that a user is a member of.
+
+        Parameters
+        ----------
+        user_id : str
+            The Keycloak user ID
+
+        Returns
+        -------
+        requests.Response
+            Response containing list of user's groups
+        """
+        return self._make_admin_request(f"users/{user_id}/groups")
+
+    def get_group_members(self, group_id: str) -> requests.Response:
+        """Get members of a group.
+
+        Parameters
+        ----------
+        group_id : str
+            The Keycloak group ID
+
+        Returns
+        -------
+        requests.Response
+            Response containing list of group members
+        """
+        return self._make_admin_request(f"groups/{group_id}/members")
+
+    def assign_realm_roles_to_group(self, group_id: str, roles: list) -> requests.Response:
+        """Assign realm roles to a group.
+
+        Parameters
+        ----------
+        group_id : str
+            The Keycloak group ID
+        roles : list
+            List of role representations
+
+        Returns
+        -------
+        requests.Response
+            Response from the assignment request
+        """
+        return self._make_admin_request(
+            f"groups/{group_id}/role-mappings/realm", method="POST", json_data=roles
+        )
+
+    def get_group_realm_roles(self, group_id: str) -> requests.Response:
+        """Get realm roles assigned to a group.
+
+        Parameters
+        ----------
+        group_id : str
+            The Keycloak group ID
+
+        Returns
+        -------
+        requests.Response
+            Response containing list of group's realm roles
+        """
+        return self._make_admin_request(f"groups/{group_id}/role-mappings/realm")
+
+    def create_subgroup(self, parent_group_id: str, group_data: dict) -> requests.Response:
+        """Create a subgroup under a parent group.
+
+        Parameters
+        ----------
+        parent_group_id : str
+            The Keycloak parent group ID
+        group_data : dict
+            Group data including name
+
+        Returns
+        -------
+        requests.Response
+            Response from the create subgroup request
+        """
+        return self._make_admin_request(
+            f"groups/{parent_group_id}/children", method="POST", json_data=group_data
+        )
+
+    def oauth2_client_credentials_flow(self, client_id: str, client_secret: str) -> dict:
+        """Perform OAuth2 client credentials flow.
+
+        Parameters
+        ----------
+        client_id : str
+            The OAuth2 client ID
+        client_secret : str
+            The OAuth2 client secret
+
+        Returns
+        -------
+        dict
+            Token response containing access_token
+        """
+        token_url = self._get_token_url()
+
+        payload = {
+            "grant_type": "client_credentials",
+            "client_id": client_id,
+            "client_secret": client_secret,
+        }
+
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+
+        response = requests.post(
+            token_url,
+            data=payload,
+            headers=headers,
+            verify=self.verify_ssl,
+            timeout=TIMEOUT,
+        )
+
+        response.raise_for_status()
+        return response.json()
+
+    def oauth2_password_flow(
+        self, client_id: str, username: str, password: str, client_secret: str = None
+    ) -> dict:
+        """Perform OAuth2 resource owner password flow.
+
+        Parameters
+        ----------
+        client_id : str
+            The OAuth2 client ID
+        username : str
+            Username for authentication
+        password : str
+            Password for authentication
+        client_secret : str, optional
+            The OAuth2 client secret (for confidential clients)
+
+        Returns
+        -------
+        dict
+            Token response containing access_token
+        """
+        token_url = self._get_token_url()
+
+        payload = {
+            "grant_type": "password",
+            "client_id": client_id,
+            "username": username,
+            "password": password,
+        }
+
+        if client_secret:
+            payload["client_secret"] = client_secret
+
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+
+        response = requests.post(
+            token_url,
+            data=payload,
+            headers=headers,
+            verify=self.verify_ssl,
+            timeout=TIMEOUT,
+        )
+
+        response.raise_for_status()
+        return response.json()
