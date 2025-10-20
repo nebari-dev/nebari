@@ -4,12 +4,13 @@ import os
 
 import pytest
 import requests
+from .keycloak_api_utils import KeycloakAPI
 
 
 @pytest.fixture(scope="session")
 def keycloak_base_url() -> str:
     """Get the base URL for Keycloak."""
-    return os.getenv("KEYCLOAK_BASE_URL", "https://tylertesting42.io/auth/")
+    return os.getenv("KEYCLOAK_BASE_URL", "https://tylertesting42.io/auth")
 
 
 @pytest.fixture(scope="session")
@@ -47,78 +48,53 @@ def verify_ssl() -> bool:
     return verify.lower() in ("1", "true")
 
 
-@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
-def test_keycloak_login_with_credentials(
+@pytest.fixture(scope="session")
+def keycloak_api(
     keycloak_base_url: str,
-    keycloak_username: str,
-    keycloak_password: str,
     keycloak_realm: str,
     keycloak_client_id: str,
     verify_ssl: bool,
-) -> None:
-    """Test that we can authenticate with Keycloak using username/password."""
-    # Construct the token endpoint URL
-    token_url = f"{keycloak_base_url}realms/{keycloak_realm}/protocol/openid-connect/token"
-
-    # Prepare the authentication request
-    payload = {
-        "grant_type": "password",
-        "client_id": keycloak_client_id,
-        "username": keycloak_username,
-        "password": keycloak_password,
-    }
-
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-    }
-
-    # Make the authentication request
-    response = requests.post(
-        token_url,
-        data=payload,
-        headers=headers,
-        verify=verify_ssl,
+) -> KeycloakAPI:
+    """Create a KeycloakAPI instance without authentication."""
+    return KeycloakAPI(
+        base_url=keycloak_base_url,
+        realm=keycloak_realm,
+        client_id=keycloak_client_id,
+        verify_ssl=verify_ssl,
     )
 
-    # Assert successful authentication
-    assert response.status_code == 200, f"Authentication failed: {response.text}"
+
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_keycloak_login_with_credentials(
+    keycloak_api: KeycloakAPI,
+    keycloak_username: str,
+    keycloak_password: str,
+) -> None:
+    """Test that we can authenticate with Keycloak using username/password."""
+    # Authenticate using KeycloakAPI
+    token_data = keycloak_api.authenticate(keycloak_username, keycloak_password)
 
     # Verify the response contains expected fields
-    token_data = response.json()
     assert "access_token" in token_data
     assert "refresh_token" in token_data
     assert "token_type" in token_data
     assert token_data["token_type"].lower() == "bearer"
     assert "expires_in" in token_data
 
+    # Verify tokens are stored in the instance
+    assert keycloak_api.access_token is not None
+    assert keycloak_api.refresh_token is not None
+    assert keycloak_api.token_type == "Bearer"
+
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_keycloak_login_invalid_credentials(
-    keycloak_base_url: str,
-    keycloak_realm: str,
-    keycloak_client_id: str,
-    verify_ssl: bool,
+    keycloak_api: KeycloakAPI,
 ) -> None:
     """Test that authentication fails with invalid credentials."""
-    token_url = f"{keycloak_base_url}realms/{keycloak_realm}/protocol/openid-connect/token"
+    # Authenticate with invalid credentials should raise an HTTPError
+    with pytest.raises(requests.exceptions.HTTPError) as exc_info:
+        keycloak_api.authenticate("invalid_user", "invalid_password")
 
-    payload = {
-        "grant_type": "password",
-        "client_id": keycloak_client_id,
-        "username": "invalid_user",
-        "password": "invalid_password",
-    }
-
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-    }
-
-    response = requests.post(
-        token_url,
-        data=payload,
-        headers=headers,
-        verify=verify_ssl,
-    )
-
-    # Assert authentication fails
-    assert response.status_code == 401
+    # Verify it's a 401 Unauthorized error
+    assert exc_info.value.response.status_code == 401
