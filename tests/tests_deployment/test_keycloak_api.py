@@ -64,6 +64,34 @@ def keycloak_api(
     )
 
 
+@pytest.fixture(scope="session")
+def authenticated_keycloak_api(
+    keycloak_base_url: str,
+    keycloak_username: str,
+    keycloak_password: str,
+    keycloak_realm: str,
+    keycloak_client_id: str,
+    verify_ssl: bool,
+) -> KeycloakAPI:
+    """Create an authenticated KeycloakAPI instance for admin operations."""
+    api = KeycloakAPI(
+        base_url=keycloak_base_url,
+        realm=keycloak_realm,
+        client_id=keycloak_client_id,
+        username=keycloak_username,
+        password=keycloak_password,
+        verify_ssl=verify_ssl,
+    )
+    return api
+
+
+@pytest.fixture
+def test_username() -> str:
+    """Generate a unique test username."""
+    import uuid
+    return f"testuser_{uuid.uuid4().hex[:8]}"
+
+
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_keycloak_login_with_credentials(
     keycloak_api: KeycloakAPI,
@@ -98,3 +126,142 @@ def test_keycloak_login_invalid_credentials(
 
     # Verify it's a 401 Unauthorized error
     assert exc_info.value.response.status_code == 401
+
+
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_create_user(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_username: str,
+) -> None:
+    """Test creating a new user in Keycloak."""
+    user_data = {
+        "username": test_username,
+        "email": f"{test_username}@example.com",
+        "firstName": "Test",
+        "lastName": "User",
+        "enabled": True,
+    }
+
+    response = authenticated_keycloak_api.create_user(user_data)
+
+    # Keycloak returns 201 Created for successful user creation
+    assert response.status_code == 201, f"Failed to create user: {response.text}"
+
+    # Cleanup: Delete the created user
+    # Get the user to retrieve the ID
+    get_response = authenticated_keycloak_api.get_users(username=test_username)
+    assert get_response.status_code == 200
+    users = get_response.json()
+    if users:
+        user_id = users[0]["id"]
+        authenticated_keycloak_api.delete_user(user_id)
+
+
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_get_users(
+    authenticated_keycloak_api: KeycloakAPI,
+) -> None:
+    """Test getting users from Keycloak."""
+    response = authenticated_keycloak_api.get_users()
+
+    assert response.status_code == 200, f"Failed to get users: {response.text}"
+    users = response.json()
+    assert isinstance(users, list), "Expected a list of users"
+
+
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_get_user_by_username(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_username: str,
+) -> None:
+    """Test getting a specific user by username."""
+    # First, create a test user
+    user_data = {
+        "username": test_username,
+        "email": f"{test_username}@example.com",
+        "enabled": True,
+    }
+    create_response = authenticated_keycloak_api.create_user(user_data)
+    assert create_response.status_code == 201
+
+    # Get the user by username
+    response = authenticated_keycloak_api.get_users(username=test_username)
+    assert response.status_code == 200, f"Failed to get user: {response.text}"
+
+    users = response.json()
+    assert len(users) > 0, "User not found"
+    assert users[0]["username"] == test_username
+
+    # Cleanup: Delete the test user
+    user_id = users[0]["id"]
+    authenticated_keycloak_api.delete_user(user_id)
+
+
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_update_user(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_username: str,
+) -> None:
+    """Test updating a user in Keycloak."""
+    # Create a test user
+    user_data = {
+        "username": test_username,
+        "email": f"{test_username}@example.com",
+        "firstName": "Original",
+        "lastName": "Name",
+        "enabled": True,
+    }
+    create_response = authenticated_keycloak_api.create_user(user_data)
+    assert create_response.status_code == 201
+
+    # Get the user ID
+    get_response = authenticated_keycloak_api.get_users(username=test_username)
+    users = get_response.json()
+    user_id = users[0]["id"]
+
+    # Update the user
+    update_data = {
+        "firstName": "Updated",
+        "lastName": "User",
+    }
+    update_response = authenticated_keycloak_api.update_user(user_id, update_data)
+    assert update_response.status_code == 204, f"Failed to update user: {update_response.text}"
+
+    # Verify the update
+    verify_response = authenticated_keycloak_api.get_user_by_id(user_id)
+    assert verify_response.status_code == 200
+    updated_user = verify_response.json()
+    assert updated_user["firstName"] == "Updated"
+    assert updated_user["lastName"] == "User"
+
+    # Cleanup: Delete the test user
+    authenticated_keycloak_api.delete_user(user_id)
+
+
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_delete_user(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_username: str,
+) -> None:
+    """Test deleting a user from Keycloak."""
+    # Create a test user
+    user_data = {
+        "username": test_username,
+        "email": f"{test_username}@example.com",
+        "enabled": True,
+    }
+    create_response = authenticated_keycloak_api.create_user(user_data)
+    assert create_response.status_code == 201
+
+    # Get the user ID
+    get_response = authenticated_keycloak_api.get_users(username=test_username)
+    users = get_response.json()
+    user_id = users[0]["id"]
+
+    # Delete the user
+    delete_response = authenticated_keycloak_api.delete_user(user_id)
+    assert delete_response.status_code == 204, f"Failed to delete user: {delete_response.text}"
+
+    # Verify the user is deleted
+    verify_response = authenticated_keycloak_api.get_user_by_id(user_id)
+    assert verify_response.status_code == 404, "User should not exist after deletion"

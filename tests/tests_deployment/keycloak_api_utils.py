@@ -105,3 +105,147 @@ class KeycloakAPI:
         self.token_type = token_data.get("token_type")
 
         return token_data
+
+    def _get_admin_url(self, endpoint: str) -> str:
+        """Construct an admin API endpoint URL.
+
+        Parameters
+        ----------
+        endpoint : str
+            The admin endpoint path (e.g., "users", "users/{id}")
+
+        Returns
+        -------
+        str
+            Full URL for the admin endpoint
+        """
+        return f"{self.base_url}/admin/realms/{self.realm}/{endpoint}"
+
+    def _make_admin_request(
+        self,
+        endpoint: str,
+        method: str = "GET",
+        json_data: dict = None,
+        timeout: int = TIMEOUT,
+    ) -> requests.Response:
+        """Make an authenticated request to the Keycloak admin API.
+
+        Parameters
+        ----------
+        endpoint : str
+            The admin endpoint path
+        method : str
+            HTTP method (GET, POST, PUT, DELETE)
+        json_data : dict, optional
+            JSON data to send in the request body
+        timeout : int
+            Request timeout in seconds
+
+        Returns
+        -------
+        requests.Response
+            Response from the admin API
+        """
+        if not self.access_token:
+            raise ValueError("Not authenticated. Call authenticate() first.")
+
+        url = self._get_admin_url(endpoint)
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json",
+        }
+
+        response = requests.request(
+            method,
+            url,
+            json=json_data,
+            headers=headers,
+            verify=self.verify_ssl,
+            timeout=timeout,
+        )
+
+        return response
+
+    def create_user(self, user_data: dict) -> requests.Response:
+        """Create a new user in Keycloak.
+
+        Parameters
+        ----------
+        user_data : dict
+            User data including username, email, firstName, lastName, etc.
+            Example: {"username": "testuser", "email": "test@example.com",
+                     "enabled": True, "firstName": "Test", "lastName": "User"}
+
+        Returns
+        -------
+        requests.Response
+            Response from the create user request
+        """
+        return self._make_admin_request("users", method="POST", json_data=user_data)
+
+    def get_users(self, username: str = None) -> requests.Response:
+        """Get users from Keycloak.
+
+        Parameters
+        ----------
+        username : str, optional
+            Filter users by exact username match
+
+        Returns
+        -------
+        requests.Response
+            Response containing list of users
+        """
+        endpoint = "users"
+        if username:
+            endpoint = f"users?username={username}"
+        return self._make_admin_request(endpoint)
+
+    def get_user_by_id(self, user_id: str) -> requests.Response:
+        """Get a specific user by ID.
+
+        Parameters
+        ----------
+        user_id : str
+            The Keycloak user ID
+
+        Returns
+        -------
+        requests.Response
+            Response containing user data
+        """
+        return self._make_admin_request(f"users/{user_id}")
+
+    def update_user(self, user_id: str, user_data: dict) -> requests.Response:
+        """Update a user in Keycloak.
+
+        Parameters
+        ----------
+        user_id : str
+            The Keycloak user ID
+        user_data : dict
+            User data to update (partial updates supported)
+
+        Returns
+        -------
+        requests.Response
+            Response from the update request
+        """
+        return self._make_admin_request(
+            f"users/{user_id}", method="PUT", json_data=user_data
+        )
+
+    def delete_user(self, user_id: str) -> requests.Response:
+        """Delete a user from Keycloak.
+
+        Parameters
+        ----------
+        user_id : str
+            The Keycloak user ID to delete
+
+        Returns
+        -------
+        requests.Response
+            Response from the delete request
+        """
+        return self._make_admin_request(f"users/{user_id}", method="DELETE")
