@@ -1,3 +1,13 @@
+> [!IMPORTANT]
+> **Nebari Deployment Issues**
+>
+> The current stable releases on PyPI and conda-forge suffer from issues related to [Bitnami image deprecation](https://github.com/bitnami/charts/issues/35164) that prevent successful deployments.
+> These issues have been resolved on the `main` branch and will be included in the upcoming `2025.10.1` release.
+>
+> If trying to deploy nebari in the meantime, please install directly from the `main` branch e.g. `pip install git+https://github.com/nebari-dev/nebari.git@main`.
+
+---
+
 <p align="center">
 <picture>
   <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup.svg">
@@ -137,8 +147,8 @@ For detailed step-by-step instructions on how to deploy Nebari, check the [Nebar
 
 ## Nebari HPC
 
-An HPC version of Nebari is currently not available. There is one under development for Nebari's precursor QHub.
-Curious? Check out the [QHub HPC](https://github.com/Quansight/qhub-hpc) repository.
+An HPC version of Nebari is available for SLURM-based high-performance computing environments.
+Check out the [Nebari SLURM](https://github.com/nebari-dev/nebari-slurm) repository.
 
 ## Contributing to Nebari 👩🏻‍💻
 
@@ -167,7 +177,7 @@ Getting help:
 
 ## Code of Conduct 📖
 
-To guarantee a welcoming and friendly community, we require all community members to follow our [Code of Conduct](https://github.com/Quansight/.github/blob/master/CODE_OF_CONDUCT.md).
+To guarantee a welcoming and friendly community, we require all community members to follow our [Code of Conduct](https://github.com/nebari-dev/.github/blob/main/CODE_OF_CONDUCT.md).
 
 ## Ongoing Support
 
