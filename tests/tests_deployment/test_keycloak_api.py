@@ -1,30 +1,50 @@
 """Keycloak API endpoint tests."""
 
 import os
+import pathlib
 import uuid
 
 import pytest
 import requests
+from _nebari.config import read_configuration
+from nebari.plugins import nebari_plugin_manager
 
+from tests.tests_deployment import constants
 from .keycloak_api_utils import KeycloakAPI, decode_jwt_token
 
+
+def get_nebari_config():
+    config_schema = nebari_plugin_manager.config_schema
+    config_filepath = constants.NEBARI_CONFIG_PATH
+    assert pathlib.Path(config_filepath).exists()
+    config = read_configuration(config_filepath, config_schema)
+    return config
 
 @pytest.fixture(scope="session")
 def keycloak_base_url() -> str:
     """Get the base URL for Keycloak."""
-    return os.getenv("KEYCLOAK_BASE_URL", "https://tylertesting42.io/auth")
+    config = get_nebari_config()
 
+    keycloak_server_url = os.environ.get(
+        "KEYCLOAK_SERVER_URL", f"https://{config.domain}/auth/"
+    )
+    return keycloak_server_url
 
 @pytest.fixture(scope="session")
 def keycloak_username() -> str:
     """Get the Keycloak admin username."""
-    return os.getenv("KEYCLOAK_USERNAME", "root")
-
+    keycloak_admin_username = os.environ.get("KEYCLOAK_ADMIN_USERNAME", "root")
+    return keycloak_admin_username
 
 @pytest.fixture(scope="session")
 def keycloak_password() -> str:
     """Get the Keycloak admin password."""
-    return os.getenv("KEYCLOAK_PASSWORD", "e7kjiszh9ykuzhkopnnw7vmgixyl5vto")
+    config = get_nebari_config()
+    keycloak_admin_password = os.environ.get(
+        "KEYCLOAK_ADMIN_PASSWORD",
+        config.security.keycloak.initial_root_password,
+    )
+    return keycloak_admin_password
 
 
 @pytest.fixture(scope="session")
