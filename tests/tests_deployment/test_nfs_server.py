@@ -1,33 +1,23 @@
-"""
-Test suite for validating NFS server functionality in Nebari deployments.
-
-This module tests the NFS server that provides shared storage for conda-store
-and other services, ensuring data persistence and proper mounting behavior.
-"""
-
 import logging
 import os
 
 import pytest
 from kubernetes import client, config
 
-# Set up logging
 logger = logging.getLogger(__name__)
 
 
 class TestNFSServer:
-    """Test NFS server functionality and data persistence."""
+    """Test NFS server basic functionality."""
 
     @pytest.fixture(scope="class")
     def kube_client(self):
-        """Initialize Kubernetes client."""
         config.load_kube_config()
         return client.CoreV1Api()
 
     @pytest.fixture(scope="class")
     def namespace(self):
-        """Get the deployment namespace."""
-        return os.environ.get("NEBARI_K8S_NAMESPACE", "dev")
+        return os.environ.get("NEBARI_NAMESPACE", "dev")
 
     def test_nfs_server_pods_running(self, kube_client, namespace):
         """Test that NFS server pods are running successfully."""
@@ -35,17 +25,12 @@ class TestNFSServer:
         nfs_server_pods = kube_client.list_namespaced_pod(
             namespace=namespace, label_selector="role=nfs-server-nfs"
         )
-        logger.info(f"Found {len(nfs_server_pods.items)} dedicated NFS server pods")
-
-        logger.info("Searching for conda-store worker pods with NFS containers...")
         conda_store_pods = kube_client.list_namespaced_pod(
             namespace=namespace, label_selector="role=nebari-conda-store-worker"
         )
-        logger.info(f"Found {len(conda_store_pods.items)} conda-store worker pods")
 
         # At least one should exist
         total_pods = len(nfs_server_pods.items) + len(conda_store_pods.items)
-        logger.info(f"Total pods that might contain NFS: {total_pods}")
         assert total_pods > 0, "No NFS server pods found"
 
         # Check that pods are running
@@ -71,14 +56,11 @@ class TestNFSServer:
     def test_nfs_service_accessible(self, kube_client, namespace):
         """Test that NFS service is accessible and responds correctly."""
 
-        # Check for any NFS services (more flexible approach)
-        logger.info("Searching for NFS services...")
         all_services = kube_client.list_namespaced_service(namespace=namespace)
         nfs_services = [
             svc for svc in all_services.items if "nfs" in svc.metadata.name.lower()
         ]
 
-        logger.info(f"Found {len(nfs_services)} NFS services:")
         for svc in nfs_services:
             logger.info(f"  - {svc.metadata.name}: {svc.spec.cluster_ip}")
 
@@ -97,9 +79,6 @@ class TestNFSServer:
 
         # Verify port numbers
         port_map = {port.name: port.port for port in nfs_service.spec.ports}
-        logger.info(f"Port mapping: {port_map}")
-
-        # Check each expected port
         expected_port_numbers = {"nfs": 2049, "mountd": 20048, "rpcbind": 111}
 
         for port_name, expected_number in expected_port_numbers.items():
@@ -114,7 +93,6 @@ class TestNFSServer:
     def test_persistent_volume_claim_bound(self, kube_client, namespace):
         """Test that NFS PVC is properly bound to a volume."""
 
-        # Check for both possible PVC names
         pvc_names = [
             "dev-conda-store-storage",
             "nebari-conda-store-storage",
@@ -127,12 +105,8 @@ class TestNFSServer:
                 namespace=namespace, field_selector=f"metadata.name={pvc_name}"
             )
             all_pvcs.extend(pvcs.items)
-            if pvcs.items:
-                logger.info(f"Found PVC: {pvc_name}")
 
-        # If no specific PVCs found, search for any storage-related PVCs
         if not all_pvcs:
-            logger.info("Searching for any storage-related PVCs...")
             all_namespace_pvcs = kube_client.list_namespaced_persistent_volume_claim(
                 namespace=namespace
             )
@@ -150,8 +124,6 @@ class TestNFSServer:
 
         pvcs = PVCList(all_pvcs)
 
-        logger.info(f"Found {len(pvcs.items)} matching PVCs")
-
         if len(pvcs.items) > 0:
             pvc = pvcs.items[0]
             logger.info(f"PVC found: {pvc.metadata.name}")
@@ -165,16 +137,10 @@ class TestNFSServer:
             logger.info(f"Requested storage: {requested_storage}")
             assert requested_storage is not None, "No storage requested in PVC"
 
-            # Log volume name if available
-            if hasattr(pvc.spec, "volume_name") and pvc.spec.volume_name:
-                logger.info(f"Bound to volume: {pvc.spec.volume_name}")
-
     def test_nfs_data_persistence_across_restarts(self, kube_client, namespace):
         """Test that NFS data persists across pod restarts."""
 
-        # Check that the PVC has the correct reclaim policy
-        # and storage class to ensure persistence
-
+        # Check that the PVC has the correct reclaim policy and storage class
         pvcs = kube_client.list_namespaced_persistent_volume_claim(
             namespace=namespace, field_selector="metadata.name=dev-conda-store-storage"
         )
@@ -191,7 +157,6 @@ class TestNFSServer:
 
                 if len(pvs.items) > 0:
                     pv = pvs.items[0]
-                    # Check reclaim policy for data safety
                     reclaim_policy = pv.spec.persistent_volume_reclaim_policy
                     assert reclaim_policy in [
                         "Retain",
