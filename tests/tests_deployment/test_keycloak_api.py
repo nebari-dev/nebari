@@ -6,10 +6,11 @@ import uuid
 
 import pytest
 import requests
+
 from _nebari.config import read_configuration
 from nebari.plugins import nebari_plugin_manager
-
 from tests.tests_deployment import constants
+
 from .keycloak_api_utils import KeycloakAPI, decode_jwt_token
 
 
@@ -19,6 +20,7 @@ def get_nebari_config():
     assert pathlib.Path(config_filepath).exists()
     config = read_configuration(config_filepath, config_schema)
     return config
+
 
 @pytest.fixture(scope="session")
 def keycloak_base_url() -> str:
@@ -30,11 +32,13 @@ def keycloak_base_url() -> str:
     )
     return keycloak_server_url
 
+
 @pytest.fixture(scope="session")
 def keycloak_username() -> str:
     """Get the Keycloak admin username."""
     keycloak_admin_username = os.environ.get("KEYCLOAK_ADMIN_USERNAME", "root")
     return keycloak_admin_username
+
 
 @pytest.fixture(scope="session")
 def keycloak_password() -> str:
