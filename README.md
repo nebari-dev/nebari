@@ -37,7 +37,7 @@
   - [Install Nebari](#install-nebari)
 - [Usage 🚀](#usage-)
 - [Nebari HPC](#nebari-hpc)
-- [Contributing to Nebari 👩🏻‍💻](#contributing-to-nebari-)
+- [Contributing to Nebari 👩🏻‍💻](#contributing-to-nebari-%E2%80%8D)
   - [Installing the Development version of Nebari ⚙️](#installing-the-development-version-of-nebari-️)
   - [Questions? 🤔](#questions-)
 - [Code of Conduct 📖](#code-of-conduct-)
