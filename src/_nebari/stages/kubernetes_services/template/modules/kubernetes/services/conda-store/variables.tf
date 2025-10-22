@@ -86,3 +86,25 @@ variable "conda-store-fs" {
     error_message = "Allowed values for input_parameter are \"cephfs\", or \"nfs\"."
   }
 }
+
+variable "conda-store-worker" {
+  description = "Worker-specific overrides for conda-store worker pods."
+  type = object({
+    max_workers = optional(any)
+    resources = optional(object({
+      cpu_limit     = optional(any)
+      mem_limit     = optional(any)
+      cpu_guarantee = optional(any)
+      mem_guarantee = optional(any)
+    }))
+  })
+  default = {
+    max_workers = 1
+    resources = {
+      cpu_limit     = 2
+      mem_limit     = "6Gi"
+      cpu_guarantee = 1
+      mem_guarantee = "4Gi"
+    }
+  }
+}
