@@ -59,7 +59,10 @@ def download_helm_binary(version=constants.HELM_VERSION) -> Path:
 def run_helm_subprocess(processargs, **kwargs) -> None:
     helm_path = download_helm_binary()
     logger.info("helm at %s", helm_path)
-    if run_subprocess_cmd([helm_path] + processargs, **kwargs):
+    return_code, output = run_subprocess_cmd(
+        [helm_path] + processargs, capture_output=True, **kwargs
+    )
+    if return_code:
         raise HelmException("Helm returned an error")
 
 
