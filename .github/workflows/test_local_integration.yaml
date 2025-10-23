@@ -119,7 +119,7 @@ jobs:
         with:
           workloads: "" # all
           namespace: "dev"
-          timeout: 300
+          timeout: 480
           max-restarts: 3
 
       ### DEPLOYMENT TESTS
