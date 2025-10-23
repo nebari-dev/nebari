@@ -216,13 +216,13 @@ class KubernetesIngressStage(NebariTerraformStage):
                     "CLOUDFLARE_TOKEN"
                 )
 
-        # Initialize HSTS based on provider and certificate type if not explicitly configured
+        # Initialize HSTS based on certificate type if not explicitly configured
         hsts = self.config.ingress.hsts
         if hsts is None:
             # Only enable HSTS for valid certificates (lets-encrypt, existing)
             # Do not enable for self-signed certs to avoid HSTS pinning issues during initial setup
             is_valid_cert = cert_type in ["lets-encrypt", "existing"]
-            if self.config.provider != schema.ProviderEnum.local and is_valid_cert:
+            if is_valid_cert:
                 hsts = HSTS()
             else:
                 hsts = HSTS(enabled=False)
