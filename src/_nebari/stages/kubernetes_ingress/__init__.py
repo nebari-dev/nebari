@@ -146,7 +146,7 @@ class DnsProvider(schema.Base):
 
 
 class HSTS(schema.Base):
-    enabled: bool = False
+    enabled: bool = True
     # Conservative default allows testing before committing to production values.
     # Recommended: Test with 300s, then increase to 31536000 (1 year) once validated.
     # Recovery: Set max_age=0 and redeploy to clear HSTS from browsers.
@@ -157,7 +157,7 @@ class HSTS(schema.Base):
 
 
 class Ingress(schema.Base):
-    hsts: HSTS = HSTS()
+    hsts: Optional[HSTS] = None
     terraform_overrides: Dict = {}
 
 
@@ -215,11 +215,21 @@ class KubernetesIngressStage(NebariTerraformStage):
                 cert_details["cloudflare-dns-api-token"] = os.environ.get(
                     "CLOUDFLARE_TOKEN"
                 )
+
+        # Initialize HSTS based on provider if not explicitly configured
+        hsts = self.config.ingress.hsts
+        if hsts is None:
+            # Enable HSTS by default for all providers except local
+            if self.config.provider != schema.ProviderEnum.local:
+                hsts = HSTS(enabled=True)
+            else:
+                hsts = HSTS(enabled=False)
+
         hsts_config = {
-            "hsts-enabled": self.config.ingress.hsts.enabled,
-            "hsts-max-age": self.config.ingress.hsts.max_age,
-            "hsts-include-subdomains": self.config.ingress.hsts.include_subdomains,
-            "hsts-preload": self.config.ingress.hsts.preload,
+            "hsts-enabled": hsts.enabled,
+            "hsts-max-age": hsts.max_age,
+            "hsts-include-subdomains": hsts.include_subdomains,
+            "hsts-preload": hsts.preload,
         }
         return {
             **{
