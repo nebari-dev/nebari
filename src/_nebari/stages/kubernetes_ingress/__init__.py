@@ -145,7 +145,15 @@ class DnsProvider(schema.Base):
     auto_provision: Optional[bool] = False
 
 
+class HSTS(schema.Base):
+    enabled: bool = False
+    max_age: int = 31536000  # 1 year in seconds
+    include_subdomains: bool = True
+    preload: bool = False
+
+
 class Ingress(schema.Base):
+    hsts: HSTS = HSTS()
     terraform_overrides: Dict = {}
 
 
@@ -203,6 +211,12 @@ class KubernetesIngressStage(NebariTerraformStage):
                 cert_details["cloudflare-dns-api-token"] = os.environ.get(
                     "CLOUDFLARE_TOKEN"
                 )
+        hsts_config = {
+            "hsts-enabled": self.config.ingress.hsts.enabled,
+            "hsts-max-age": self.config.ingress.hsts.max_age,
+            "hsts-include-subdomains": self.config.ingress.hsts.include_subdomains,
+            "hsts-preload": self.config.ingress.hsts.preload,
+        }
         return {
             **{
                 "traefik-image": {
@@ -217,6 +231,7 @@ class KubernetesIngressStage(NebariTerraformStage):
                 **self.config.ingress.terraform_overrides,
             },
             **cert_details,
+            **hsts_config,
         }
 
     def set_outputs(
