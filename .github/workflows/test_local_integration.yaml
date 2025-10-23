@@ -62,7 +62,7 @@ jobs:
         uses: mxschmitt/action-tmate@v3
         with:
           detached: true
-      
+
       # https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
       - name: "Update inotify ulimit"
         run: |
