@@ -145,7 +145,19 @@ class DnsProvider(schema.Base):
     auto_provision: Optional[bool] = False
 
 
+class HSTS(schema.Base):
+    enabled: bool = True
+    # Conservative default allows testing before committing to production values.
+    # Recommended: Test with 300s, then increase to 31536000 (1 year) once validated.
+    # Recovery: Set max_age=0 and redeploy to clear HSTS from browsers.
+    # See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+    max_age: int = 300  # 5 minutes - safe for initial deployments
+    include_subdomains: bool = True
+    preload: bool = False
+
+
 class Ingress(schema.Base):
+    hsts: Optional[HSTS] = None
     terraform_overrides: Dict = {}
 
 
@@ -203,6 +215,24 @@ class KubernetesIngressStage(NebariTerraformStage):
                 cert_details["cloudflare-dns-api-token"] = os.environ.get(
                     "CLOUDFLARE_TOKEN"
                 )
+
+        # Initialize HSTS based on certificate type if not explicitly configured
+        hsts = self.config.ingress.hsts
+        if hsts is None:
+            # Only enable HSTS for valid certificates (lets-encrypt, existing)
+            # Do not enable for self-signed certs to avoid HSTS pinning issues during initial setup
+            is_valid_cert = cert_type in ["lets-encrypt", "existing"]
+            if is_valid_cert:
+                hsts = HSTS()
+            else:
+                hsts = HSTS(enabled=False)
+
+        hsts_config = {
+            "hsts-enabled": hsts.enabled,
+            "hsts-max-age": hsts.max_age,
+            "hsts-include-subdomains": hsts.include_subdomains,
+            "hsts-preload": hsts.preload,
+        }
         return {
             **{
                 "traefik-image": {
@@ -217,6 +247,7 @@ class KubernetesIngressStage(NebariTerraformStage):
                 **self.config.ingress.terraform_overrides,
             },
             **cert_details,
+            **hsts_config,
         }
 
     def set_outputs(
