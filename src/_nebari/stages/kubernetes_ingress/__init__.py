@@ -147,10 +147,11 @@ class DnsProvider(schema.Base):
 
 class HSTS(schema.Base):
     enabled: bool = False
-    # Conservative default for initial testing. Once validated, increase to
-    # production value (e.g., 31536000 = 1 year). See:
-    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
-    max_age: int = 30  # 30 seconds - for initial testing only
+    # Conservative default allows testing before committing to production values.
+    # Recommended: Test with 300s, then increase to 31536000 (1 year) once validated.
+    # Recovery: Set max_age=0 and redeploy to clear HSTS from browsers.
+    # See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+    max_age: int = 300  # 5 minutes - safe for initial deployments
     include_subdomains: bool = True
     preload: bool = False
 

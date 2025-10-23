@@ -98,9 +98,9 @@ variable "hsts-enabled" {
 }
 
 variable "hsts-max-age" {
-  description = "HSTS max-age in seconds (default 30s for initial testing; increase to 31536000 for production)"
+  description = "HSTS max-age in seconds (default 300s / 5 minutes; increase to 31536000 for production)"
   type        = number
-  default     = 30
+  default     = 300
 }
 
 variable "hsts-include-subdomains" {
