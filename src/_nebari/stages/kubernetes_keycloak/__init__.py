@@ -318,13 +318,36 @@ class KubernetesKeycloakStage(NebariTerraformStage):
     def post_deploy(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
     ):
-        """Create nebari-bot user after Keycloak is deployed."""
+        """Restore Keycloak database (if backup exists) and create nebari-bot user after Keycloak is deployed."""
+        from pathlib import Path
+
+        import kubernetes
         from keycloak import KeycloakAdmin
         from keycloak.exceptions import KeycloakError
+        from kubernetes.stream import stream
 
+        # Step 1: Restore database if backup exists
+        backup_file = Path(self.output_directory) / "keycloak-backup.sql"
+
+        if backup_file.exists():
+            print("\n" + "=" * 80)
+            print("KEYCLOAK DATABASE RESTORE")
+            print("=" * 80)
+            print(f"Found backup file: {backup_file}")
+            print(f"Size: {backup_file.stat().st_size / 1024:.2f} KB\n")
+
+            self._restore_keycloak_database(backup_file)
+
+            # Rename backup file to prevent re-running restore on subsequent deploys
+            backup_file.rename(backup_file.with_suffix('.sql.restored'))
+            print(f"\n✓ Renamed backup file to {backup_file.with_suffix('.sql.restored')}")
+            print("=" * 80 + "\n")
+        else:
+            print("No Keycloak database backup found, skipping restore")
+
+        # Step 2: Create nebari-bot user
         keycloak_url = f"{stage_outputs['stages/' + self.name]['keycloak_credentials']['value']['url']}/auth/"
         nebari_bot_password = stage_outputs["stages/" + self.name]["keycloak_nebari_bot_password"]["value"]
-
         print("Creating nebari-bot user in Keycloak master realm...")
 
         max_attempts = 10
@@ -386,6 +409,265 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                 else:
                     print(f"Failed to configure nebari-bot user after {max_attempts} attempts: {e}")
                     sys.exit(1)
+
+    def _restore_keycloak_database(self, backup_file):
+        """Restore PostgreSQL database from backup file using Kubernetes exec."""
+        import kubernetes
+        from kubernetes.stream import stream
+
+        # Configuration - these should match your new postgres deployment
+        namespace = self.config.namespace
+        keycloak_statefulset_name = "keycloak-keycloakx"
+        pod_name = "keycloak-postgres-standalone-postgresql-0"
+        db_user = "keycloak"
+        db_name = "keycloak"
+        db_password = "keycloak"  # This should ideally come from config or secret
+        postgres_user = "postgres"
+
+        # Load kubernetes config
+        kubernetes.config.load_kube_config()
+        api = kubernetes.client.CoreV1Api()
+        apps_api = kubernetes.client.AppsV1Api()
+
+        # Step 0: Scale down Keycloak to prevent active database connections
+        print(f"Step 0: Scaling down Keycloak statefulset '{keycloak_statefulset_name}' to 0 replicas...")
+        try:
+            # Get current statefulset
+            statefulset = apps_api.read_namespaced_stateful_set(
+                name=keycloak_statefulset_name,
+                namespace=namespace
+            )
+            original_replicas = statefulset.spec.replicas
+            print(f"  Current replicas: {original_replicas}")
+
+            # Scale to 0
+            statefulset.spec.replicas = 0
+            apps_api.patch_namespaced_stateful_set(
+                name=keycloak_statefulset_name,
+                namespace=namespace,
+                body=statefulset
+            )
+            print(f"  Scaled to 0 replicas")
+
+            # Wait for pods to terminate
+            print(f"  Waiting for Keycloak pods to terminate...")
+            max_wait = 60  # seconds
+            wait_interval = 2
+            elapsed = 0
+            while elapsed < max_wait:
+                pods = api.list_namespaced_pod(
+                    namespace=namespace,
+                    label_selector=f"app.kubernetes.io/name=keycloak"
+                )
+                if len(pods.items) == 0:
+                    print(f"  ✓ All Keycloak pods terminated")
+                    break
+                print(f"  Still waiting... ({len(pods.items)} pods remaining)")
+                time.sleep(wait_interval)
+                elapsed += wait_interval
+
+            if elapsed >= max_wait:
+                print(f"  ⚠ Warning: Timed out waiting for pods to terminate, proceeding anyway")
+
+            print("✓ Keycloak scaled down\n")
+
+        except kubernetes.client.exceptions.ApiException as e:
+            print(f"⚠ Warning: Could not scale down Keycloak statefulset: {e}")
+            print("Proceeding with restore anyway...\n")
+            original_replicas = None
+
+        # Check if pod exists
+        print(f"Checking if pod '{pod_name}' exists in namespace '{namespace}'...")
+        try:
+            api.read_namespaced_pod(name=pod_name, namespace=namespace)
+            print(f"✓ Pod found\n")
+        except kubernetes.client.exceptions.ApiException as e:
+            if e.status == 404:
+                print(f"✗ Pod '{pod_name}' not found in namespace '{namespace}'")
+                print("Skipping database restore - pod may not be ready yet")
+                return
+            raise
+
+        # Get postgres superuser password from secret
+        print("Getting postgres superuser password from secret...")
+        try:
+            secret_name = "keycloak-postgres-standalone-postgresql"
+            secret = api.read_namespaced_secret(name=secret_name, namespace=namespace)
+            import base64
+            postgres_password = base64.b64decode(secret.data['postgres-password']).decode('utf-8')
+            print("✓ Got postgres password\n")
+        except Exception as e:
+            print(f"✗ Error getting postgres password: {e}")
+            print("Skipping database restore")
+            return
+
+        # Helper function to run commands in pod
+        def run_command(command, show_output=True):
+            print(f"  Running: {command}")
+            sys.stdout.flush()
+
+            resp = stream(
+                api.connect_get_namespaced_pod_exec,
+                name=pod_name,
+                namespace=namespace,
+                command=['/bin/sh', '-c', command],
+                stderr=True,
+                stdin=False,
+                stdout=True,
+                tty=False,
+                _preload_content=False
+            )
+
+            stdout_lines = []
+            stderr_lines = []
+
+            while resp.is_open():
+                resp.update(timeout=1)
+                if resp.peek_stdout():
+                    data = resp.read_stdout()
+                    stdout_lines.append(data)
+                    if show_output:
+                        print(data, end='')
+                        sys.stdout.flush()
+                if resp.peek_stderr():
+                    data = resp.read_stderr()
+                    stderr_lines.append(data)
+                    if show_output:
+                        print(data, end='', file=sys.stderr)
+                        sys.stderr.flush()
+
+            resp.close()
+            return ''.join(stdout_lines), ''.join(stderr_lines)
+
+        # Helper function to run command with stdin
+        def run_command_with_stdin(command, stdin_data, show_output=True):
+            print(f"  Running: {command}")
+            print(f"  Piping {len(stdin_data)} bytes to stdin...")
+            sys.stdout.flush()
+
+            resp = stream(
+                api.connect_get_namespaced_pod_exec,
+                name=pod_name,
+                namespace=namespace,
+                command=['/bin/sh', '-c', command],
+                stderr=True,
+                stdin=True,
+                stdout=True,
+                tty=False,
+                _preload_content=False
+            )
+
+            # Write stdin data and close stdin to signal EOF
+            resp.write_stdin(stdin_data)
+            resp.write_stdin("")  # Signal EOF
+
+            stdout_lines = []
+            stderr_lines = []
+            no_data_cycles = 0
+            max_no_data_cycles = 30
+
+            while resp.is_open():
+                resp.update(timeout=1)
+                has_data = False
+
+                if resp.peek_stdout():
+                    data = resp.read_stdout()
+                    stdout_lines.append(data)
+                    if show_output:
+                        print(data, end='')
+                        sys.stdout.flush()
+                    has_data = True
+                    no_data_cycles = 0
+
+                if resp.peek_stderr():
+                    data = resp.read_stderr()
+                    stderr_lines.append(data)
+                    if show_output:
+                        print(data, end='', file=sys.stderr)
+                        sys.stderr.flush()
+                    has_data = True
+                    no_data_cycles = 0
+
+                if not has_data:
+                    no_data_cycles += 1
+                    if no_data_cycles >= max_no_data_cycles:
+                        print("\n  No output for 30 seconds, assuming command completed...")
+                        break
+
+            resp.close()
+            return ''.join(stdout_lines), ''.join(stderr_lines)
+
+        # Step 1: Drop existing database
+        print(f"Step 1: Dropping database '{db_name}' (if exists)...")
+        drop_cmd = f"env PGPASSWORD={postgres_password} psql -U {postgres_user} -c 'DROP DATABASE IF EXISTS {db_name};'"
+        run_command(drop_cmd)
+        print("✓ Database dropped\n")
+
+        # Step 2: Create fresh database
+        print(f"Step 2: Creating fresh database '{db_name}'...")
+        create_cmd = f"env PGPASSWORD={postgres_password} psql -U {postgres_user} -c 'CREATE DATABASE {db_name};'"
+        run_command(create_cmd)
+        print("✓ Database created\n")
+
+        # Step 3: Grant privileges to keycloak user
+        print(f"Step 3: Granting privileges to user '{db_user}'...")
+        grant_db_cmd = f"env PGPASSWORD={postgres_password} psql -U {postgres_user} -c 'GRANT ALL PRIVILEGES ON DATABASE {db_name} TO {db_user};'"
+        run_command(grant_db_cmd)
+
+        grant_schema_cmd = f"env PGPASSWORD={postgres_password} psql -U {postgres_user} -d {db_name} -c 'GRANT ALL ON SCHEMA public TO {db_user};'"
+        run_command(grant_schema_cmd)
+
+        grant_default_cmd = f"env PGPASSWORD={postgres_password} psql -U {postgres_user} -d {db_name} -c 'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO {db_user};'"
+        run_command(grant_default_cmd)
+        print("✓ Privileges granted\n")
+
+        # Step 4: Read the backup file
+        print(f"Step 4: Reading backup file...")
+        with open(backup_file, 'r') as f:
+            backup_sql = f.read()
+        print(f"✓ Backup file loaded ({len(backup_sql)} characters)\n")
+
+        # Step 5: Restore the database
+        print(f"Step 5: Restoring database from backup...")
+        print("This may take a few moments. Output will be shown below:\n")
+        print("Note: Warnings about 'public' schema permissions are expected and harmless.")
+        print("=" * 80)
+
+        restore_cmd = f"env PGPASSWORD={db_password} psql -U {db_user} -d {db_name} --set ON_ERROR_STOP=off"
+        run_command_with_stdin(restore_cmd, backup_sql)
+
+        print("=" * 80)
+        print("\n✓ Restore completed!\n")
+
+        # Step 6: Verify the restore
+        print(f"Step 6: Verifying restore by checking user count...")
+        verify_cmd = f"env PGPASSWORD={db_password} psql -U {db_user} -d {db_name} -c 'SELECT count(*) FROM user_entity;'"
+        run_command(verify_cmd)
+        print("✓ Verification complete\n")
+
+        print("=" * 80)
+        print("DATABASE RESTORE SUCCESSFUL!")
+        print("=" * 80)
+
+        # Step 7: Scale Keycloak back up
+        if original_replicas is not None:
+            print(f"\nStep 7: Scaling Keycloak statefulset back to {original_replicas} replicas...")
+            try:
+                statefulset = apps_api.read_namespaced_stateful_set(
+                    name=keycloak_statefulset_name,
+                    namespace=namespace
+                )
+                statefulset.spec.replicas = original_replicas
+                apps_api.patch_namespaced_stateful_set(
+                    name=keycloak_statefulset_name,
+                    namespace=namespace,
+                    body=statefulset
+                )
+                print(f"✓ Keycloak scaled back to {original_replicas} replicas")
+                print("  Keycloak pods will start connecting to the restored database\n")
+            except kubernetes.client.exceptions.ApiException as e:
+                print(f"⚠ Warning: Could not scale up Keycloak statefulset: {e}")
+                print(f"  You may need to manually scale it back up: kubectl scale statefulset {keycloak_statefulset_name} --replicas={original_replicas} -n {namespace}\n")
 
     @contextlib.contextmanager
     def deploy(
