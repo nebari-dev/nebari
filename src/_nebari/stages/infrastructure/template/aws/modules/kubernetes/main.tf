@@ -154,6 +154,9 @@ resource "aws_eks_addon" "aws-ebs-csi-driver" {
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
+  # Use IRSA - the addon will automatically annotate the service account with this role ARN
+  service_account_role_arn = aws_iam_role.ebs_csi_driver.arn
+
   configuration_values = jsonencode({
     controller = {
       nodeSelector = {
@@ -169,6 +172,7 @@ resource "aws_eks_addon" "aws-ebs-csi-driver" {
   depends_on = [
     aws_eks_cluster.main,
     aws_eks_node_group.main,
+    aws_iam_role_policy_attachment.ebs_csi_driver,
   ]
 }
 
@@ -205,4 +209,38 @@ resource "aws_iam_openid_connect_provider" "oidc_provider" {
     { Name = "${var.name}-eks-irsa" },
     var.tags
   )
+}
+
+# IAM role for EBS CSI driver using IRSA
+resource "aws_iam_role" "ebs_csi_driver" {
+  name = "${var.name}-ebs-csi-driver"
+
+  # Trust policy - allows the Kubernetes service account to assume this role via OIDC
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = aws_iam_openid_connect_provider.oidc_provider.arn
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${replace(aws_eks_cluster.main.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+          "${replace(aws_eks_cluster.main.identity[0].oidc[0].issuer, "https://", "")}:aud" = "sts.amazonaws.com"
+        }
+      }
+    }]
+  })
+
+  tags = merge(
+    { Name = "${var.name}-ebs-csi-driver" },
+    var.tags
+  )
+}
+
+# Attach the AWS managed policy for EBS CSI driver
+resource "aws_iam_role_policy_attachment" "ebs_csi_driver" {
+  role       = aws_iam_role.ebs_csi_driver.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
