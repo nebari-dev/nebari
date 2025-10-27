@@ -2,9 +2,9 @@ data "google_client_config" "main" {
 }
 
 resource "google_container_cluster" "main" {
-  name               = var.name
-  location           = var.location
-  min_master_version = var.kubernetes_version
+  name                = var.name
+  location            = var.location
+  min_master_version  = var.kubernetes_version
   deletion_protection = false
 
   node_locations = var.availability_zones
