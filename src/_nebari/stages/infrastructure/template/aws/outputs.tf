@@ -34,3 +34,8 @@ output "oidc_provider_arn" {
   description = "The ARN of the OIDC Provider"
   value       = module.kubernetes.oidc_provider_arn
 }
+
+output "cluster_autoscaler_role_arn" {
+  description = "IAM role ARN for Cluster Autoscaler (IRSA)"
+  value       = module.kubernetes.cluster_autoscaler_role_arn
+}
