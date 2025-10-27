@@ -244,3 +244,37 @@ resource "aws_iam_role_policy_attachment" "ebs_csi_driver" {
   role       = aws_iam_role.ebs_csi_driver.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
+
+# IAM role for Cluster Autoscaler using IRSA
+resource "aws_iam_role" "cluster_autoscaler" {
+  name = "${var.name}-cluster-autoscaler"
+
+  # Trust policy - allows the Kubernetes service account to assume this role via OIDC
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = aws_iam_openid_connect_provider.oidc_provider.arn
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${replace(aws_eks_cluster.main.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:${var.environment}:cluster-autoscaler"
+          "${replace(aws_eks_cluster.main.identity[0].oidc[0].issuer, "https://", "")}:aud" = "sts.amazonaws.com"
+        }
+      }
+    }]
+  })
+
+  tags = merge(
+    { Name = "${var.name}-cluster-autoscaler" },
+    var.tags
+  )
+}
+
+# Attach the autoscaling policy to Cluster Autoscaler role
+resource "aws_iam_role_policy_attachment" "cluster_autoscaler" {
+  role       = aws_iam_role.cluster_autoscaler.name
+  policy_arn = aws_iam_policy.worker_autoscaling.arn
+}

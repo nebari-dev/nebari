@@ -87,6 +87,7 @@ module "kubernetes" {
   tags               = local.additional_tags
   region             = var.region
   kubernetes_version = var.kubernetes_version
+  environment        = var.environment
 
   cluster_subnets         = local.subnet_ids
   cluster_security_groups = [local.security_group_id]
