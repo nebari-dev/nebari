@@ -1,12 +1,22 @@
 import logging
 import os
 import typing
+import warnings
 
 import typer
 from typer.core import TyperGroup
 
 from _nebari.version import __version__
 from nebari.plugins import nebari_plugin_manager
+
+# Suppress Python 3.10 EOL warning from google-api-core
+# This warning started appearing in google-api-core 2.28.0+
+warnings.filterwarnings(
+    "ignore",
+    message=r"You are using a Python version \(3\.10\..*\) which Google will stop supporting",
+    category=FutureWarning,
+    module="google.api_core",
+)
 
 
 class OrderCommands(TyperGroup):
