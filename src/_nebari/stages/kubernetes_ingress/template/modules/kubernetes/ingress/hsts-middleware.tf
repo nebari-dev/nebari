@@ -1,16 +1,5 @@
 # HSTS (HTTP Strict Transport Security) Middleware
 #
-# The default max-age is 300 seconds (5 minutes) for safe initial deployments.
-# After validating that HSTS works correctly with your deployment, increase
-# max_age to a production value (e.g., 31536000 = 1 year) in nebari-config.yaml:
-#
-#   ingress:
-#     hsts:
-#       enabled: true
-#       max_age: 31536000  # 1 year for production
-#       include_subdomains: true
-#       preload: false
-#
 # Recovery: If HSTS causes issues, set max_age: 0 and redeploy. Users visit
 # the site once over HTTPS and their browsers will immediately clear the policy.
 #
