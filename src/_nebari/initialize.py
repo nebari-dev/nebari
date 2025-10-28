@@ -189,7 +189,7 @@ def render_config(
     config["ingress"] = {
         "hsts": {
             "enabled": hsts_enabled,
-            "max_age": 300,  # 5 minutes - safe for initial deployments, increase to 31536000 (1 year) for production
+            "max_age": 31536000,  # 1 year
             "include_subdomains": True,
             "preload": False,
         }
