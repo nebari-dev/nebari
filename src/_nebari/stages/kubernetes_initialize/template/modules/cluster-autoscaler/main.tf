@@ -12,9 +12,7 @@ resource "helm_release" "autoscaler" {
         create = true
         serviceAccount = {
           name = "cluster-autoscaler"
-          annotations = {
-            "eks.amazonaws.com/role-arn" = var.iam_role_arn
-          }
+          # Pod Identity doesn't require annotations - association is handled via EKS Pod Identity
         }
       }
 
