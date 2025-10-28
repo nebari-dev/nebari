@@ -222,25 +222,22 @@ resource "aws_iam_openid_connect_provider" "oidc_provider" {
   )
 }
 
-# IAM role for EBS CSI driver using IRSA
+# IAM role for EBS CSI driver using Pod Identity
 resource "aws_iam_role" "ebs_csi_driver" {
   name = "${var.name}-ebs-csi-driver"
 
-  # Trust policy - allows the Kubernetes service account to assume this role via OIDC
+  # Trust policy - allows EKS Pod Identity to assume this role
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Effect = "Allow"
       Principal = {
-        Federated = aws_iam_openid_connect_provider.oidc_provider.arn
+        Service = "pods.eks.amazonaws.com"
       }
-      Action = "sts:AssumeRoleWithWebIdentity"
-      Condition = {
-        StringEquals = {
-          "${replace(aws_eks_cluster.main.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
-          "${replace(aws_eks_cluster.main.identity[0].oidc[0].issuer, "https://", "")}:aud" = "sts.amazonaws.com"
-        }
-      }
+      Action = [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ]
     }]
   })
 
@@ -254,6 +251,16 @@ resource "aws_iam_role" "ebs_csi_driver" {
 resource "aws_iam_role_policy_attachment" "ebs_csi_driver" {
   role       = aws_iam_role.ebs_csi_driver.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+}
+
+# EKS Pod Identity Association for EBS CSI Driver
+resource "aws_eks_pod_identity_association" "ebs_csi_driver" {
+  cluster_name    = aws_eks_cluster.main.name
+  namespace       = "kube-system"
+  service_account = "ebs-csi-controller-sa"
+  role_arn        = aws_iam_role.ebs_csi_driver.arn
+
+  tags = var.tags
 }
 
 # IAM role for Cluster Autoscaler using Pod Identity
