@@ -1,8 +1,3 @@
-# HSTS (HTTP Strict Transport Security) Middleware
-#
-# Recovery: If HSTS causes issues, set max_age: 0 and redeploy. Users visit
-# the site once over HTTPS and their browsers will immediately clear the policy.
-#
 resource "kubernetes_manifest" "hsts_middleware" {
   count = var.hsts-enabled ? 1 : 0
 
