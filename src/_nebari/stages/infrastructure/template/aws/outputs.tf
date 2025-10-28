@@ -24,18 +24,3 @@ output "nfs_endpoint" {
   description = "Endpoint for nfs server"
   value       = length(module.efs) == 1 ? module.efs[0].credentials.dns_name : null
 }
-
-output "cluster_oidc_issuer_url" {
-  description = "The URL on the EKS cluster for the OpenID Connect identity provider"
-  value       = module.kubernetes.cluster_oidc_issuer_url
-}
-
-output "oidc_provider_arn" {
-  description = "The ARN of the OIDC Provider"
-  value       = module.kubernetes.oidc_provider_arn
-}
-
-output "cluster_autoscaler_role_arn" {
-  description = "IAM role ARN for Cluster Autoscaler (IRSA)"
-  value       = module.kubernetes.cluster_autoscaler_role_arn
-}

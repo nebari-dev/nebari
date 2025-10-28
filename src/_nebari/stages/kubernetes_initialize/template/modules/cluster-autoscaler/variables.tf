@@ -18,9 +18,3 @@ variable "overrides" {
   type        = list(string)
   default     = []
 }
-
-variable "iam_role_arn" {
-  description = "IAM role ARN for Cluster Autoscaler (not used with Pod Identity, kept for compatibility)"
-  type        = string
-  default     = ""
-}

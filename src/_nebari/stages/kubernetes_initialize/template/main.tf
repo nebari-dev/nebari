@@ -14,7 +14,6 @@ module "kubernetes-autoscaling" {
 
   aws_region   = var.aws_region
   cluster-name = local.cluster_name
-  iam_role_arn = var.cluster_autoscaler_role_arn
 }
 
 module "traefik-crds" {

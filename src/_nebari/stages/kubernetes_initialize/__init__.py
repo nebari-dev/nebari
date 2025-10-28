@@ -45,7 +45,6 @@ class InputVars(schema.Base):
     external_container_reg: Optional[ExtContainerReg] = None
     gpu_enabled: bool = False
     gpu_node_group_names: List[str] = []
-    cluster_autoscaler_role_arn: Optional[str] = None
 
 
 class InputSchema(schema.Base):
@@ -95,13 +94,6 @@ class KubernetesInitializeStage(NebariTerraformStage):
                 if self.config.amazon_web_services.node_groups[group].gpu
             ]
             input_vars.aws_region = self.config.amazon_web_services.region
-            # Get the Cluster Autoscaler IAM role ARN from infrastructure stage output
-            if "stages/02-infrastructure" in stage_outputs:
-                input_vars.cluster_autoscaler_role_arn = (
-                    stage_outputs["stages/02-infrastructure"]
-                    .get("cluster_autoscaler_role_arn", {})
-                    .get("value", "")
-                )
 
         return input_vars.model_dump()
 

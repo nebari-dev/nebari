@@ -30,9 +30,3 @@ variable "gpu_enabled" {
 variable "gpu_node_group_names" {
   description = "Names of node groups with GPU"
 }
-
-variable "cluster_autoscaler_role_arn" {
-  description = "IAM role ARN for Cluster Autoscaler (IRSA)"
-  type        = string
-  default     = ""
-}
