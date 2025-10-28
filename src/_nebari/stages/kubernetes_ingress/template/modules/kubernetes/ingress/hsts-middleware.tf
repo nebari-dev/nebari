@@ -29,7 +29,7 @@ resource "kubernetes_manifest" "hsts_middleware" {
         stsSeconds           = var.hsts-max-age
         stsIncludeSubdomains = var.hsts-include-subdomains
         stsPreload           = var.hsts-preload
-        forceSTSHeader       = true
+        forceSTSheader       = true
       }
     }
   }
