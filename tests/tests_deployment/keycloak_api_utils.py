@@ -2,6 +2,7 @@
 
 import base64
 import json
+import time
 
 import requests
 
@@ -78,6 +79,7 @@ class KeycloakAPI:
         self.access_token = None
         self.refresh_token = None
         self.token_type = None
+        self.token_expires_at = None
 
         # Authenticate if credentials provided
         if username and password:
@@ -136,6 +138,70 @@ class KeycloakAPI:
         self.refresh_token = token_data.get("refresh_token")
         self.token_type = token_data.get("token_type")
 
+        # Track token expiration (default to 5 minutes if not provided)
+        expires_in = token_data.get("expires_in", 300)
+        self.token_expires_at = time.time() + expires_in
+
+        return token_data
+
+    def refresh_access_token(self) -> dict:
+        """Refresh the access token using the refresh token.
+
+        Returns
+        -------
+        dict
+            Token response containing new access_token and refresh_token
+
+        Raises
+        ------
+        ValueError
+            If no refresh token is available
+        requests.exceptions.HTTPError
+            If the refresh request fails (e.g., refresh token expired)
+        """
+        if not self.refresh_token:
+            # If we have username/password, re-authenticate instead
+            if self.username and self.password:
+                return self.authenticate()
+            raise ValueError(
+                "No refresh token available and no credentials for re-authentication"
+            )
+
+        token_url = self._get_token_url()
+
+        payload = {
+            "grant_type": "refresh_token",
+            "client_id": self.client_id,
+            "refresh_token": self.refresh_token,
+        }
+
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+
+        response = requests.post(
+            token_url,
+            data=payload,
+            headers=headers,
+            verify=self.verify_ssl,
+            timeout=TIMEOUT,
+        )
+
+        # If refresh fails and we have credentials, try to re-authenticate
+        if response.status_code == 400 and self.username and self.password:
+            return self.authenticate()
+
+        response.raise_for_status()
+
+        token_data = response.json()
+        self.access_token = token_data.get("access_token")
+        self.refresh_token = token_data.get("refresh_token")
+        self.token_type = token_data.get("token_type")
+
+        # Update token expiration
+        expires_in = token_data.get("expires_in", 300)
+        self.token_expires_at = time.time() + expires_in
+
         return token_data
 
     def _get_admin_url(self, endpoint: str) -> str:
@@ -180,6 +246,10 @@ class KeycloakAPI:
         """
         if not self.access_token:
             raise ValueError("Not authenticated. Call authenticate() first.")
+
+        # Auto-refresh token if expired or expiring soon (30 second buffer)
+        if self.token_expires_at and time.time() > (self.token_expires_at - 30):
+            self.refresh_access_token()
 
         url = self._get_admin_url(endpoint)
         headers = {
