@@ -192,7 +192,11 @@ class KeycloakAPI:
         )
 
         # If refresh fails and we have credentials, try to re-authenticate
-        if response.status_code == HTTPStatus.BAD_REQUEST and self.username and self.password:
+        if (
+            response.status_code == HTTPStatus.BAD_REQUEST
+            and self.username
+            and self.password
+        ):
             return self.authenticate()
 
         response.raise_for_status()
@@ -406,7 +410,9 @@ class KeycloakAPI:
         """
         return self._make_admin_request(f"clients/{client_internal_id}")
 
-    def update_client(self, client_internal_id: str, client_data: dict) -> requests.Response:
+    def update_client(
+        self, client_internal_id: str, client_data: dict
+    ) -> requests.Response:
         """Update a client in Keycloak.
 
         Parameters
@@ -438,7 +444,9 @@ class KeycloakAPI:
         requests.Response
             Response from the delete request
         """
-        return self._make_admin_request(f"clients/{client_internal_id}", method="DELETE")
+        return self._make_admin_request(
+            f"clients/{client_internal_id}", method="DELETE"
+        )
 
     def reset_user_password(
         self, user_id: str, password: str, temporary: bool = False
@@ -492,7 +500,9 @@ class KeycloakAPI:
         requests.Response
             Response containing the new client secret
         """
-        return self._make_admin_request(f"clients/{client_internal_id}/client-secret", method="POST")
+        return self._make_admin_request(
+            f"clients/{client_internal_id}/client-secret", method="POST"
+        )
 
     def create_realm_role(self, role_data: dict) -> requests.Response:
         """Create a new realm role.
