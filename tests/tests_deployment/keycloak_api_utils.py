@@ -391,12 +391,12 @@ class KeycloakAPI:
             endpoint = f"clients?clientId={client_id}"
         return self._make_admin_request(endpoint)
 
-    def get_client_by_id(self, id: str) -> requests.Response:
+    def get_client_by_id(self, client_internal_id: str) -> requests.Response:
         """Get a specific client by internal ID.
 
         Parameters
         ----------
-        id : str
+        client_internal_id : str
             The Keycloak client internal ID (not clientId)
 
         Returns
@@ -404,14 +404,14 @@ class KeycloakAPI:
         requests.Response
             Response containing client data
         """
-        return self._make_admin_request(f"clients/{id}")
+        return self._make_admin_request(f"clients/{client_internal_id}")
 
-    def update_client(self, id: str, client_data: dict) -> requests.Response:
+    def update_client(self, client_internal_id: str, client_data: dict) -> requests.Response:
         """Update a client in Keycloak.
 
         Parameters
         ----------
-        id : str
+        client_internal_id : str
             The Keycloak client internal ID
         client_data : dict
             Client data to update (partial updates supported)
@@ -422,15 +422,15 @@ class KeycloakAPI:
             Response from the update request
         """
         return self._make_admin_request(
-            f"clients/{id}", method="PUT", json_data=client_data
+            f"clients/{client_internal_id}", method="PUT", json_data=client_data
         )
 
-    def delete_client(self, id: str) -> requests.Response:
+    def delete_client(self, client_internal_id: str) -> requests.Response:
         """Delete a client from Keycloak.
 
         Parameters
         ----------
-        id : str
+        client_internal_id : str
             The Keycloak client internal ID to delete
 
         Returns
@@ -438,7 +438,7 @@ class KeycloakAPI:
         requests.Response
             Response from the delete request
         """
-        return self._make_admin_request(f"clients/{id}", method="DELETE")
+        return self._make_admin_request(f"clients/{client_internal_id}", method="DELETE")
 
     def reset_user_password(
         self, user_id: str, password: str, temporary: bool = False
@@ -464,12 +464,12 @@ class KeycloakAPI:
             f"users/{user_id}/reset-password", method="PUT", json_data=password_data
         )
 
-    def get_client_secret(self, id: str) -> requests.Response:
+    def get_client_secret(self, client_internal_id: str) -> requests.Response:
         """Get the secret for a confidential client.
 
         Parameters
         ----------
-        id : str
+        client_internal_id : str
             The Keycloak client internal ID
 
         Returns
@@ -477,14 +477,14 @@ class KeycloakAPI:
         requests.Response
             Response containing the client secret
         """
-        return self._make_admin_request(f"clients/{id}/client-secret")
+        return self._make_admin_request(f"clients/{client_internal_id}/client-secret")
 
-    def regenerate_client_secret(self, id: str) -> requests.Response:
+    def regenerate_client_secret(self, client_internal_id: str) -> requests.Response:
         """Regenerate the secret for a confidential client.
 
         Parameters
         ----------
-        id : str
+        client_internal_id : str
             The Keycloak client internal ID
 
         Returns
@@ -492,7 +492,7 @@ class KeycloakAPI:
         requests.Response
             Response containing the new client secret
         """
-        return self._make_admin_request(f"clients/{id}/client-secret", method="POST")
+        return self._make_admin_request(f"clients/{client_internal_id}/client-secret", method="POST")
 
     def create_realm_role(self, role_data: dict) -> requests.Response:
         """Create a new realm role.
