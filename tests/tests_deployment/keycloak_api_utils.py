@@ -4,6 +4,7 @@ import base64
 import json
 import os
 import time
+from http import HTTPStatus
 
 import requests
 
@@ -191,7 +192,7 @@ class KeycloakAPI:
         )
 
         # If refresh fails and we have credentials, try to re-authenticate
-        if response.status_code == 400 and self.username and self.password:
+        if response.status_code == HTTPStatus.BAD_REQUEST and self.username and self.password:
             return self.authenticate()
 
         response.raise_for_status()
