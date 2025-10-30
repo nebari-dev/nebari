@@ -1,0 +1,11 @@
+# kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+helmCharts:
+- name: daskgateway
+  repo: https://helm.dask.org/
+  releaseName: daskgateway
+  namespace: {{ namespace }}
+  version: "{{ daskgateway_helm_version }}"
+  valuesFile: values.yaml
