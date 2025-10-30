@@ -2,16 +2,19 @@
 
 import base64
 import json
+import os
 import time
 
 import requests
 
-TIMEOUT = 10
+TIMEOUT = int(os.getenv("KEYCLOAK_TIMEOUT", "10"))
 
 
 def decode_jwt_token(token: str) -> dict:
     """Decode a JWT token without verification (for testing purposes).
-
+    ******************************
+    DO NOT USE THIS FOR PRODUCTION
+    ******************************
     Parameters
     ----------
     token : str
