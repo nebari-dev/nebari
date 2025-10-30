@@ -1,0 +1,56 @@
+name: "Documentation 📖"
+description: Did you find an error in our documentation? Report your findings here.
+title: "[DOC] - <title>"
+labels: ["area: documentation 📖"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Welcome 👋
+
+        Thanks for using Nebari and taking some time to contribute to this project.
+
+        Please fill out each section below. This info allows Nebari maintainers to diagnose (and fix!) your issue as
+        quickly as possible.
+        Before submitting a bug, please make sure the issue hasn't been already addressed by searching through
+        [the past issues](https://github.com/nebari-dev/nebari-docs/issues).
+
+        Useful links:
+
+        - Documentation: https://www.nebari.dev
+        - Contribution guidelines: https://www.nebari.dev/community/
+
+  - type: checkboxes
+    attributes:
+      label: Preliminary Checks
+      description: Please make sure that you verify each checkbox and follow the instructions for them.
+      options:
+        - label: "This issue is not a question, feature request, RFC, or anything other than a bug report. Please post those things in GitHub Discussions: https://github.com/nebari-dev/nebari/discussions"
+          required: true
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Summary
+      description: |
+        What problem(s) did you run into that caused you to request a fix to the documentation or additional
+        documentation? What questions do you think we should answer?
+
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Steps to Resolve this Issue
+      description: |
+        How can the problem be solved? Are there any additional steps required? Do any other pages need to be updated?
+      value: |
+        1.
+        2.
+        3.
+        ...
+
+  - type: markdown
+    attributes:
+      value: >
+        Thanks for contributing 🎉!
