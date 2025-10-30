@@ -1,0 +1,17 @@
+name: base
+channels:
+  - conda-forge
+dependencies:
+  - pip==21.1.2
+  - jupyterhub==5.3.0
+  - jupyterhub-kubespawner==6.2.0
+  - oauthenticator==16.3.0
+  - escapism==1.0.1
+  - python-kubernetes
+  - kubernetes_asyncio==29.0.0
+  - jupyterhub-idle-culler==1.2.1
+  - sqlalchemy==1.4.46
+  - pip:
+    - nebari-jupyterhub-theme==2024.7.1
+    - python-keycloak==0.26.1
+    - jhub-apps==2025.2.1
