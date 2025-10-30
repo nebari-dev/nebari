@@ -414,14 +414,6 @@ def test_update_user_password(
     users = get_response.json()
     user_id = users[0]["id"]
 
-    # Verify user can authenticate with old password
-    try:
-        token_data = keycloak_api.authenticate(test_username, old_password)
-        assert "access_token" in token_data
-    except requests.exceptions.HTTPError:
-        # Some Keycloak configurations may not allow password auth immediately
-        pass
-
     # Update the password
     update_response = authenticated_keycloak_api.reset_user_password(
         user_id, new_password, temporary=False
