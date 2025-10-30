@@ -7,17 +7,17 @@ spec:
   selector:
     match_labels:
       app.kubernetes.io/component: dask-gateway-gateway
-  
+
   template:
     metadata:
-      
-      labels: 
+
+      labels:
         app.kubernetes.io/component: dask-gateway-gateway
-      
+
       annotations:
         checksum/config-map: sha256(jsonencode(kubernetes_config_map.gateway.data))
         checksum/secret: sha256(jsonencode(kubernetes_secret.gateway.data))
-    
+
     spec:
       affinity:
         node_affinity:
@@ -27,4 +27,3 @@ spec:
                 key: var.general-node-group.key
                 operator: In
                 values: var.general-node-group.value
-
