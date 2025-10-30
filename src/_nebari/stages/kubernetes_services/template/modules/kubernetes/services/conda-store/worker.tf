@@ -66,7 +66,7 @@ resource "kubernetes_deployment" "worker" {
   }
 
   spec {
-    replicas = 1
+    replicas = var.conda-store-worker.max_workers != null ? tonumber(var.conda-store-worker.max_workers) : 1
 
     selector {
       match_labels = {
@@ -94,6 +94,8 @@ resource "kubernetes_deployment" "worker" {
             required_during_scheduling_ignored_during_execution {
               node_selector_term {
                 match_expressions {
+                  // Since all node selectors use the same provider key, we can reuse
+                  // the same key even when overriding the value.
                   key      = var.node-group.key
                   operator = "In"
                   values = [
@@ -114,6 +116,20 @@ resource "kubernetes_deployment" "worker" {
             "--config",
             "/etc/conda-store/conda_store_config.py"
           ]
+
+          dynamic "resources" {
+            for_each = var.conda-store-worker.resources == null ? [] : [var.conda-store-worker.resources]
+            content {
+              limits = {
+                cpu    = resources.value.cpu_limit == null ? null : resources.value.cpu_limit
+                memory = resources.value.mem_limit == null ? null : resources.value.mem_limit
+              }
+              requests = {
+                cpu    = resources.value.cpu_guarantee == null ? null : resources.value.cpu_guarantee
+                memory = resources.value.mem_guarantee == null ? null : resources.value.mem_guarantee
+              }
+            }
+          }
 
           volume_mount {
             name       = "config"
@@ -140,7 +156,7 @@ resource "kubernetes_deployment" "worker" {
           for_each = local.enable-nfs-server-worker ? [1] : []
           content {
             name  = "nfs-server"
-            image = "gcr.io/google_containers/volume-nfs:0.8"
+            image = "quay.io/nebari/volume-nfs:0.8-repack"
 
             port {
               name           = "nfs"

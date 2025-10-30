@@ -88,7 +88,7 @@ resource "kubernetes_deployment" "main" {
 
         container {
           name  = "nfs-server"
-          image = "gcr.io/google_containers/volume-nfs:0.8"
+          image = "quay.io/nebari/volume-nfs:0.8-repack"
 
           port {
             name           = "nfs"
