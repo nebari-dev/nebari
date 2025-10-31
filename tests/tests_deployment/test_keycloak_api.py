@@ -136,6 +136,261 @@ def test_group_name() -> str:
     return f"test-group-{uuid.uuid4().hex[:8]}"
 
 
+# Resource cleanup fixtures
+
+@pytest.fixture
+def created_user(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_username: str,
+) -> dict:
+    """Create a test user and ensure cleanup.
+
+    Returns
+    -------
+    dict
+        Dictionary with 'id', 'username', and 'data' keys
+    """
+    user_data = {
+        "username": test_username,
+        "email": f"{test_username}@example.com",
+        "enabled": True,
+    }
+
+    response = authenticated_keycloak_api.create_user(user_data)
+    assert response.status_code == HTTPStatus.CREATED, f"Failed to create user: {response.text}"
+
+    # Get user ID
+    get_response = authenticated_keycloak_api.get_users(username=test_username)
+    users = get_response.json()
+    user_id = users[0]["id"] if users else None
+
+    user_info = {
+        "id": user_id,
+        "username": test_username,
+        "data": user_data,
+    }
+
+    yield user_info
+
+    # Cleanup
+    if user_id:
+        try:
+            authenticated_keycloak_api.delete_user(user_id)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == HTTPStatus.NOT_FOUND:
+                # User was already deleted by the test - this is fine
+                pass
+            else:
+                # Unexpected HTTP error - log it
+                print(f"WARNING: Failed to delete user {user_id}: HTTP {e.response.status_code}")
+        except Exception as e:
+            # Non-HTTP error (network, timeout, etc.) - log it
+            print(f"WARNING: Failed to delete user {user_id}: {type(e).__name__}: {e}")
+
+
+@pytest.fixture
+def created_user_with_password(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_username: str,
+) -> dict:
+    """Create a test user with password and ensure cleanup.
+
+    Returns
+    -------
+    dict
+        Dictionary with 'id', 'username', 'password', and 'data' keys
+    """
+    password = "TestPassword123!"
+    user_data = {
+        "username": test_username,
+        "email": f"{test_username}@example.com",
+        "enabled": True,
+        "credentials": [
+            {
+                "type": "password",
+                "value": password,
+                "temporary": False,
+            }
+        ],
+    }
+
+    response = authenticated_keycloak_api.create_user(user_data)
+    assert response.status_code == HTTPStatus.CREATED, f"Failed to create user: {response.text}"
+
+    # Get user ID
+    get_response = authenticated_keycloak_api.get_users(username=test_username)
+    users = get_response.json()
+    user_id = users[0]["id"] if users else None
+
+    user_info = {
+        "id": user_id,
+        "username": test_username,
+        "password": password,
+        "data": user_data,
+    }
+
+    yield user_info
+
+    # Cleanup
+    if user_id:
+        try:
+            authenticated_keycloak_api.delete_user(user_id)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == HTTPStatus.NOT_FOUND:
+                # User was already deleted by the test - this is fine
+                pass
+            else:
+                # Unexpected HTTP error - log it
+                print(f"WARNING: Failed to delete user {user_id}: HTTP {e.response.status_code}")
+        except Exception as e:
+            # Non-HTTP error (network, timeout, etc.) - log it
+            print(f"WARNING: Failed to delete user {user_id}: {type(e).__name__}: {e}")
+
+
+@pytest.fixture
+def created_client(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_client_id: str,
+) -> dict:
+    """Create a test client and ensure cleanup.
+
+    Returns
+    -------
+    dict
+        Dictionary with 'internal_id', 'client_id', and 'data' keys
+    """
+    client_data = {
+        "clientId": test_client_id,
+        "enabled": True,
+        "publicClient": False,
+        "protocol": "openid-connect",
+    }
+
+    response = authenticated_keycloak_api.create_client(client_data)
+    assert response.status_code == HTTPStatus.CREATED, f"Failed to create client: {response.text}"
+
+    # Get client internal ID
+    get_response = authenticated_keycloak_api.get_clients(client_id=test_client_id)
+    clients = get_response.json()
+    client_internal_id = clients[0]["id"] if clients else None
+
+    client_info = {
+        "internal_id": client_internal_id,
+        "client_id": test_client_id,
+        "data": client_data,
+    }
+
+    yield client_info
+
+    # Cleanup
+    if client_internal_id:
+        try:
+            authenticated_keycloak_api.delete_client(client_internal_id)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == HTTPStatus.NOT_FOUND:
+                # Client was already deleted by the test - this is fine
+                pass
+            else:
+                # Unexpected HTTP error - log it
+                print(f"WARNING: Failed to delete client {client_internal_id}: HTTP {e.response.status_code}")
+        except Exception as e:
+            # Non-HTTP error (network, timeout, etc.) - log it
+            print(f"WARNING: Failed to delete client {client_internal_id}: {type(e).__name__}: {e}")
+
+
+@pytest.fixture
+def created_realm_role(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_role_name: str,
+) -> dict:
+    """Create a test realm role and ensure cleanup.
+
+    Returns
+    -------
+    dict
+        Dictionary with 'name' and 'role' (full role object) keys
+    """
+    role_data = {
+        "name": test_role_name,
+        "description": "Test realm role",
+    }
+
+    response = authenticated_keycloak_api.create_realm_role(role_data)
+    assert response.status_code == HTTPStatus.CREATED, f"Failed to create realm role: {response.text}"
+
+    # Get the full role object
+    get_response = authenticated_keycloak_api.get_realm_role_by_name(test_role_name)
+    role = get_response.json() if get_response.status_code == HTTPStatus.OK else None
+
+    role_info = {
+        "name": test_role_name,
+        "role": role,
+    }
+
+    yield role_info
+
+    # Cleanup
+    try:
+        authenticated_keycloak_api.delete_realm_role(test_role_name)
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == HTTPStatus.NOT_FOUND:
+            # Role was already deleted by the test - this is fine
+            pass
+        else:
+            # Unexpected HTTP error - log it
+            print(f"WARNING: Failed to delete realm role {test_role_name}: HTTP {e.response.status_code}")
+    except Exception as e:
+        # Non-HTTP error (network, timeout, etc.) - log it
+        print(f"WARNING: Failed to delete realm role {test_role_name}: {type(e).__name__}: {e}")
+
+
+@pytest.fixture
+def created_group(
+    authenticated_keycloak_api: KeycloakAPI,
+    test_group_name: str,
+) -> dict:
+    """Create a test group and ensure cleanup.
+
+    Returns
+    -------
+    dict
+        Dictionary with 'id', 'name', and 'data' keys
+    """
+    group_data = {"name": test_group_name}
+
+    response = authenticated_keycloak_api.create_group(group_data)
+    assert response.status_code == HTTPStatus.CREATED, f"Failed to create group: {response.text}"
+
+    # Get group ID
+    groups_response = authenticated_keycloak_api.get_groups()
+    groups = groups_response.json()
+    group = next((g for g in groups if g["name"] == test_group_name), None)
+    group_id = group["id"] if group else None
+
+    group_info = {
+        "id": group_id,
+        "name": test_group_name,
+        "data": group_data,
+    }
+
+    yield group_info
+
+    # Cleanup
+    if group_id:
+        try:
+            authenticated_keycloak_api.delete_group(group_id)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == HTTPStatus.NOT_FOUND:
+                # Group was already deleted by the test - this is fine
+                pass
+            else:
+                # Unexpected HTTP error - log it
+                print(f"WARNING: Failed to delete group {group_id}: HTTP {e.response.status_code}")
+        except Exception as e:
+            # Non-HTTP error (network, timeout, etc.) - log it
+            print(f"WARNING: Failed to delete group {group_id}: {type(e).__name__}: {e}")
+
+
 @pytest.mark.keycloak
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_keycloak_login_with_credentials(
@@ -228,29 +483,16 @@ def test_get_users(
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_get_user_by_username(
     authenticated_keycloak_api: KeycloakAPI,
-    test_username: str,
+    created_user: dict,
 ) -> None:
     """Test getting a specific user by username."""
-    # First, create a test user
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "enabled": True,
-    }
-    create_response = authenticated_keycloak_api.create_user(user_data)
-    assert create_response.status_code == HTTPStatus.CREATED
-
     # Get the user by username
-    response = authenticated_keycloak_api.get_users(username=test_username)
+    response = authenticated_keycloak_api.get_users(username=created_user["username"])
     assert response.status_code == HTTPStatus.OK, f"Failed to get user: {response.text}"
 
     users = response.json()
     assert len(users) > 0, "User not found"
-    assert users[0]["username"] == test_username
-
-    # Cleanup: Delete the test user
-    user_id = users[0]["id"]
-    authenticated_keycloak_api.delete_user(user_id)
+    assert users[0]["username"] == created_user["username"]
 
 
 @pytest.mark.keycloak
@@ -258,24 +500,10 @@ def test_get_user_by_username(
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_update_user(
     authenticated_keycloak_api: KeycloakAPI,
-    test_username: str,
+    created_user: dict,
 ) -> None:
     """Test updating a user in Keycloak."""
-    # Create a test user
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "firstName": "Original",
-        "lastName": "Name",
-        "enabled": True,
-    }
-    create_response = authenticated_keycloak_api.create_user(user_data)
-    assert create_response.status_code == HTTPStatus.CREATED
-
-    # Get the user ID
-    get_response = authenticated_keycloak_api.get_users(username=test_username)
-    users = get_response.json()
-    user_id = users[0]["id"]
+    user_id = created_user["id"]
 
     # Update the user
     update_data = {
@@ -294,31 +522,16 @@ def test_update_user(
     assert updated_user["firstName"] == "Updated"
     assert updated_user["lastName"] == "User"
 
-    # Cleanup: Delete the test user
-    authenticated_keycloak_api.delete_user(user_id)
-
 
 @pytest.mark.keycloak
 @pytest.mark.keycloak_users
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_delete_user(
     authenticated_keycloak_api: KeycloakAPI,
-    test_username: str,
+    created_user: dict,
 ) -> None:
     """Test deleting a user from Keycloak."""
-    # Create a test user
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "enabled": True,
-    }
-    create_response = authenticated_keycloak_api.create_user(user_data)
-    assert create_response.status_code == HTTPStatus.CREATED
-
-    # Get the user ID
-    get_response = authenticated_keycloak_api.get_users(username=test_username)
-    users = get_response.json()
-    user_id = users[0]["id"]
+    user_id = created_user["id"]
 
     # Delete the user
     delete_response = authenticated_keycloak_api.delete_user(user_id)
@@ -358,24 +571,11 @@ def test_list_users(
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_get_user_by_id(
     authenticated_keycloak_api: KeycloakAPI,
-    test_username: str,
+    created_user: dict,
 ) -> None:
     """Test getting a specific user by ID."""
-    # Create a test user
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "firstName": "Test",
-        "lastName": "User",
-        "enabled": True,
-    }
-    create_response = authenticated_keycloak_api.create_user(user_data)
-    assert create_response.status_code == HTTPStatus.CREATED
-
-    # Get the user ID
-    get_response = authenticated_keycloak_api.get_users(username=test_username)
-    users = get_response.json()
-    user_id = users[0]["id"]
+    user_id = created_user["id"]
+    test_username = created_user["username"]
 
     # Get user by ID
     response = authenticated_keycloak_api.get_user_by_id(user_id)
@@ -388,9 +588,6 @@ def test_get_user_by_id(
     assert user["username"] == test_username
     assert user["email"] == f"{test_username}@example.com"
 
-    # Cleanup
-    authenticated_keycloak_api.delete_user(user_id)
-
 
 @pytest.mark.keycloak
 @pytest.mark.keycloak_users
@@ -398,32 +595,13 @@ def test_get_user_by_id(
 def test_update_user_password(
     authenticated_keycloak_api: KeycloakAPI,
     keycloak_api: KeycloakAPI,
-    test_username: str,
+    created_user_with_password: dict,
 ) -> None:
     """Test updating a user's password and verifying authentication."""
-    old_password = "OldPassword123!"
+    user_id = created_user_with_password["id"]
+    test_username = created_user_with_password["username"]
+    old_password = created_user_with_password["password"]
     new_password = "NewPassword456!"
-
-    # Create a test user with initial password
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "enabled": True,
-        "credentials": [
-            {
-                "type": "password",
-                "value": old_password,
-                "temporary": False,
-            }
-        ],
-    }
-    create_response = authenticated_keycloak_api.create_user(user_data)
-    assert create_response.status_code == HTTPStatus.CREATED
-
-    # Get the user ID
-    get_response = authenticated_keycloak_api.get_users(username=test_username)
-    users = get_response.json()
-    user_id = users[0]["id"]
 
     # Update the password
     update_response = authenticated_keycloak_api.reset_user_password(
@@ -442,9 +620,6 @@ def test_update_user_password(
         keycloak_api.authenticate(test_username, old_password)
     assert exc_info.value.response.status_code == HTTPStatus.UNAUTHORIZED
 
-    # Cleanup
-    authenticated_keycloak_api.delete_user(user_id)
-
 
 @pytest.mark.keycloak
 @pytest.mark.keycloak_users
@@ -452,31 +627,12 @@ def test_update_user_password(
 def test_enable_disable_user(
     authenticated_keycloak_api: KeycloakAPI,
     keycloak_api: KeycloakAPI,
-    test_username: str,
+    created_user_with_password: dict,
 ) -> None:
     """Test disabling and re-enabling a user account."""
-    password = "TestPassword123!"
-
-    # Create an enabled test user with password
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "enabled": True,
-        "credentials": [
-            {
-                "type": "password",
-                "value": password,
-                "temporary": False,
-            }
-        ],
-    }
-    create_response = authenticated_keycloak_api.create_user(user_data)
-    assert create_response.status_code == HTTPStatus.CREATED
-
-    # Get the user ID
-    get_response = authenticated_keycloak_api.get_users(username=test_username)
-    users = get_response.json()
-    user_id = users[0]["id"]
+    user_id = created_user_with_password["id"]
+    test_username = created_user_with_password["username"]
+    password = created_user_with_password["password"]
 
     # Verify user can authenticate while enabled
     try:
@@ -520,9 +676,6 @@ def test_enable_disable_user(
     if user_can_auth:
         token_data = keycloak_api.authenticate(test_username, password)
         assert "access_token" in token_data
-
-    # Cleanup
-    authenticated_keycloak_api.delete_user(user_id)
 
 
 @pytest.mark.keycloak
@@ -578,18 +731,10 @@ def test_get_clients(
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_get_client_by_client_id(
     authenticated_keycloak_api: KeycloakAPI,
-    test_client_id: str,
+    created_client: dict,
 ) -> None:
     """Test getting a specific client by clientId."""
-    # First, create a test client
-    client_data = {
-        "clientId": test_client_id,
-        "enabled": True,
-        "publicClient": True,
-        "protocol": "openid-connect",
-    }
-    create_response = authenticated_keycloak_api.create_client(client_data)
-    assert create_response.status_code == HTTPStatus.CREATED
+    test_client_id = created_client["client_id"]
 
     # Get the client by clientId
     response = authenticated_keycloak_api.get_clients(client_id=test_client_id)
@@ -601,34 +746,17 @@ def test_get_client_by_client_id(
     assert len(clients) > 0, "Client not found"
     assert clients[0]["clientId"] == test_client_id
 
-    # Cleanup: Delete the test client
-    client_internal_id = clients[0]["id"]
-    authenticated_keycloak_api.delete_client(client_internal_id)
-
 
 @pytest.mark.keycloak
 @pytest.mark.keycloak_clients
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_update_client(
     authenticated_keycloak_api: KeycloakAPI,
-    test_client_id: str,
+    created_client: dict,
 ) -> None:
     """Test updating a client in Keycloak."""
-    # Create a test client
-    client_data = {
-        "clientId": test_client_id,
-        "enabled": True,
-        "publicClient": True,
-        "protocol": "openid-connect",
-        "description": "Original description",
-    }
-    create_response = authenticated_keycloak_api.create_client(client_data)
-    assert create_response.status_code == HTTPStatus.CREATED
-
-    # Get the client internal ID
-    get_response = authenticated_keycloak_api.get_clients(client_id=test_client_id)
-    clients = get_response.json()
-    client_internal_id = clients[0]["id"]
+    client_internal_id = created_client["internal_id"]
+    test_client_id = created_client["client_id"]
 
     # Update the client
     update_data = {
@@ -652,32 +780,16 @@ def test_update_client(
     assert updated_client["description"] == "Updated description"
     assert updated_client["publicClient"] is False
 
-    # Cleanup: Delete the test client
-    authenticated_keycloak_api.delete_client(client_internal_id)
-
 
 @pytest.mark.keycloak
 @pytest.mark.keycloak_clients
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_delete_client(
     authenticated_keycloak_api: KeycloakAPI,
-    test_client_id: str,
+    created_client: dict,
 ) -> None:
     """Test deleting a client from Keycloak."""
-    # Create a test client
-    client_data = {
-        "clientId": test_client_id,
-        "enabled": True,
-        "publicClient": True,
-        "protocol": "openid-connect",
-    }
-    create_response = authenticated_keycloak_api.create_client(client_data)
-    assert create_response.status_code == HTTPStatus.CREATED
-
-    # Get the client internal ID
-    get_response = authenticated_keycloak_api.get_clients(client_id=test_client_id)
-    clients = get_response.json()
-    client_internal_id = clients[0]["id"]
+    client_internal_id = created_client["internal_id"]
 
     # Delete the client
     delete_response = authenticated_keycloak_api.delete_client(client_internal_id)
@@ -720,7 +832,7 @@ def test_client_secret_regeneration(
     test_client_id: str,
 ) -> None:
     """Test regenerating a client secret."""
-    # Create a confidential client
+    # Create a confidential client with service accounts enabled
     client_data = {
         "clientId": test_client_id,
         "enabled": True,
@@ -736,36 +848,37 @@ def test_client_secret_regeneration(
     clients = get_response.json()
     client_internal_id = clients[0]["id"]
 
-    # Get the initial secret
-    secret_response = authenticated_keycloak_api.get_client_secret(client_internal_id)
-    assert secret_response.status_code == HTTPStatus.OK
-    old_secret = secret_response.json()["value"]
+    try:
+        # Get the initial secret
+        secret_response = authenticated_keycloak_api.get_client_secret(client_internal_id)
+        assert secret_response.status_code == HTTPStatus.OK
+        old_secret = secret_response.json()["value"]
 
-    # Regenerate the secret
-    regen_response = authenticated_keycloak_api.regenerate_client_secret(
-        client_internal_id
-    )
-    assert regen_response.status_code == HTTPStatus.OK
-    new_secret = regen_response.json()["value"]
-
-    # Verify the secrets are different
-    assert old_secret != new_secret
-
-    # Verify old secret no longer works for client credentials flow
-    with pytest.raises(requests.exceptions.HTTPError) as exc_info:
-        authenticated_keycloak_api.oauth2_client_credentials_flow(
-            test_client_id, old_secret
+        # Regenerate the secret
+        regen_response = authenticated_keycloak_api.regenerate_client_secret(
+            client_internal_id
         )
-    assert exc_info.value.response.status_code == HTTPStatus.UNAUTHORIZED
+        assert regen_response.status_code == HTTPStatus.OK
+        new_secret = regen_response.json()["value"]
 
-    # Verify new secret works
-    token_data = authenticated_keycloak_api.oauth2_client_credentials_flow(
-        test_client_id, new_secret
-    )
-    assert "access_token" in token_data
+        # Verify the secrets are different
+        assert old_secret != new_secret
 
-    # Cleanup
-    authenticated_keycloak_api.delete_client(client_internal_id)
+        # Verify old secret no longer works for client credentials flow
+        with pytest.raises(requests.exceptions.HTTPError) as exc_info:
+            authenticated_keycloak_api.oauth2_client_credentials_flow(
+                test_client_id, old_secret
+            )
+        assert exc_info.value.response.status_code == HTTPStatus.UNAUTHORIZED
+
+        # Verify new secret works
+        token_data = authenticated_keycloak_api.oauth2_client_credentials_flow(
+            test_client_id, new_secret
+        )
+        assert "access_token" in token_data
+    finally:
+        # Ensure cleanup
+        authenticated_keycloak_api.delete_client(client_internal_id)
 
 
 @pytest.mark.keycloak
@@ -799,52 +912,61 @@ def test_client_oauth2_flow(
     secret_response = authenticated_keycloak_api.get_client_secret(client_internal_id)
     client_secret = secret_response.json()["value"]
 
-    # Test client credentials flow
-    token_data = authenticated_keycloak_api.oauth2_client_credentials_flow(
-        test_client_id, client_secret
-    )
-    assert "access_token" in token_data
-    assert "token_type" in token_data
+    user_id = None
+    try:
+        # Test client credentials flow
+        token_data = authenticated_keycloak_api.oauth2_client_credentials_flow(
+            test_client_id, client_secret
+        )
+        assert "access_token" in token_data
+        assert "token_type" in token_data
 
-    # Verify token is valid by decoding it
-    access_token = token_data["access_token"]
-    token_payload = decode_jwt_token(access_token)
-    assert "exp" in token_payload  # Has expiration
+        # Verify token is valid by decoding it
+        access_token = token_data["access_token"]
+        token_payload = decode_jwt_token(access_token)
+        assert "exp" in token_payload  # Has expiration
 
-    # Create a test user for password flow
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "enabled": True,
-        "credentials": [
-            {
-                "type": "password",
-                "value": password,
-                "temporary": False,
-            }
-        ],
-    }
-    user_create_response = authenticated_keycloak_api.create_user(user_data)
-    assert user_create_response.status_code == HTTPStatus.CREATED
+        # Create a test user for password flow
+        user_data = {
+            "username": test_username,
+            "email": f"{test_username}@example.com",
+            "enabled": True,
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": password,
+                    "temporary": False,
+                }
+            ],
+        }
+        user_create_response = authenticated_keycloak_api.create_user(user_data)
+        assert user_create_response.status_code == HTTPStatus.CREATED
 
-    # Get user ID for cleanup
-    user_get_response = authenticated_keycloak_api.get_users(username=test_username)
-    user_id = user_get_response.json()[0]["id"]
+        # Get user ID for cleanup
+        user_get_response = authenticated_keycloak_api.get_users(username=test_username)
+        user_id = user_get_response.json()[0]["id"]
 
-    # Test password flow
-    password_token_data = authenticated_keycloak_api.oauth2_password_flow(
-        test_client_id, test_username, password, client_secret
-    )
-    assert "access_token" in password_token_data
+        # Test password flow
+        password_token_data = authenticated_keycloak_api.oauth2_password_flow(
+            test_client_id, test_username, password, client_secret
+        )
+        assert "access_token" in password_token_data
 
-    # Verify user token contains username
-    user_token_payload = decode_jwt_token(password_token_data["access_token"])
-    assert "preferred_username" in user_token_payload
-    assert user_token_payload["preferred_username"] == test_username
-
-    # Cleanup
-    authenticated_keycloak_api.delete_user(user_id)
-    authenticated_keycloak_api.delete_client(client_internal_id)
+        # Verify user token contains username
+        user_token_payload = decode_jwt_token(password_token_data["access_token"])
+        assert "preferred_username" in user_token_payload
+        assert user_token_payload["preferred_username"] == test_username
+    finally:
+        # Cleanup
+        if user_id:
+            try:
+                authenticated_keycloak_api.delete_user(user_id)
+            except Exception:
+                pass
+        try:
+            authenticated_keycloak_api.delete_client(client_internal_id)
+        except Exception:
+            pass
 
 
 @pytest.mark.keycloak
@@ -855,7 +977,7 @@ def test_client_with_invalid_credentials(
     test_client_id: str,
 ) -> None:
     """Test OAuth2 flow with invalid client credentials."""
-    # Create a confidential client
+    # Create a confidential client with service accounts enabled
     client_data = {
         "clientId": test_client_id,
         "enabled": True,
@@ -871,15 +993,16 @@ def test_client_with_invalid_credentials(
     clients = get_response.json()
     client_internal_id = clients[0]["id"]
 
-    # Attempt OAuth2 flow with invalid secret
-    with pytest.raises(requests.exceptions.HTTPError) as exc_info:
-        authenticated_keycloak_api.oauth2_client_credentials_flow(
-            test_client_id, "invalid-secret"
-        )
-    assert exc_info.value.response.status_code == HTTPStatus.UNAUTHORIZED
-
-    # Cleanup
-    authenticated_keycloak_api.delete_client(client_internal_id)
+    try:
+        # Attempt OAuth2 flow with invalid secret
+        with pytest.raises(requests.exceptions.HTTPError) as exc_info:
+            authenticated_keycloak_api.oauth2_client_credentials_flow(
+                test_client_id, "invalid-secret"
+            )
+        assert exc_info.value.response.status_code == HTTPStatus.UNAUTHORIZED
+    finally:
+        # Ensure cleanup
+        authenticated_keycloak_api.delete_client(client_internal_id)
 
 
 # Role Tests
@@ -936,16 +1059,10 @@ def test_list_realm_roles(
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_get_realm_role_by_name(
     authenticated_keycloak_api: KeycloakAPI,
-    test_role_name: str,
+    created_realm_role: dict,
 ) -> None:
     """Test getting a specific realm role by name."""
-    # Create a test role
-    role_data = {
-        "name": test_role_name,
-        "description": "Test role",
-    }
-    create_response = authenticated_keycloak_api.create_realm_role(role_data)
-    assert create_response.status_code == HTTPStatus.CREATED
+    test_role_name = created_realm_role["name"]
 
     # Get the role by name
     response = authenticated_keycloak_api.get_realm_role_by_name(test_role_name)
@@ -953,10 +1070,7 @@ def test_get_realm_role_by_name(
 
     role = response.json()
     assert role["name"] == test_role_name
-    assert role["description"] == "Test role"
-
-    # Cleanup
-    authenticated_keycloak_api.delete_realm_role(test_role_name)
+    assert role["description"] == "Test realm role"
 
 
 @pytest.mark.keycloak
@@ -964,16 +1078,10 @@ def test_get_realm_role_by_name(
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_delete_realm_role(
     authenticated_keycloak_api: KeycloakAPI,
-    test_role_name: str,
+    created_realm_role: dict,
 ) -> None:
     """Test deleting a realm role."""
-    # Create a test role
-    role_data = {
-        "name": test_role_name,
-        "description": "Test role to delete",
-    }
-    create_response = authenticated_keycloak_api.create_realm_role(role_data)
-    assert create_response.status_code == HTTPStatus.CREATED
+    test_role_name = created_realm_role["name"]
 
     # Delete the role
     delete_response = authenticated_keycloak_api.delete_realm_role(test_role_name)
@@ -1068,43 +1176,15 @@ def test_list_client_roles(
 def test_assign_realm_role_to_user(
     authenticated_keycloak_api: KeycloakAPI,
     keycloak_api: KeycloakAPI,
-    test_username: str,
-    test_role_name: str,
+    created_user_with_password: dict,
+    created_realm_role: dict,
 ) -> None:
     """Test assigning a realm role to a user."""
-    password = "TestPassword123!"
-
-    # Create a test role
-    role_data = {
-        "name": test_role_name,
-        "description": "Test role for assignment",
-    }
-    create_role_response = authenticated_keycloak_api.create_realm_role(role_data)
-    assert create_role_response.status_code == HTTPStatus.CREATED
-
-    # Get the role
-    role_response = authenticated_keycloak_api.get_realm_role_by_name(test_role_name)
-    role = role_response.json()
-
-    # Create a test user
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "enabled": True,
-        "credentials": [
-            {
-                "type": "password",
-                "value": password,
-                "temporary": False,
-            }
-        ],
-    }
-    create_user_response = authenticated_keycloak_api.create_user(user_data)
-    assert create_user_response.status_code == HTTPStatus.CREATED
-
-    # Get user ID
-    user_get_response = authenticated_keycloak_api.get_users(username=test_username)
-    user_id = user_get_response.json()[0]["id"]
+    user_id = created_user_with_password["id"]
+    test_username = created_user_with_password["username"]
+    password = created_user_with_password["password"]
+    test_role_name = created_realm_role["name"]
+    role = created_realm_role["role"]
 
     # Assign role to user
     assign_response = authenticated_keycloak_api.assign_realm_roles_to_user(
@@ -1125,21 +1205,19 @@ def test_assign_realm_role_to_user(
     if "realm_access" in token_payload and "roles" in token_payload["realm_access"]:
         assert test_role_name in token_payload["realm_access"]["roles"]
 
-    # Cleanup
-    authenticated_keycloak_api.delete_user(user_id)
-    authenticated_keycloak_api.delete_realm_role(test_role_name)
-
 
 @pytest.mark.keycloak
 @pytest.mark.keycloak_roles
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_assign_client_role_to_user(
     authenticated_keycloak_api: KeycloakAPI,
-    test_username: str,
+    created_user: dict,
     test_client_id: str,
     test_role_name: str,
 ) -> None:
     """Test assigning a client role to a user."""
+    user_id = created_user["id"]
+
     # Create a client
     client_data = {
         "clientId": test_client_id,
@@ -1156,53 +1234,40 @@ def test_assign_client_role_to_user(
     )
     client_internal_id = get_client_response.json()[0]["id"]
 
-    # Create a client role
-    role_data = {
-        "name": test_role_name,
-        "description": "Test client role for assignment",
-    }
-    create_role_response = authenticated_keycloak_api.create_client_role(
-        client_internal_id, role_data
-    )
-    assert create_role_response.status_code == HTTPStatus.CREATED
+    try:
+        # Create a client role
+        role_data = {
+            "name": test_role_name,
+            "description": "Test client role for assignment",
+        }
+        create_role_response = authenticated_keycloak_api.create_client_role(
+            client_internal_id, role_data
+        )
+        assert create_role_response.status_code == HTTPStatus.CREATED
 
-    # Get the role
-    role_response = authenticated_keycloak_api.get_client_role_by_name(
-        client_internal_id, test_role_name
-    )
-    role = role_response.json()
+        # Get the role
+        role_response = authenticated_keycloak_api.get_client_role_by_name(
+            client_internal_id, test_role_name
+        )
+        role = role_response.json()
 
-    # Create a test user
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "enabled": True,
-    }
-    create_user_response = authenticated_keycloak_api.create_user(user_data)
-    assert create_user_response.status_code == HTTPStatus.CREATED
+        # Assign client role to user
+        assign_response = authenticated_keycloak_api.assign_client_roles_to_user(
+            user_id, client_internal_id, [role]
+        )
+        assert assign_response.status_code == HTTPStatus.NO_CONTENT
 
-    # Get user ID
-    user_get_response = authenticated_keycloak_api.get_users(username=test_username)
-    user_id = user_get_response.json()[0]["id"]
-
-    # Assign client role to user
-    assign_response = authenticated_keycloak_api.assign_client_roles_to_user(
-        user_id, client_internal_id, [role]
-    )
-    assert assign_response.status_code == HTTPStatus.NO_CONTENT
-
-    # Verify user has client role
-    user_roles_response = authenticated_keycloak_api.get_user_client_roles(
-        user_id, client_internal_id
-    )
-    assert user_roles_response.status_code == HTTPStatus.OK
-    user_roles = user_roles_response.json()
-    role_names = [r["name"] for r in user_roles]
-    assert test_role_name in role_names
-
-    # Cleanup
-    authenticated_keycloak_api.delete_user(user_id)
-    authenticated_keycloak_api.delete_client(client_internal_id)
+        # Verify user has client role
+        user_roles_response = authenticated_keycloak_api.get_user_client_roles(
+            user_id, client_internal_id
+        )
+        assert user_roles_response.status_code == HTTPStatus.OK
+        user_roles = user_roles_response.json()
+        role_names = [r["name"] for r in user_roles]
+        assert test_role_name in role_names
+    finally:
+        # Cleanup
+        authenticated_keycloak_api.delete_client(client_internal_id)
 
 
 @pytest.mark.keycloak
@@ -1210,34 +1275,13 @@ def test_assign_client_role_to_user(
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_remove_role_from_user(
     authenticated_keycloak_api: KeycloakAPI,
-    test_username: str,
-    test_role_name: str,
+    created_user: dict,
+    created_realm_role: dict,
 ) -> None:
     """Test removing a role from a user."""
-    # Create a test role
-    role_data = {
-        "name": test_role_name,
-        "description": "Test role for removal",
-    }
-    create_role_response = authenticated_keycloak_api.create_realm_role(role_data)
-    assert create_role_response.status_code == HTTPStatus.CREATED
-
-    # Get the role
-    role_response = authenticated_keycloak_api.get_realm_role_by_name(test_role_name)
-    role = role_response.json()
-
-    # Create a test user
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "enabled": True,
-    }
-    create_user_response = authenticated_keycloak_api.create_user(user_data)
-    assert create_user_response.status_code == HTTPStatus.CREATED
-
-    # Get user ID
-    user_get_response = authenticated_keycloak_api.get_users(username=test_username)
-    user_id = user_get_response.json()[0]["id"]
+    user_id = created_user["id"]
+    test_role_name = created_realm_role["name"]
+    role = created_realm_role["role"]
 
     # Assign role to user
     assign_response = authenticated_keycloak_api.assign_realm_roles_to_user(
@@ -1256,10 +1300,6 @@ def test_remove_role_from_user(
     user_roles = user_roles_response.json()
     role_names = [r["name"] for r in user_roles]
     assert test_role_name not in role_names
-
-    # Cleanup
-    authenticated_keycloak_api.delete_user(user_id)
-    authenticated_keycloak_api.delete_realm_role(test_role_name)
 
 
 # Group Tests
@@ -1315,33 +1355,13 @@ def test_list_groups(
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_add_user_to_group(
     authenticated_keycloak_api: KeycloakAPI,
-    test_username: str,
-    test_group_name: str,
+    created_user: dict,
+    created_group: dict,
 ) -> None:
     """Test adding a user to a group."""
-    # Create a group
-    group_data = {"name": test_group_name}
-    create_group_response = authenticated_keycloak_api.create_group(group_data)
-    assert create_group_response.status_code == HTTPStatus.CREATED
-
-    # Get group ID
-    groups_response = authenticated_keycloak_api.get_groups()
-    groups = groups_response.json()
-    group = [g for g in groups if g["name"] == test_group_name][0]
-    group_id = group["id"]
-
-    # Create a user
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "enabled": True,
-    }
-    create_user_response = authenticated_keycloak_api.create_user(user_data)
-    assert create_user_response.status_code == HTTPStatus.CREATED
-
-    # Get user ID
-    user_get_response = authenticated_keycloak_api.get_users(username=test_username)
-    user_id = user_get_response.json()[0]["id"]
+    user_id = created_user["id"]
+    group_id = created_group["id"]
+    test_group_name = created_group["name"]
 
     # Add user to group
     add_response = authenticated_keycloak_api.add_user_to_group(user_id, group_id)
@@ -1354,43 +1374,19 @@ def test_add_user_to_group(
     user_group_names = [g["name"] for g in user_groups]
     assert test_group_name in user_group_names
 
-    # Cleanup
-    authenticated_keycloak_api.delete_user(user_id)
-    authenticated_keycloak_api.delete_group(group_id)
-
 
 @pytest.mark.keycloak
 @pytest.mark.keycloak_groups
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_remove_user_from_group(
     authenticated_keycloak_api: KeycloakAPI,
-    test_username: str,
-    test_group_name: str,
+    created_user: dict,
+    created_group: dict,
 ) -> None:
     """Test removing a user from a group."""
-    # Create a group
-    group_data = {"name": test_group_name}
-    create_group_response = authenticated_keycloak_api.create_group(group_data)
-    assert create_group_response.status_code == HTTPStatus.CREATED
-
-    # Get group ID
-    groups_response = authenticated_keycloak_api.get_groups()
-    groups = groups_response.json()
-    group = [g for g in groups if g["name"] == test_group_name][0]
-    group_id = group["id"]
-
-    # Create a user
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "enabled": True,
-    }
-    create_user_response = authenticated_keycloak_api.create_user(user_data)
-    assert create_user_response.status_code == HTTPStatus.CREATED
-
-    # Get user ID
-    user_get_response = authenticated_keycloak_api.get_users(username=test_username)
-    user_id = user_get_response.json()[0]["id"]
+    user_id = created_user["id"]
+    group_id = created_group["id"]
+    test_group_name = created_group["name"]
 
     # Add user to group
     add_response = authenticated_keycloak_api.add_user_to_group(user_id, group_id)
@@ -1408,29 +1404,17 @@ def test_remove_user_from_group(
     user_group_names = [g["name"] for g in user_groups]
     assert test_group_name not in user_group_names
 
-    # Cleanup
-    authenticated_keycloak_api.delete_user(user_id)
-    authenticated_keycloak_api.delete_group(group_id)
-
 
 @pytest.mark.keycloak
 @pytest.mark.keycloak_groups
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_delete_group(
     authenticated_keycloak_api: KeycloakAPI,
-    test_group_name: str,
+    created_group: dict,
 ) -> None:
     """Test deleting a group."""
-    # Create a group
-    group_data = {"name": test_group_name}
-    create_response = authenticated_keycloak_api.create_group(group_data)
-    assert create_response.status_code == HTTPStatus.CREATED
-
-    # Get group ID
-    groups_response = authenticated_keycloak_api.get_groups()
-    groups = groups_response.json()
-    group = [g for g in groups if g["name"] == test_group_name][0]
-    group_id = group["id"]
+    group_id = created_group["id"]
+    test_group_name = created_group["name"]
 
     # Delete the group
     delete_response = authenticated_keycloak_api.delete_group(group_id)
@@ -1449,61 +1433,23 @@ def test_delete_group(
 def test_group_role_assignment(
     authenticated_keycloak_api: KeycloakAPI,
     keycloak_api: KeycloakAPI,
-    test_username: str,
-    test_group_name: str,
-    test_role_name: str,
+    created_user_with_password: dict,
+    created_group: dict,
+    created_realm_role: dict,
 ) -> None:
     """Test that user inherits roles from group."""
-    password = "TestPassword123!"
-
-    # Create a role
-    role_data = {
-        "name": test_role_name,
-        "description": "Test role for group",
-    }
-    create_role_response = authenticated_keycloak_api.create_realm_role(role_data)
-    assert create_role_response.status_code == HTTPStatus.CREATED
-
-    # Get the role
-    role_response = authenticated_keycloak_api.get_realm_role_by_name(test_role_name)
-    role = role_response.json()
-
-    # Create a group
-    group_data = {"name": test_group_name}
-    create_group_response = authenticated_keycloak_api.create_group(group_data)
-    assert create_group_response.status_code == HTTPStatus.CREATED
-
-    # Get group ID
-    groups_response = authenticated_keycloak_api.get_groups()
-    groups = groups_response.json()
-    group = [g for g in groups if g["name"] == test_group_name][0]
-    group_id = group["id"]
+    user_id = created_user_with_password["id"]
+    test_username = created_user_with_password["username"]
+    password = created_user_with_password["password"]
+    group_id = created_group["id"]
+    test_role_name = created_realm_role["name"]
+    role = created_realm_role["role"]
 
     # Assign role to group
     assign_role_response = authenticated_keycloak_api.assign_realm_roles_to_group(
         group_id, [role]
     )
     assert assign_role_response.status_code == HTTPStatus.NO_CONTENT
-
-    # Create a user
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "enabled": True,
-        "credentials": [
-            {
-                "type": "password",
-                "value": password,
-                "temporary": False,
-            }
-        ],
-    }
-    create_user_response = authenticated_keycloak_api.create_user(user_data)
-    assert create_user_response.status_code == HTTPStatus.CREATED
-
-    # Get user ID
-    user_get_response = authenticated_keycloak_api.get_users(username=test_username)
-    user_id = user_get_response.json()[0]["id"]
 
     # Add user to group
     add_user_response = authenticated_keycloak_api.add_user_to_group(user_id, group_id)
@@ -1514,11 +1460,6 @@ def test_group_role_assignment(
     token_payload = decode_jwt_token(token_data["access_token"])
     if "realm_access" in token_payload and "roles" in token_payload["realm_access"]:
         assert test_role_name in token_payload["realm_access"]["roles"]
-
-    # Cleanup
-    authenticated_keycloak_api.delete_user(user_id)
-    authenticated_keycloak_api.delete_group(group_id)
-    authenticated_keycloak_api.delete_realm_role(test_role_name)
 
 
 @pytest.mark.keycloak
@@ -1535,86 +1476,104 @@ def test_nested_groups(
     role_name = f"parent-role-{uuid.uuid4().hex[:8]}"
     password = "TestPassword123!"
 
-    # Create a role
-    role_data = {
-        "name": role_name,
-        "description": "Test role for parent group",
-    }
-    create_role_response = authenticated_keycloak_api.create_realm_role(role_data)
-    assert create_role_response.status_code == HTTPStatus.CREATED
+    user_id = None
+    parent_group_id = None
+    role_created = False
 
-    # Get the role
-    role_response = authenticated_keycloak_api.get_realm_role_by_name(role_name)
-    role = role_response.json()
+    try:
+        # Create a role
+        role_data = {
+            "name": role_name,
+            "description": "Test role for parent group",
+        }
+        create_role_response = authenticated_keycloak_api.create_realm_role(role_data)
+        assert create_role_response.status_code == HTTPStatus.CREATED
+        role_created = True
 
-    # Create parent group
-    parent_group_data = {"name": parent_group_name}
-    create_parent_response = authenticated_keycloak_api.create_group(parent_group_data)
-    assert create_parent_response.status_code == HTTPStatus.CREATED
+        # Get the role
+        role_response = authenticated_keycloak_api.get_realm_role_by_name(role_name)
+        role = role_response.json()
 
-    # Get parent group ID
-    groups_response = authenticated_keycloak_api.get_groups()
-    groups = groups_response.json()
-    parent_group = [g for g in groups if g["name"] == parent_group_name][0]
-    parent_group_id = parent_group["id"]
+        # Create parent group
+        parent_group_data = {"name": parent_group_name}
+        create_parent_response = authenticated_keycloak_api.create_group(parent_group_data)
+        assert create_parent_response.status_code == HTTPStatus.CREATED
 
-    # Assign role to parent group
-    assign_role_response = authenticated_keycloak_api.assign_realm_roles_to_group(
-        parent_group_id, [role]
-    )
-    assert assign_role_response.status_code == HTTPStatus.NO_CONTENT
+        # Get parent group ID
+        groups_response = authenticated_keycloak_api.get_groups()
+        groups = groups_response.json()
+        parent_group = [g for g in groups if g["name"] == parent_group_name][0]
+        parent_group_id = parent_group["id"]
 
-    # Create child group under parent
-    child_group_data = {"name": child_group_name}
-    create_child_response = authenticated_keycloak_api.create_subgroup(
-        parent_group_id, child_group_data
-    )
-    assert create_child_response.status_code == HTTPStatus.CREATED
+        # Assign role to parent group
+        assign_role_response = authenticated_keycloak_api.assign_realm_roles_to_group(
+            parent_group_id, [role]
+        )
+        assert assign_role_response.status_code == HTTPStatus.NO_CONTENT
 
-    # Get child group ID
-    parent_details_response = authenticated_keycloak_api.get_group_by_id(
-        parent_group_id
-    )
-    parent_details = parent_details_response.json()
-    child_group = parent_details["subGroups"][0]
-    child_group_id = child_group["id"]
+        # Create child group under parent
+        child_group_data = {"name": child_group_name}
+        create_child_response = authenticated_keycloak_api.create_subgroup(
+            parent_group_id, child_group_data
+        )
+        assert create_child_response.status_code == HTTPStatus.CREATED
 
-    # Create a user
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "enabled": True,
-        "credentials": [
-            {
-                "type": "password",
-                "value": password,
-                "temporary": False,
-            }
-        ],
-    }
-    create_user_response = authenticated_keycloak_api.create_user(user_data)
-    assert create_user_response.status_code == HTTPStatus.CREATED
+        # Get child group ID
+        parent_details_response = authenticated_keycloak_api.get_group_by_id(
+            parent_group_id
+        )
+        parent_details = parent_details_response.json()
+        child_group = parent_details["subGroups"][0]
+        child_group_id = child_group["id"]
 
-    # Get user ID
-    user_get_response = authenticated_keycloak_api.get_users(username=test_username)
-    user_id = user_get_response.json()[0]["id"]
+        # Create a user
+        user_data = {
+            "username": test_username,
+            "email": f"{test_username}@example.com",
+            "enabled": True,
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": password,
+                    "temporary": False,
+                }
+            ],
+        }
+        create_user_response = authenticated_keycloak_api.create_user(user_data)
+        assert create_user_response.status_code == HTTPStatus.CREATED
 
-    # Add user to child group
-    add_user_response = authenticated_keycloak_api.add_user_to_group(
-        user_id, child_group_id
-    )
-    assert add_user_response.status_code == HTTPStatus.NO_CONTENT
+        # Get user ID
+        user_get_response = authenticated_keycloak_api.get_users(username=test_username)
+        user_id = user_get_response.json()[0]["id"]
 
-    # Verify user inherits role from parent group
-    token_data = keycloak_api.authenticate(test_username, password)
-    token_payload = decode_jwt_token(token_data["access_token"])
-    if "realm_access" in token_payload and "roles" in token_payload["realm_access"]:
-        assert role_name in token_payload["realm_access"]["roles"]
+        # Add user to child group
+        add_user_response = authenticated_keycloak_api.add_user_to_group(
+            user_id, child_group_id
+        )
+        assert add_user_response.status_code == HTTPStatus.NO_CONTENT
 
-    # Cleanup
-    authenticated_keycloak_api.delete_user(user_id)
-    authenticated_keycloak_api.delete_group(parent_group_id)  # Deletes children too
-    authenticated_keycloak_api.delete_realm_role(role_name)
+        # Verify user inherits role from parent group
+        token_data = keycloak_api.authenticate(test_username, password)
+        token_payload = decode_jwt_token(token_data["access_token"])
+        if "realm_access" in token_payload and "roles" in token_payload["realm_access"]:
+            assert role_name in token_payload["realm_access"]["roles"]
+    finally:
+        # Cleanup
+        if user_id:
+            try:
+                authenticated_keycloak_api.delete_user(user_id)
+            except Exception:
+                pass
+        if parent_group_id:
+            try:
+                authenticated_keycloak_api.delete_group(parent_group_id)  # Deletes children too
+            except Exception:
+                pass
+        if role_created:
+            try:
+                authenticated_keycloak_api.delete_realm_role(role_name)
+            except Exception:
+                pass
 
 
 @pytest.mark.keycloak
@@ -1632,76 +1591,105 @@ def test_group_scope_propagation(
     role2_name = f"test-role-2-{uuid.uuid4().hex[:8]}"
     password = "TestPassword123!"
 
-    # Create two roles
-    role1_data = {"name": role1_name, "description": "Role 1"}
-    role2_data = {"name": role2_name, "description": "Role 2"}
-    authenticated_keycloak_api.create_realm_role(role1_data)
-    authenticated_keycloak_api.create_realm_role(role2_data)
+    user_id = None
+    group1_id = None
+    group2_id = None
+    role1_created = False
+    role2_created = False
 
-    # Get roles
-    role1 = authenticated_keycloak_api.get_realm_role_by_name(role1_name).json()
-    role2 = authenticated_keycloak_api.get_realm_role_by_name(role2_name).json()
+    try:
+        # Create two roles
+        role1_data = {"name": role1_name, "description": "Role 1"}
+        role2_data = {"name": role2_name, "description": "Role 2"}
+        authenticated_keycloak_api.create_realm_role(role1_data)
+        role1_created = True
+        authenticated_keycloak_api.create_realm_role(role2_data)
+        role2_created = True
 
-    # Create two groups
-    authenticated_keycloak_api.create_group({"name": group1_name})
-    authenticated_keycloak_api.create_group({"name": group2_name})
+        # Get roles
+        role1 = authenticated_keycloak_api.get_realm_role_by_name(role1_name).json()
+        role2 = authenticated_keycloak_api.get_realm_role_by_name(role2_name).json()
 
-    # Get group IDs
-    groups = authenticated_keycloak_api.get_groups().json()
-    group1 = [g for g in groups if g["name"] == group1_name][0]
-    group2 = [g for g in groups if g["name"] == group2_name][0]
-    group1_id = group1["id"]
-    group2_id = group2["id"]
+        # Create two groups
+        authenticated_keycloak_api.create_group({"name": group1_name})
+        authenticated_keycloak_api.create_group({"name": group2_name})
 
-    # Assign roles to groups
-    authenticated_keycloak_api.assign_realm_roles_to_group(group1_id, [role1])
-    authenticated_keycloak_api.assign_realm_roles_to_group(group2_id, [role2])
+        # Get group IDs
+        groups = authenticated_keycloak_api.get_groups().json()
+        group1 = [g for g in groups if g["name"] == group1_name][0]
+        group2 = [g for g in groups if g["name"] == group2_name][0]
+        group1_id = group1["id"]
+        group2_id = group2["id"]
 
-    # Create a user
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "enabled": True,
-        "credentials": [
-            {
-                "type": "password",
-                "value": password,
-                "temporary": False,
-            }
-        ],
-    }
-    authenticated_keycloak_api.create_user(user_data)
+        # Assign roles to groups
+        authenticated_keycloak_api.assign_realm_roles_to_group(group1_id, [role1])
+        authenticated_keycloak_api.assign_realm_roles_to_group(group2_id, [role2])
 
-    # Get user ID
-    user_id = authenticated_keycloak_api.get_users(username=test_username).json()[0][
-        "id"
-    ]
+        # Create a user
+        user_data = {
+            "username": test_username,
+            "email": f"{test_username}@example.com",
+            "enabled": True,
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": password,
+                    "temporary": False,
+                }
+            ],
+        }
+        authenticated_keycloak_api.create_user(user_data)
 
-    # Add user to both groups
-    authenticated_keycloak_api.add_user_to_group(user_id, group1_id)
-    authenticated_keycloak_api.add_user_to_group(user_id, group2_id)
+        # Get user ID
+        user_id = authenticated_keycloak_api.get_users(username=test_username).json()[0][
+            "id"
+        ]
 
-    # Verify user has roles from both groups
-    token_data = keycloak_api.authenticate(test_username, password)
-    token_payload = decode_jwt_token(token_data["access_token"])
+        # Add user to both groups
+        authenticated_keycloak_api.add_user_to_group(user_id, group1_id)
+        authenticated_keycloak_api.add_user_to_group(user_id, group2_id)
 
-    # Check user is in both groups
-    user_groups = authenticated_keycloak_api.get_user_groups(user_id).json()
-    user_group_names = [g["name"] for g in user_groups]
-    assert group1_name in user_group_names
-    assert group2_name in user_group_names
+        # Verify user has roles from both groups
+        token_data = keycloak_api.authenticate(test_username, password)
+        token_payload = decode_jwt_token(token_data["access_token"])
 
-    # Check token contains both roles
-    if "realm_access" in token_payload and "roles" in token_payload["realm_access"]:
-        assert role1_name in token_payload["realm_access"]["roles"]
-        assert role2_name in token_payload["realm_access"]["roles"]
+        # Check user is in both groups
+        user_groups = authenticated_keycloak_api.get_user_groups(user_id).json()
+        user_group_names = [g["name"] for g in user_groups]
+        assert group1_name in user_group_names
+        assert group2_name in user_group_names
 
-    # Cleanup
-    authenticated_keycloak_api.delete_user(user_id)
-    authenticated_keycloak_api.delete_group(group1_id)
-    authenticated_keycloak_api.delete_group(group2_id)
-    authenticated_keycloak_api.delete_realm_role(role1_name)
-    authenticated_keycloak_api.delete_realm_role(role2_name)
+        # Check token contains both roles
+        if "realm_access" in token_payload and "roles" in token_payload["realm_access"]:
+            assert role1_name in token_payload["realm_access"]["roles"]
+            assert role2_name in token_payload["realm_access"]["roles"]
+    finally:
+        # Cleanup
+        if user_id:
+            try:
+                authenticated_keycloak_api.delete_user(user_id)
+            except Exception:
+                pass
+        if group1_id:
+            try:
+                authenticated_keycloak_api.delete_group(group1_id)
+            except Exception:
+                pass
+        if group2_id:
+            try:
+                authenticated_keycloak_api.delete_group(group2_id)
+            except Exception:
+                pass
+        if role1_created:
+            try:
+                authenticated_keycloak_api.delete_realm_role(role1_name)
+            except Exception:
+                pass
+        if role2_created:
+            try:
+                authenticated_keycloak_api.delete_realm_role(role2_name)
+            except Exception:
+                pass
 
 
 # Integration Tests
@@ -1732,138 +1720,172 @@ def test_admin_user_workflow(
     admin_role_name = f"workflow-admin-role-{uuid.uuid4().hex[:8]}"
     user_role_name = f"workflow-user-role-{uuid.uuid4().hex[:8]}"
 
-    # Step 1: Admin Setup
-    # Create roles
-    admin_role_data = {"name": admin_role_name, "description": "Admin role"}
-    user_role_data = {"name": user_role_name, "description": "User role"}
-    authenticated_keycloak_api.create_realm_role(admin_role_data)
-    authenticated_keycloak_api.create_realm_role(user_role_data)
+    user_id = None
+    client_internal_id = None
+    admin_group_id = None
+    user_group_id = None
+    admin_role_created = False
+    user_role_created = False
 
-    # Get roles
-    admin_role = authenticated_keycloak_api.get_realm_role_by_name(
-        admin_role_name
-    ).json()
-    user_role = authenticated_keycloak_api.get_realm_role_by_name(user_role_name).json()
+    try:
+        # Step 1: Admin Setup
+        # Create roles
+        admin_role_data = {"name": admin_role_name, "description": "Admin role"}
+        user_role_data = {"name": user_role_name, "description": "User role"}
+        authenticated_keycloak_api.create_realm_role(admin_role_data)
+        admin_role_created = True
+        authenticated_keycloak_api.create_realm_role(user_role_data)
+        user_role_created = True
 
-    # Create groups
-    authenticated_keycloak_api.create_group({"name": admin_group_name})
-    authenticated_keycloak_api.create_group({"name": user_group_name})
+        # Get roles
+        admin_role = authenticated_keycloak_api.get_realm_role_by_name(
+            admin_role_name
+        ).json()
+        user_role = authenticated_keycloak_api.get_realm_role_by_name(user_role_name).json()
 
-    # Get group IDs
-    groups = authenticated_keycloak_api.get_groups().json()
-    admin_group = [g for g in groups if g["name"] == admin_group_name][0]
-    user_group = [g for g in groups if g["name"] == user_group_name][0]
-    admin_group_id = admin_group["id"]
-    user_group_id = user_group["id"]
+        # Create groups
+        authenticated_keycloak_api.create_group({"name": admin_group_name})
+        authenticated_keycloak_api.create_group({"name": user_group_name})
 
-    # Assign roles to groups
-    authenticated_keycloak_api.assign_realm_roles_to_group(admin_group_id, [admin_role])
-    authenticated_keycloak_api.assign_realm_roles_to_group(user_group_id, [user_role])
+        # Get group IDs
+        groups = authenticated_keycloak_api.get_groups().json()
+        admin_group = [g for g in groups if g["name"] == admin_group_name][0]
+        user_group = [g for g in groups if g["name"] == user_group_name][0]
+        admin_group_id = admin_group["id"]
+        user_group_id = user_group["id"]
 
-    # Create OAuth2 client
-    client_data = {
-        "clientId": test_client_id,
-        "enabled": True,
-        "publicClient": False,
-        "protocol": "openid-connect",
-        "serviceAccountsEnabled": True,
-        "directAccessGrantsEnabled": True,
-        "standardFlowEnabled": False,
-        "implicitFlowEnabled": False,
-    }
-    authenticated_keycloak_api.create_client(client_data)
+        # Assign roles to groups
+        authenticated_keycloak_api.assign_realm_roles_to_group(admin_group_id, [admin_role])
+        authenticated_keycloak_api.assign_realm_roles_to_group(user_group_id, [user_role])
 
-    # Get client internal ID and secret
-    client_internal_id = authenticated_keycloak_api.get_clients(
-        client_id=test_client_id
-    ).json()[0]["id"]
-    client_secret = authenticated_keycloak_api.get_client_secret(
-        client_internal_id
-    ).json()["value"]
+        # Create OAuth2 client
+        client_data = {
+            "clientId": test_client_id,
+            "enabled": True,
+            "publicClient": False,
+            "protocol": "openid-connect",
+            "serviceAccountsEnabled": True,
+            "directAccessGrantsEnabled": True,
+            "standardFlowEnabled": False,
+            "implicitFlowEnabled": False,
+        }
+        authenticated_keycloak_api.create_client(client_data)
 
-    # Create test user
-    user_data = {
-        "username": test_username,
-        "email": f"{test_username}@example.com",
-        "firstName": "Workflow",
-        "lastName": "User",
-        "enabled": True,
-        "credentials": [
-            {
-                "type": "password",
-                "value": test_password,
-                "temporary": False,
-            }
-        ],
-    }
-    authenticated_keycloak_api.create_user(user_data)
+        # Get client internal ID and secret
+        client_internal_id = authenticated_keycloak_api.get_clients(
+            client_id=test_client_id
+        ).json()[0]["id"]
+        client_secret = authenticated_keycloak_api.get_client_secret(
+            client_internal_id
+        ).json()["value"]
 
-    # Get user ID
-    user_id = authenticated_keycloak_api.get_users(username=test_username).json()[0][
-        "id"
-    ]
+        # Create test user
+        user_data = {
+            "username": test_username,
+            "email": f"{test_username}@example.com",
+            "firstName": "Workflow",
+            "lastName": "User",
+            "enabled": True,
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": test_password,
+                    "temporary": False,
+                }
+            ],
+        }
+        authenticated_keycloak_api.create_user(user_data)
 
-    # Assign user to groups
-    authenticated_keycloak_api.add_user_to_group(user_id, admin_group_id)
-    authenticated_keycloak_api.add_user_to_group(user_id, user_group_id)
+        # Get user ID
+        user_id = authenticated_keycloak_api.get_users(username=test_username).json()[0][
+            "id"
+        ]
 
-    # Step 2: User Authentication
-    token_data = keycloak_api.authenticate(test_username, test_password)
-    assert "access_token" in token_data
-    assert "refresh_token" in token_data
+        # Assign user to groups
+        authenticated_keycloak_api.add_user_to_group(user_id, admin_group_id)
+        authenticated_keycloak_api.add_user_to_group(user_id, user_group_id)
 
-    # Step 3: Group Association Verification
-    user_details = authenticated_keycloak_api.get_user_by_id(user_id).json()
-    assert user_details["username"] == test_username
+        # Step 2: User Authentication
+        token_data = keycloak_api.authenticate(test_username, test_password)
+        assert "access_token" in token_data
+        assert "refresh_token" in token_data
 
-    # Verify user is member of expected groups
-    user_groups_response = authenticated_keycloak_api.get_user_groups(user_id)
-    user_groups = user_groups_response.json()
-    user_group_names = [g["name"] for g in user_groups]
-    assert admin_group_name in user_group_names
-    assert user_group_name in user_group_names
+        # Step 3: Group Association Verification
+        user_details = authenticated_keycloak_api.get_user_by_id(user_id).json()
+        assert user_details["username"] == test_username
 
-    # Parse user's access token
-    user_token_payload = decode_jwt_token(token_data["access_token"])
-    assert "preferred_username" in user_token_payload
-    assert user_token_payload["preferred_username"] == test_username
+        # Verify user is member of expected groups
+        user_groups_response = authenticated_keycloak_api.get_user_groups(user_id)
+        user_groups = user_groups_response.json()
+        user_group_names = [g["name"] for g in user_groups]
+        assert admin_group_name in user_group_names
+        assert user_group_name in user_group_names
 
-    # Step 4: OAuth Client Login
-    # Authenticate as test user through OAuth2 flow
-    oauth_token_data = authenticated_keycloak_api.oauth2_password_flow(
-        test_client_id, test_username, test_password, client_secret
-    )
-    assert "access_token" in oauth_token_data
+        # Parse user's access token
+        user_token_payload = decode_jwt_token(token_data["access_token"])
+        assert "preferred_username" in user_token_payload
+        assert user_token_payload["preferred_username"] == test_username
 
-    # Also test client credentials flow
-    client_token_data = authenticated_keycloak_api.oauth2_client_credentials_flow(
-        test_client_id, client_secret
-    )
-    assert "access_token" in client_token_data
+        # Step 4: OAuth Client Login
+        # Authenticate as test user through OAuth2 flow
+        oauth_token_data = authenticated_keycloak_api.oauth2_password_flow(
+            test_client_id, test_username, test_password, client_secret
+        )
+        assert "access_token" in oauth_token_data
 
-    # Step 5: Scope Verification
-    oauth_token_payload = decode_jwt_token(oauth_token_data["access_token"])
+        # Also test client credentials flow
+        client_token_data = authenticated_keycloak_api.oauth2_client_credentials_flow(
+            test_client_id, client_secret
+        )
+        assert "access_token" in client_token_data
 
-    # Verify token contains expected group memberships and roles
-    if (
-        "realm_access" in oauth_token_payload
-        and "roles" in oauth_token_payload["realm_access"]
-    ):
-        token_roles = oauth_token_payload["realm_access"]["roles"]
-        assert (
-            admin_role_name in token_roles
-        ), f"Admin role not found in token roles: {token_roles}"
-        assert (
-            user_role_name in token_roles
-        ), f"User role not found in token roles: {token_roles}"
+        # Step 5: Scope Verification
+        oauth_token_payload = decode_jwt_token(oauth_token_data["access_token"])
 
-    # Verify user identity in token
-    assert oauth_token_payload["preferred_username"] == test_username
+        # Verify token contains expected group memberships and roles
+        if (
+            "realm_access" in oauth_token_payload
+            and "roles" in oauth_token_payload["realm_access"]
+        ):
+            token_roles = oauth_token_payload["realm_access"]["roles"]
+            assert (
+                admin_role_name in token_roles
+            ), f"Admin role not found in token roles: {token_roles}"
+            assert (
+                user_role_name in token_roles
+            ), f"User role not found in token roles: {token_roles}"
 
-    # Step 6: Cleanup
-    authenticated_keycloak_api.delete_user(user_id)
-    authenticated_keycloak_api.delete_client(client_internal_id)
-    authenticated_keycloak_api.delete_group(admin_group_id)
-    authenticated_keycloak_api.delete_group(user_group_id)
-    authenticated_keycloak_api.delete_realm_role(admin_role_name)
-    authenticated_keycloak_api.delete_realm_role(user_role_name)
+        # Verify user identity in token
+        assert oauth_token_payload["preferred_username"] == test_username
+    finally:
+        # Step 6: Cleanup
+        if user_id:
+            try:
+                authenticated_keycloak_api.delete_user(user_id)
+            except Exception:
+                pass
+        if client_internal_id:
+            try:
+                authenticated_keycloak_api.delete_client(client_internal_id)
+            except Exception:
+                pass
+        if admin_group_id:
+            try:
+                authenticated_keycloak_api.delete_group(admin_group_id)
+            except Exception:
+                pass
+        if user_group_id:
+            try:
+                authenticated_keycloak_api.delete_group(user_group_id)
+            except Exception:
+                pass
+        if admin_role_created:
+            try:
+                authenticated_keycloak_api.delete_realm_role(admin_role_name)
+            except Exception:
+                pass
+        if user_role_created:
+            try:
+                authenticated_keycloak_api.delete_realm_role(user_role_name)
+            except Exception:
+                pass
