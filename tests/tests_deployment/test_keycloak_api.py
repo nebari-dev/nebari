@@ -138,6 +138,7 @@ def test_group_name() -> str:
 
 # Resource cleanup fixtures
 
+
 @pytest.fixture
 def created_user(
     authenticated_keycloak_api: KeycloakAPI,
@@ -157,7 +158,9 @@ def created_user(
     }
 
     response = authenticated_keycloak_api.create_user(user_data)
-    assert response.status_code == HTTPStatus.CREATED, f"Failed to create user: {response.text}"
+    assert (
+        response.status_code == HTTPStatus.CREATED
+    ), f"Failed to create user: {response.text}"
 
     # Get user ID
     get_response = authenticated_keycloak_api.get_users(username=test_username)
@@ -182,7 +185,9 @@ def created_user(
                 pass
             else:
                 # Unexpected HTTP error - log it
-                print(f"WARNING: Failed to delete user {user_id}: HTTP {e.response.status_code}")
+                print(
+                    f"WARNING: Failed to delete user {user_id}: HTTP {e.response.status_code}"
+                )
         except Exception as e:
             # Non-HTTP error (network, timeout, etc.) - log it
             print(f"WARNING: Failed to delete user {user_id}: {type(e).__name__}: {e}")
@@ -215,7 +220,9 @@ def created_user_with_password(
     }
 
     response = authenticated_keycloak_api.create_user(user_data)
-    assert response.status_code == HTTPStatus.CREATED, f"Failed to create user: {response.text}"
+    assert (
+        response.status_code == HTTPStatus.CREATED
+    ), f"Failed to create user: {response.text}"
 
     # Get user ID
     get_response = authenticated_keycloak_api.get_users(username=test_username)
@@ -241,7 +248,9 @@ def created_user_with_password(
                 pass
             else:
                 # Unexpected HTTP error - log it
-                print(f"WARNING: Failed to delete user {user_id}: HTTP {e.response.status_code}")
+                print(
+                    f"WARNING: Failed to delete user {user_id}: HTTP {e.response.status_code}"
+                )
         except Exception as e:
             # Non-HTTP error (network, timeout, etc.) - log it
             print(f"WARNING: Failed to delete user {user_id}: {type(e).__name__}: {e}")
@@ -267,7 +276,9 @@ def created_client(
     }
 
     response = authenticated_keycloak_api.create_client(client_data)
-    assert response.status_code == HTTPStatus.CREATED, f"Failed to create client: {response.text}"
+    assert (
+        response.status_code == HTTPStatus.CREATED
+    ), f"Failed to create client: {response.text}"
 
     # Get client internal ID
     get_response = authenticated_keycloak_api.get_clients(client_id=test_client_id)
@@ -292,10 +303,14 @@ def created_client(
                 pass
             else:
                 # Unexpected HTTP error - log it
-                print(f"WARNING: Failed to delete client {client_internal_id}: HTTP {e.response.status_code}")
+                print(
+                    f"WARNING: Failed to delete client {client_internal_id}: HTTP {e.response.status_code}"
+                )
         except Exception as e:
             # Non-HTTP error (network, timeout, etc.) - log it
-            print(f"WARNING: Failed to delete client {client_internal_id}: {type(e).__name__}: {e}")
+            print(
+                f"WARNING: Failed to delete client {client_internal_id}: {type(e).__name__}: {e}"
+            )
 
 
 @pytest.fixture
@@ -316,7 +331,9 @@ def created_realm_role(
     }
 
     response = authenticated_keycloak_api.create_realm_role(role_data)
-    assert response.status_code == HTTPStatus.CREATED, f"Failed to create realm role: {response.text}"
+    assert (
+        response.status_code == HTTPStatus.CREATED
+    ), f"Failed to create realm role: {response.text}"
 
     # Get the full role object
     get_response = authenticated_keycloak_api.get_realm_role_by_name(test_role_name)
@@ -338,10 +355,14 @@ def created_realm_role(
             pass
         else:
             # Unexpected HTTP error - log it
-            print(f"WARNING: Failed to delete realm role {test_role_name}: HTTP {e.response.status_code}")
+            print(
+                f"WARNING: Failed to delete realm role {test_role_name}: HTTP {e.response.status_code}"
+            )
     except Exception as e:
         # Non-HTTP error (network, timeout, etc.) - log it
-        print(f"WARNING: Failed to delete realm role {test_role_name}: {type(e).__name__}: {e}")
+        print(
+            f"WARNING: Failed to delete realm role {test_role_name}: {type(e).__name__}: {e}"
+        )
 
 
 @pytest.fixture
@@ -359,7 +380,9 @@ def created_group(
     group_data = {"name": test_group_name}
 
     response = authenticated_keycloak_api.create_group(group_data)
-    assert response.status_code == HTTPStatus.CREATED, f"Failed to create group: {response.text}"
+    assert (
+        response.status_code == HTTPStatus.CREATED
+    ), f"Failed to create group: {response.text}"
 
     # Get group ID
     groups_response = authenticated_keycloak_api.get_groups()
@@ -385,10 +408,14 @@ def created_group(
                 pass
             else:
                 # Unexpected HTTP error - log it
-                print(f"WARNING: Failed to delete group {group_id}: HTTP {e.response.status_code}")
+                print(
+                    f"WARNING: Failed to delete group {group_id}: HTTP {e.response.status_code}"
+                )
         except Exception as e:
             # Non-HTTP error (network, timeout, etc.) - log it
-            print(f"WARNING: Failed to delete group {group_id}: {type(e).__name__}: {e}")
+            print(
+                f"WARNING: Failed to delete group {group_id}: {type(e).__name__}: {e}"
+            )
 
 
 @pytest.mark.keycloak
@@ -850,7 +877,9 @@ def test_client_secret_regeneration(
 
     try:
         # Get the initial secret
-        secret_response = authenticated_keycloak_api.get_client_secret(client_internal_id)
+        secret_response = authenticated_keycloak_api.get_client_secret(
+            client_internal_id
+        )
         assert secret_response.status_code == HTTPStatus.OK
         old_secret = secret_response.json()["value"]
 
@@ -1496,7 +1525,9 @@ def test_nested_groups(
 
         # Create parent group
         parent_group_data = {"name": parent_group_name}
-        create_parent_response = authenticated_keycloak_api.create_group(parent_group_data)
+        create_parent_response = authenticated_keycloak_api.create_group(
+            parent_group_data
+        )
         assert create_parent_response.status_code == HTTPStatus.CREATED
 
         # Get parent group ID
@@ -1563,17 +1594,25 @@ def test_nested_groups(
             try:
                 authenticated_keycloak_api.delete_user(user_id)
             except Exception as e:
-                print(f"WARNING: Failed to cleanup user {user_id}: {type(e).__name__}: {e}")
+                print(
+                    f"WARNING: Failed to cleanup user {user_id}: {type(e).__name__}: {e}"
+                )
         if parent_group_id:
             try:
-                authenticated_keycloak_api.delete_group(parent_group_id)  # Deletes children too
+                authenticated_keycloak_api.delete_group(
+                    parent_group_id
+                )  # Deletes children too
             except Exception as e:
-                print(f"WARNING: Failed to cleanup group {parent_group_id}: {type(e).__name__}: {e}")
+                print(
+                    f"WARNING: Failed to cleanup group {parent_group_id}: {type(e).__name__}: {e}"
+                )
         if role_created:
             try:
                 authenticated_keycloak_api.delete_realm_role(role_name)
             except Exception as e:
-                print(f"WARNING: Failed to cleanup role {role_name}: {type(e).__name__}: {e}")
+                print(
+                    f"WARNING: Failed to cleanup role {role_name}: {type(e).__name__}: {e}"
+                )
 
 
 @pytest.mark.keycloak
@@ -1641,9 +1680,9 @@ def test_group_scope_propagation(
         authenticated_keycloak_api.create_user(user_data)
 
         # Get user ID
-        user_id = authenticated_keycloak_api.get_users(username=test_username).json()[0][
-            "id"
-        ]
+        user_id = authenticated_keycloak_api.get_users(username=test_username).json()[
+            0
+        ]["id"]
 
         # Add user to both groups
         authenticated_keycloak_api.add_user_to_group(user_id, group1_id)
@@ -1669,27 +1708,37 @@ def test_group_scope_propagation(
             try:
                 authenticated_keycloak_api.delete_user(user_id)
             except Exception as e:
-                print(f"WARNING: Failed to cleanup user {user_id}: {type(e).__name__}: {e}")
+                print(
+                    f"WARNING: Failed to cleanup user {user_id}: {type(e).__name__}: {e}"
+                )
         if group1_id:
             try:
                 authenticated_keycloak_api.delete_group(group1_id)
             except Exception as e:
-                print(f"WARNING: Failed to cleanup group {group1_id}: {type(e).__name__}: {e}")
+                print(
+                    f"WARNING: Failed to cleanup group {group1_id}: {type(e).__name__}: {e}"
+                )
         if group2_id:
             try:
                 authenticated_keycloak_api.delete_group(group2_id)
             except Exception as e:
-                print(f"WARNING: Failed to cleanup group {group2_id}: {type(e).__name__}: {e}")
+                print(
+                    f"WARNING: Failed to cleanup group {group2_id}: {type(e).__name__}: {e}"
+                )
         if role1_created:
             try:
                 authenticated_keycloak_api.delete_realm_role(role1_name)
             except Exception as e:
-                print(f"WARNING: Failed to cleanup role {role1_name}: {type(e).__name__}: {e}")
+                print(
+                    f"WARNING: Failed to cleanup role {role1_name}: {type(e).__name__}: {e}"
+                )
         if role2_created:
             try:
                 authenticated_keycloak_api.delete_realm_role(role2_name)
             except Exception as e:
-                print(f"WARNING: Failed to cleanup role {role2_name}: {type(e).__name__}: {e}")
+                print(
+                    f"WARNING: Failed to cleanup role {role2_name}: {type(e).__name__}: {e}"
+                )
 
 
 # Integration Tests
@@ -1741,7 +1790,9 @@ def test_admin_user_workflow(
         admin_role = authenticated_keycloak_api.get_realm_role_by_name(
             admin_role_name
         ).json()
-        user_role = authenticated_keycloak_api.get_realm_role_by_name(user_role_name).json()
+        user_role = authenticated_keycloak_api.get_realm_role_by_name(
+            user_role_name
+        ).json()
 
         # Create groups
         authenticated_keycloak_api.create_group({"name": admin_group_name})
@@ -1755,8 +1806,12 @@ def test_admin_user_workflow(
         user_group_id = user_group["id"]
 
         # Assign roles to groups
-        authenticated_keycloak_api.assign_realm_roles_to_group(admin_group_id, [admin_role])
-        authenticated_keycloak_api.assign_realm_roles_to_group(user_group_id, [user_role])
+        authenticated_keycloak_api.assign_realm_roles_to_group(
+            admin_group_id, [admin_role]
+        )
+        authenticated_keycloak_api.assign_realm_roles_to_group(
+            user_group_id, [user_role]
+        )
 
         # Create OAuth2 client
         client_data = {
@@ -1797,9 +1852,9 @@ def test_admin_user_workflow(
         authenticated_keycloak_api.create_user(user_data)
 
         # Get user ID
-        user_id = authenticated_keycloak_api.get_users(username=test_username).json()[0][
-            "id"
-        ]
+        user_id = authenticated_keycloak_api.get_users(username=test_username).json()[
+            0
+        ]["id"]
 
         # Assign user to groups
         authenticated_keycloak_api.add_user_to_group(user_id, admin_group_id)
@@ -1863,29 +1918,41 @@ def test_admin_user_workflow(
             try:
                 authenticated_keycloak_api.delete_user(user_id)
             except Exception as e:
-                print(f"WARNING: Failed to cleanup user {user_id}: {type(e).__name__}: {e}")
+                print(
+                    f"WARNING: Failed to cleanup user {user_id}: {type(e).__name__}: {e}"
+                )
         if client_internal_id:
             try:
                 authenticated_keycloak_api.delete_client(client_internal_id)
             except Exception as e:
-                print(f"WARNING: Failed to cleanup client {client_internal_id}: {type(e).__name__}: {e}")
+                print(
+                    f"WARNING: Failed to cleanup client {client_internal_id}: {type(e).__name__}: {e}"
+                )
         if admin_group_id:
             try:
                 authenticated_keycloak_api.delete_group(admin_group_id)
             except Exception as e:
-                print(f"WARNING: Failed to cleanup group {admin_group_id}: {type(e).__name__}: {e}")
+                print(
+                    f"WARNING: Failed to cleanup group {admin_group_id}: {type(e).__name__}: {e}"
+                )
         if user_group_id:
             try:
                 authenticated_keycloak_api.delete_group(user_group_id)
             except Exception as e:
-                print(f"WARNING: Failed to cleanup group {user_group_id}: {type(e).__name__}: {e}")
+                print(
+                    f"WARNING: Failed to cleanup group {user_group_id}: {type(e).__name__}: {e}"
+                )
         if admin_role_created:
             try:
                 authenticated_keycloak_api.delete_realm_role(admin_role_name)
             except Exception as e:
-                print(f"WARNING: Failed to cleanup role {admin_role_name}: {type(e).__name__}: {e}")
+                print(
+                    f"WARNING: Failed to cleanup role {admin_role_name}: {type(e).__name__}: {e}"
+                )
         if user_role_created:
             try:
                 authenticated_keycloak_api.delete_realm_role(user_role_name)
             except Exception as e:
-                print(f"WARNING: Failed to cleanup role {user_role_name}: {type(e).__name__}: {e}")
+                print(
+                    f"WARNING: Failed to cleanup role {user_role_name}: {type(e).__name__}: {e}"
+                )

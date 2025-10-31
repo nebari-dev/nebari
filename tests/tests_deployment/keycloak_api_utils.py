@@ -462,13 +462,17 @@ class KeycloakAPI:
         RuntimeError
             If the client still exists after deletion
         """
-        response = self._make_admin_request(f"clients/{client_internal_id}", method="DELETE")
+        response = self._make_admin_request(
+            f"clients/{client_internal_id}", method="DELETE"
+        )
 
         # Verify deletion if the delete request was successful
         if response.status_code == HTTPStatus.NO_CONTENT:
             verify_response = self._make_admin_request(f"clients/{client_internal_id}")
             if verify_response.status_code != HTTPStatus.NOT_FOUND:
-                raise RuntimeError(f"Client {client_internal_id} still exists after deletion")
+                raise RuntimeError(
+                    f"Client {client_internal_id} still exists after deletion"
+                )
 
         return response
 
@@ -593,7 +597,9 @@ class KeycloakAPI:
         if response.status_code == HTTPStatus.NO_CONTENT:
             verify_response = self._make_admin_request(f"roles/{role_name}")
             if verify_response.status_code != HTTPStatus.NOT_FOUND:
-                raise RuntimeError(f"Realm role {role_name} still exists after deletion")
+                raise RuntimeError(
+                    f"Realm role {role_name} still exists after deletion"
+                )
 
         return response
 
@@ -676,9 +682,13 @@ class KeycloakAPI:
 
         # Verify deletion if the delete request was successful
         if response.status_code == HTTPStatus.NO_CONTENT:
-            verify_response = self._make_admin_request(f"clients/{client_id}/roles/{role_name}")
+            verify_response = self._make_admin_request(
+                f"clients/{client_id}/roles/{role_name}"
+            )
             if verify_response.status_code != HTTPStatus.NOT_FOUND:
-                raise RuntimeError(f"Client role {role_name} still exists after deletion")
+                raise RuntimeError(
+                    f"Client role {role_name} still exists after deletion"
+                )
 
         return response
 
