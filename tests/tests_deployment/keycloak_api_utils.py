@@ -346,7 +346,7 @@ class KeycloakAPI:
         )
 
     def delete_user(self, user_id: str) -> requests.Response:
-        """Delete a user from Keycloak.
+        """Delete a user from Keycloak and verify deletion.
 
         Parameters
         ----------
@@ -357,8 +357,21 @@ class KeycloakAPI:
         -------
         requests.Response
             Response from the delete request
+
+        Raises
+        ------
+        RuntimeError
+            If the user still exists after deletion
         """
-        return self._make_admin_request(f"users/{user_id}", method="DELETE")
+        response = self._make_admin_request(f"users/{user_id}", method="DELETE")
+
+        # Verify deletion if the delete request was successful
+        if response.status_code == HTTPStatus.NO_CONTENT:
+            verify_response = self._make_admin_request(f"users/{user_id}")
+            if verify_response.status_code != HTTPStatus.NOT_FOUND:
+                raise RuntimeError(f"User {user_id} still exists after deletion")
+
+        return response
 
     def create_client(self, client_data: dict) -> requests.Response:
         """Create a new client in Keycloak.
@@ -432,7 +445,7 @@ class KeycloakAPI:
         )
 
     def delete_client(self, client_internal_id: str) -> requests.Response:
-        """Delete a client from Keycloak.
+        """Delete a client from Keycloak and verify deletion.
 
         Parameters
         ----------
@@ -443,10 +456,21 @@ class KeycloakAPI:
         -------
         requests.Response
             Response from the delete request
+
+        Raises
+        ------
+        RuntimeError
+            If the client still exists after deletion
         """
-        return self._make_admin_request(
-            f"clients/{client_internal_id}", method="DELETE"
-        )
+        response = self._make_admin_request(f"clients/{client_internal_id}", method="DELETE")
+
+        # Verify deletion if the delete request was successful
+        if response.status_code == HTTPStatus.NO_CONTENT:
+            verify_response = self._make_admin_request(f"clients/{client_internal_id}")
+            if verify_response.status_code != HTTPStatus.NOT_FOUND:
+                raise RuntimeError(f"Client {client_internal_id} still exists after deletion")
+
+        return response
 
     def reset_user_password(
         self, user_id: str, password: str, temporary: bool = False
@@ -546,7 +570,7 @@ class KeycloakAPI:
         return self._make_admin_request(f"roles/{role_name}")
 
     def delete_realm_role(self, role_name: str) -> requests.Response:
-        """Delete a realm role.
+        """Delete a realm role and verify deletion.
 
         Parameters
         ----------
@@ -557,8 +581,21 @@ class KeycloakAPI:
         -------
         requests.Response
             Response from the delete request
+
+        Raises
+        ------
+        RuntimeError
+            If the role still exists after deletion
         """
-        return self._make_admin_request(f"roles/{role_name}", method="DELETE")
+        response = self._make_admin_request(f"roles/{role_name}", method="DELETE")
+
+        # Verify deletion if the delete request was successful
+        if response.status_code == HTTPStatus.NO_CONTENT:
+            verify_response = self._make_admin_request(f"roles/{role_name}")
+            if verify_response.status_code != HTTPStatus.NOT_FOUND:
+                raise RuntimeError(f"Realm role {role_name} still exists after deletion")
+
+        return response
 
     def create_client_role(self, client_id: str, role_data: dict) -> requests.Response:
         """Create a new client role.
@@ -614,7 +651,7 @@ class KeycloakAPI:
         return self._make_admin_request(f"clients/{client_id}/roles/{role_name}")
 
     def delete_client_role(self, client_id: str, role_name: str) -> requests.Response:
-        """Delete a client role.
+        """Delete a client role and verify deletion.
 
         Parameters
         ----------
@@ -627,10 +664,23 @@ class KeycloakAPI:
         -------
         requests.Response
             Response from the delete request
+
+        Raises
+        ------
+        RuntimeError
+            If the role still exists after deletion
         """
-        return self._make_admin_request(
+        response = self._make_admin_request(
             f"clients/{client_id}/roles/{role_name}", method="DELETE"
         )
+
+        # Verify deletion if the delete request was successful
+        if response.status_code == HTTPStatus.NO_CONTENT:
+            verify_response = self._make_admin_request(f"clients/{client_id}/roles/{role_name}")
+            if verify_response.status_code != HTTPStatus.NOT_FOUND:
+                raise RuntimeError(f"Client role {role_name} still exists after deletion")
+
+        return response
 
     def assign_realm_roles_to_user(
         self, user_id: str, roles: list
@@ -800,7 +850,7 @@ class KeycloakAPI:
         return self._make_admin_request(f"groups/{group_id}")
 
     def delete_group(self, group_id: str) -> requests.Response:
-        """Delete a group.
+        """Delete a group and verify deletion.
 
         Parameters
         ----------
@@ -811,8 +861,21 @@ class KeycloakAPI:
         -------
         requests.Response
             Response from the delete request
+
+        Raises
+        ------
+        RuntimeError
+            If the group still exists after deletion
         """
-        return self._make_admin_request(f"groups/{group_id}", method="DELETE")
+        response = self._make_admin_request(f"groups/{group_id}", method="DELETE")
+
+        # Verify deletion if the delete request was successful
+        if response.status_code == HTTPStatus.NO_CONTENT:
+            verify_response = self._make_admin_request(f"groups/{group_id}")
+            if verify_response.status_code != HTTPStatus.NOT_FOUND:
+                raise RuntimeError(f"Group {group_id} still exists after deletion")
+
+        return response
 
     def add_user_to_group(self, user_id: str, group_id: str) -> requests.Response:
         """Add a user to a group.
