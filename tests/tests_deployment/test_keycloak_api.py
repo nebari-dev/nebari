@@ -1558,22 +1558,22 @@ def test_nested_groups(
         if "realm_access" in token_payload and "roles" in token_payload["realm_access"]:
             assert role_name in token_payload["realm_access"]["roles"]
     finally:
-        # Cleanup
+        # Cleanup - log failures but continue
         if user_id:
             try:
                 authenticated_keycloak_api.delete_user(user_id)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"WARNING: Failed to cleanup user {user_id}: {type(e).__name__}: {e}")
         if parent_group_id:
             try:
                 authenticated_keycloak_api.delete_group(parent_group_id)  # Deletes children too
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"WARNING: Failed to cleanup group {parent_group_id}: {type(e).__name__}: {e}")
         if role_created:
             try:
                 authenticated_keycloak_api.delete_realm_role(role_name)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"WARNING: Failed to cleanup role {role_name}: {type(e).__name__}: {e}")
 
 
 @pytest.mark.keycloak
@@ -1664,32 +1664,32 @@ def test_group_scope_propagation(
             assert role1_name in token_payload["realm_access"]["roles"]
             assert role2_name in token_payload["realm_access"]["roles"]
     finally:
-        # Cleanup
+        # Cleanup - log failures but continue
         if user_id:
             try:
                 authenticated_keycloak_api.delete_user(user_id)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"WARNING: Failed to cleanup user {user_id}: {type(e).__name__}: {e}")
         if group1_id:
             try:
                 authenticated_keycloak_api.delete_group(group1_id)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"WARNING: Failed to cleanup group {group1_id}: {type(e).__name__}: {e}")
         if group2_id:
             try:
                 authenticated_keycloak_api.delete_group(group2_id)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"WARNING: Failed to cleanup group {group2_id}: {type(e).__name__}: {e}")
         if role1_created:
             try:
                 authenticated_keycloak_api.delete_realm_role(role1_name)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"WARNING: Failed to cleanup role {role1_name}: {type(e).__name__}: {e}")
         if role2_created:
             try:
                 authenticated_keycloak_api.delete_realm_role(role2_name)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"WARNING: Failed to cleanup role {role2_name}: {type(e).__name__}: {e}")
 
 
 # Integration Tests
@@ -1858,34 +1858,34 @@ def test_admin_user_workflow(
         # Verify user identity in token
         assert oauth_token_payload["preferred_username"] == test_username
     finally:
-        # Step 6: Cleanup
+        # Step 6: Cleanup - log failures but continue
         if user_id:
             try:
                 authenticated_keycloak_api.delete_user(user_id)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"WARNING: Failed to cleanup user {user_id}: {type(e).__name__}: {e}")
         if client_internal_id:
             try:
                 authenticated_keycloak_api.delete_client(client_internal_id)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"WARNING: Failed to cleanup client {client_internal_id}: {type(e).__name__}: {e}")
         if admin_group_id:
             try:
                 authenticated_keycloak_api.delete_group(admin_group_id)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"WARNING: Failed to cleanup group {admin_group_id}: {type(e).__name__}: {e}")
         if user_group_id:
             try:
                 authenticated_keycloak_api.delete_group(user_group_id)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"WARNING: Failed to cleanup group {user_group_id}: {type(e).__name__}: {e}")
         if admin_role_created:
             try:
                 authenticated_keycloak_api.delete_realm_role(admin_role_name)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"WARNING: Failed to cleanup role {admin_role_name}: {type(e).__name__}: {e}")
         if user_role_created:
             try:
                 authenticated_keycloak_api.delete_realm_role(user_role_name)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"WARNING: Failed to cleanup role {user_role_name}: {type(e).__name__}: {e}")
