@@ -44,14 +44,6 @@
 - [Ongoing Support](#ongoing-support)
 - [License](#license)
 
-> **⚠️ Warning ⚠️**
-> The `2023.10.1` release includes the initial implementation of a [Pluggy-based](https://pluggy.readthedocs.io/en/stable/) extension mechanism, for more details refer [here](https://www.nebari.dev/docs/community/plugins).
-> This version also fully deprecates CDS Dashboards as it is no longer compatible with the newer versions of JupyterHub.
-> For more details on all of changes included in this release, please refer to our [release notes](./RELEASE.md).
-> After you've installed version `2023.10.1`, you can update your `nebari-config.yaml` by running `nebari upgrade -c nebari-config.yaml`, please
-> follow the upgrades instructions output by this command.
-> And please make sure to [back up your data before attempting an upgrade](https://www.nebari.dev/docs/how-tos/manual-backup).
-
 Automated data science platform. From [JupyterHub](https://jupyter.org/hub "Multi-user version of the Notebook") to Cloud environments with
 [Dask Gateway](https://docs.dask.org/ "Parallel computing in Python").
 
