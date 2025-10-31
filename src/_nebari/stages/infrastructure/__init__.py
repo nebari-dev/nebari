@@ -169,8 +169,8 @@ class AzureInputVars(schema.Base):
 
 
 class AWSAmiTypes(str, enum.Enum):
-    AL2_x86_64 = "AL2_x86_64"
-    AL2_x86_64_GPU = "AL2_x86_64_GPU"
+    AL2023_x86_64_STANDARD = "AL2023_x86_64_STANDARD"
+    AL2023_x86_64_NVIDIA = "AL2023_x86_64_NVIDIA"
     CUSTOM = "CUSTOM"
 
 
@@ -219,9 +219,9 @@ def construct_aws_ami_type(
 
     Returns the AMI type (str) determined by the following rules:
         - Returns "CUSTOM" if a `launch_template` is provided and it includes a valid `ami_id`.
-        - Returns "AL2_x86_64_GPU" if `gpu_enabled` is True and no valid
+        - Returns "AL2023_x86_64_NVIDIA" if `gpu_enabled` is True and no valid
           `launch_template` is provided (None).
-        - Returns "AL2_x86_64" as the default AMI type if `gpu_enabled` is False and no
+        - Returns "AL2023_x86_64_STANDARD" as the default AMI type if `gpu_enabled` is False and no
           valid `launch_template` is provided (None).
     """
 
@@ -229,9 +229,9 @@ def construct_aws_ami_type(
         return "CUSTOM"
 
     if gpu_enabled:
-        return "AL2_x86_64_GPU"
+        return "AL2023_x86_64_NVIDIA"
 
-    return "AL2_x86_64"
+    return "AL2023_x86_64_STANDARD"
 
 
 class AWSInputVars(schema.Base):
