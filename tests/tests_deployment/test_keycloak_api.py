@@ -15,7 +15,7 @@ from tests.tests_deployment import constants
 from .keycloak_api_utils import KeycloakAPI, decode_jwt_token
 
 
-def get_nebari_config():
+def get_nebari_config() -> dict:
     config_schema = nebari_plugin_manager.config_schema
     config_filepath = constants.NEBARI_CONFIG_PATH
     assert pathlib.Path(config_filepath).exists()
