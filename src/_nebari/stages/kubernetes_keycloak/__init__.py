@@ -371,6 +371,15 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                 if users:
                     print("nebari-bot user already exists")
                     user_id = users[0]["id"]
+
+                    # Reset password to ensure it matches the expected value
+                    # (Keycloak doesn't allow reading passwords for comparison)
+                    admin.set_user_password(
+                        user_id=user_id,
+                        password=nebari_bot_password,
+                        temporary=False
+                    )
+                    print("Updated nebari-bot password to match expected value")
                 else:
                     # Create nebari-bot user
                     user_id = admin.create_user({
@@ -412,6 +421,11 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
     def _restore_keycloak_database(self, backup_file):
         """Restore PostgreSQL database from backup file using Kubernetes exec."""
+        import base64
+        import tarfile
+        from io import BytesIO
+        from pathlib import Path
+
         import kubernetes
         from kubernetes.stream import stream
 
@@ -539,17 +553,32 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             resp.close()
             return ''.join(stdout_lines), ''.join(stderr_lines)
 
-        # Helper function to run command with stdin
-        def run_command_with_stdin(command, stdin_data, show_output=True):
-            print(f"  Running: {command}")
-            print(f"  Piping {len(stdin_data)} bytes to stdin...")
-            sys.stdout.flush()
+        # Helper function to copy file to pod using tar
+        def copy_file_to_pod(local_path, remote_path):
+            """
+            Copy a file to pod using tar (similar to kubectl cp).
+            More reliable than stdin streaming for large files.
+            """
+            print(f"  Copying {local_path.name} to pod:{remote_path}")
+            print(f"  File size: {local_path.stat().st_size / 1024:.2f} KB")
+
+            # Create tar archive in memory
+            tar_buffer = BytesIO()
+            with tarfile.open(fileobj=tar_buffer, mode='w') as tar:
+                tar.add(str(local_path), arcname=os.path.basename(remote_path))
+
+            tar_buffer.seek(0)
+            tar_data = tar_buffer.getvalue()
+
+            # Extract tar in pod
+            remote_dir = os.path.dirname(remote_path)
+            extract_cmd = ['tar', 'xf', '-', '-C', remote_dir or '/']
 
             resp = stream(
                 api.connect_get_namespaced_pod_exec,
                 name=pod_name,
                 namespace=namespace,
-                command=['/bin/sh', '-c', command],
+                command=extract_cmd,
                 stderr=True,
                 stdin=True,
                 stdout=True,
@@ -557,45 +586,16 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                 _preload_content=False
             )
 
-            # Write stdin data and close stdin to signal EOF
-            resp.write_stdin(stdin_data)
-            resp.write_stdin("")  # Signal EOF
+            # Write tar data in chunks
+            chunk_size = 1024 * 1024  # 1MB chunks
+            for i in range(0, len(tar_data), chunk_size):
+                chunk = tar_data[i:i + chunk_size]
+                resp.write_stdin(chunk)
 
-            stdout_lines = []
-            stderr_lines = []
-            no_data_cycles = 0
-            max_no_data_cycles = 30
-
-            while resp.is_open():
-                resp.update(timeout=1)
-                has_data = False
-
-                if resp.peek_stdout():
-                    data = resp.read_stdout()
-                    stdout_lines.append(data)
-                    if show_output:
-                        print(data, end='')
-                        sys.stdout.flush()
-                    has_data = True
-                    no_data_cycles = 0
-
-                if resp.peek_stderr():
-                    data = resp.read_stderr()
-                    stderr_lines.append(data)
-                    if show_output:
-                        print(data, end='', file=sys.stderr)
-                        sys.stderr.flush()
-                    has_data = True
-                    no_data_cycles = 0
-
-                if not has_data:
-                    no_data_cycles += 1
-                    if no_data_cycles >= max_no_data_cycles:
-                        print("\n  No output for 30 seconds, assuming command completed...")
-                        break
-
+            resp.write_stdin('')  # Signal EOF
             resp.close()
-            return ''.join(stdout_lines), ''.join(stderr_lines)
+
+            print(f"  ✓ File copied successfully")
 
         # Step 1: Drop existing database
         print(f"Step 1: Dropping database '{db_name}' (if exists)...")
@@ -621,20 +621,21 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         run_command(grant_default_cmd)
         print("✓ Privileges granted\n")
 
-        # Step 4: Read the backup file
-        print(f"Step 4: Reading backup file...")
-        with open(backup_file, 'r') as f:
-            backup_sql = f.read()
-        print(f"✓ Backup file loaded ({len(backup_sql)} characters)\n")
+        # Step 4: Copy backup file to pod
+        print(f"Step 4: Copying backup file to pod...")
+        remote_backup_path = "/tmp/keycloak-backup.sql"
+        copy_file_to_pod(Path(backup_file), remote_backup_path)
+        print(f"✓ Backup file copied to pod\n")
 
-        # Step 5: Restore the database
+        # Step 5: Restore the database from file
         print(f"Step 5: Restoring database from backup...")
         print("This may take a few moments. Output will be shown below:\n")
         print("Note: Warnings about 'public' schema permissions are expected and harmless.")
         print("=" * 80)
 
-        restore_cmd = f"env PGPASSWORD={db_password} psql -U {db_user} -d {db_name} --set ON_ERROR_STOP=off"
-        run_command_with_stdin(restore_cmd, backup_sql)
+        # Use -f flag to read from file instead of stdin - much more reliable!
+        restore_cmd = f"env PGPASSWORD={db_password} psql -U {db_user} -d {db_name} --set ON_ERROR_STOP=off -f {remote_backup_path}"
+        run_command(restore_cmd)
 
         print("=" * 80)
         print("\n✓ Restore completed!\n")
@@ -644,6 +645,12 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         verify_cmd = f"env PGPASSWORD={db_password} psql -U {db_user} -d {db_name} -c 'SELECT count(*) FROM user_entity;'"
         run_command(verify_cmd)
         print("✓ Verification complete\n")
+
+        # Step 6.5: Clean up temporary file in pod
+        print(f"Step 6.5: Cleaning up temporary file in pod...")
+        cleanup_cmd = f"rm -f {remote_backup_path}"
+        run_command(cleanup_cmd, show_output=False)
+        print(f"✓ Removed {remote_backup_path}\n")
 
         print("=" * 80)
         print("DATABASE RESTORE SUCCESSFUL!")
