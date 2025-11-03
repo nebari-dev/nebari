@@ -6,7 +6,7 @@ terraform {
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "2.16.0"
+      version = "3.8.0"
     }
     kubectl = {
       source  = "gavinbunney/kubectl"
