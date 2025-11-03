@@ -87,12 +87,13 @@ From the repository's root folder, you can build these images locally by running
   ```
 
 - To build all of the images
-  
+
   ```shell
   make all
   ```
+
 - To delete built images
-  
+
   ```shell
   make clean
   ```

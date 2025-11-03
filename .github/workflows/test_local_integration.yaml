@@ -52,7 +52,7 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: "Checkout Infrastructure"
-      # Pin checkout version due to issue with node24 support on self-hosted runners
+        # Pin checkout version due to issue with node24 support on self-hosted runners
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -171,12 +171,12 @@ jobs:
         env:
           CONDA: /home/runnerx/miniconda3
         with:
-            environment-file: conda-store/conda-store-server/environment-dev.yaml
-            miniforge-version: latest
-            auto-activate-base: false
-            activate-environment: conda-store-server-dev
-            python-version: ${{ env.PYTHON_VERSION }}
-            conda-remove-defaults: "true"
+          environment-file: conda-store/conda-store-server/environment-dev.yaml
+          miniforge-version: latest
+          auto-activate-base: false
+          activate-environment: conda-store-server-dev
+          python-version: ${{ env.PYTHON_VERSION }}
+          conda-remove-defaults: "true"
 
       - name: Install conda-store dependencies
         run: |

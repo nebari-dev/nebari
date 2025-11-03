@@ -45,13 +45,10 @@ repos:
     rev: v2.4.1
     hooks:
       - id: codespell
-        args:
-          [
-            "--write",
-          ]
+        args: ["--write"]
         language: python
         additional_dependencies:
-        - tomli
+          - tomli
 
   # python
   - repo: https://github.com/psf/black

@@ -7,12 +7,12 @@ name: Code Scanning
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ "main" ]
+    branches: ["main"]
   schedule:
-    - cron: '19 23 * * 6'
+    - cron: "19 23 * * 6"
 
 permissions:
   contents: read
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        scan-type: ['config', 'fs']
+        scan-type: ["config", "fs"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -47,14 +47,14 @@ jobs:
         with:
           scan-type: ${{ matrix.scan-type }}
           hide-progress: true
-          format: 'sarif'
-          output: 'trivy-${{ matrix.scan-type }}.sarif'
+          format: "sarif"
+          output: "trivy-${{ matrix.scan-type }}.sarif"
           ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
+          severity: "CRITICAL,HIGH"
           limit-severities-for-sarif: true
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-${{ matrix.scan-type }}.sarif'
+          sarif_file: "trivy-${{ matrix.scan-type }}.sarif"

@@ -53,7 +53,7 @@ fi
 
 # ========== cleanup conda ===========
 /opt/conda/bin/mamba clean -afy
-# remove unnecissary files (status, js.maps)
+# remove unnecessary files (status, js.maps)
 find /opt/conda/ -follow -type f -name '*.a' -delete
 find /opt/conda/ -follow -type f -name '*.js.map' -delete
 

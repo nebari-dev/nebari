@@ -5,7 +5,7 @@ inputs:
   directory:
     description: "Path to directory to initialize in"
     required: false
-    default: './local-deployment'
+    default: "./local-deployment"
 
 outputs:
   directory:

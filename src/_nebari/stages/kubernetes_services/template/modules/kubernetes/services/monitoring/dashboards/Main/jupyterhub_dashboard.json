@@ -1257,9 +1257,7 @@
   "refresh": "5s",
   "schemaVersion": 34,
   "style": "dark",
-  "tags": [
-    "jupyterhub"
-  ],
+  "tags": ["jupyterhub"],
   "templating": {
     "list": [
       {
@@ -1282,12 +1280,8 @@
       {
         "current": {
           "selected": true,
-          "text": [
-            "dev"
-          ],
-          "value": [
-            "dev"
-          ]
+          "text": ["dev"],
+          "value": ["dev"]
         },
         "datasource": {
           "uid": "$PROMETHEUS_DS"
@@ -1330,17 +1324,7 @@
       "2h",
       "1d"
     ],
-    "time_options": [
-      "5m",
-      "15m",
-      "1h",
-      "6h",
-      "12h",
-      "24h",
-      "2d",
-      "7d",
-      "30d"
-    ]
+    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
   },
   "timezone": "browser",
   "title": "JupyterHub Dashboard",

@@ -6,22 +6,21 @@ on:
   workflow_dispatch:
     inputs:
       image-tag:
-        description: 'Nebari image tag created by the nebari-docker-images repo'
+        description: "Nebari image tag created by the nebari-docker-images repo"
         required: true
         default: main
         type: string
       tf-log-level:
-        description: 'Change Terraform log levels'
+        description: "Change Terraform log levels"
         required: false
         default: info
         type: choice
         options:
-        - info
-        - warn
-        - debug
-        - trace
-        - error
-
+          - info
+          - warn
+          - debug
+          - trace
+          - error
 
 env:
   AWS_DEFAULT_REGION: "us-west-2"

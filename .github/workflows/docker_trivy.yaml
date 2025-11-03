@@ -2,10 +2,10 @@ name: Code Scanning
 
 on:
   push:
-    branches: [ "main"]
+    branches: ["main"]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ "main" ]
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -25,16 +25,16 @@ jobs:
       - name: Run Trivy vulnerability scanner in config mode
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'config'
+          scan-type: "config"
           hide-progress: true
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          format: "sarif"
+          output: "trivy-results.sarif"
           ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
+          severity: "CRITICAL,HIGH"
           limit-severities-for-sarif: true
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
