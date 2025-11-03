@@ -2055,6 +2055,22 @@ class Upgrade_2025_10_1(UpgradeStep):
 
 
 class Upgrade_2025_11_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2025.11.1
+
+    This upgrade includes a major Keycloak upgrade from the `keycloak` chart (15.0.2)
+    to the `keycloakx` chart (7.1.3). The old keycloak chart includes PostgreSQL as a
+    subchart, but the new keycloakx chart does not. Users must backup their Keycloak
+    PostgreSQL database before upgrading to prevent data loss.
+    """
+
+    version = "2025.11.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+
         namespace = config.get("namespace", "dev")
 
         rich.print("\n ⚠️  CRITICAL UPGRADE WARNING ⚠️")
@@ -2241,7 +2257,7 @@ class Upgrade_2025_11_1(UpgradeStep):
             "\n[yellow]For detailed upgrade instructions, see:[/yellow] UPGRADE_STEPS.md\n"
         )
 
-        rich.print("Ready to upgrade to Nebari version [green]2025.10.1[/green].")
+        rich.print("Ready to upgrade to Nebari version [green]2025.11.1[/green].")
 
         return config
 
