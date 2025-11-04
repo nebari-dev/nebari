@@ -18,7 +18,9 @@ database:
   port: 5432
   database: keycloak
   username: keycloak
-  password: keycloak
+  # Password is read from the auto-generated secret
+  existingSecret: keycloak-postgres-standalone-postgresql
+  existingSecretPasswordKey: password
 
 # Enable database readiness check
 dbchecker:

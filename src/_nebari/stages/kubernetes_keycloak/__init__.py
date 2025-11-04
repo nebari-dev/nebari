@@ -435,7 +435,6 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         pod_name = "keycloak-postgres-standalone-postgresql-0"
         db_user = "keycloak"
         db_name = "keycloak"
-        db_password = "keycloak"  # This should ideally come from config or secret
         postgres_user = "postgres"
 
         # Load kubernetes config
@@ -502,16 +501,17 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                 return
             raise
 
-        # Get postgres superuser password from secret
-        print("Getting postgres superuser password from secret...")
+        # Get postgres passwords from secret
+        print("Getting database passwords from secret...")
         try:
             secret_name = "keycloak-postgres-standalone-postgresql"
             secret = api.read_namespaced_secret(name=secret_name, namespace=namespace)
             import base64
             postgres_password = base64.b64decode(secret.data['postgres-password']).decode('utf-8')
-            print("✓ Got postgres password\n")
+            db_password = base64.b64decode(secret.data['password']).decode('utf-8')
+            print("✓ Got database passwords\n")
         except Exception as e:
-            print(f"✗ Error getting postgres password: {e}")
+            print(f"✗ Error getting database passwords: {e}")
             print("Skipping database restore")
             return
 
