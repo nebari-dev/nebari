@@ -42,10 +42,6 @@ proxy:
   enabled: true
   mode: edge
 
-# Cache configuration - use jdbc-ping for clustering via database
-cache:
-  stack: jdbc-ping
-
 # Environment variables for Keycloak configuration
 extraEnv: |
   - name: KC_HOSTNAME

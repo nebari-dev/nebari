@@ -633,7 +633,6 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         print("Note: Warnings about 'public' schema permissions are expected and harmless.")
         print("=" * 80)
 
-        # Use -f flag to read from file instead of stdin - much more reliable!
         restore_cmd = f"env PGPASSWORD={db_password} psql -U {db_user} -d {db_name} --set ON_ERROR_STOP=off -f {remote_backup_path}"
         run_command(restore_cmd)
 
