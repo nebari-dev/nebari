@@ -2091,9 +2091,8 @@ class Upgrade_2025_11_1(UpgradeStep):
                 - OAuth clients now require [green]openid[/green] scope explicitly
                 - Startup scripts replaced with Python post_deploy hooks
 
-                After this upgrade step completes, you will need to:
-                1. [cyan]nebari render -c {config_filename}[/cyan] to generate updated Terraform
-                2. [cyan]nebari deploy -c {config_filename}[/cyan] to apply the changes
+                After this upgrade step completes, you will need to run:
+                      nebari deploy -c {config_filename}[/cyan] to apply the changes
                 """
             )
         )
@@ -2138,12 +2137,8 @@ class Upgrade_2025_11_1(UpgradeStep):
             rich.print(
                 "\n[green]✓ Database backup confirmed.[/green] You can now proceed with:"
             )
-            rich.print(f"  1. [cyan]nebari render -c {config_filename}[/cyan]")
-            rich.print(f"  2. [cyan]nebari deploy -c {config_filename}[/cyan]")
-            rich.print(
-                "\n[yellow]For detailed upgrade instructions, see:[/yellow] UPGRADE_STEPS.md\n"
-            )
-            rich.print("Ready to upgrade to Nebari version [green]2025.10.1[/green].")
+            rich.print(f"     [cyan]nebari deploy -c {config_filename}[/cyan]")
+            rich.print("Ready to upgrade to Nebari version [green]2025.11.1[/green].")
             return config
 
         # User accepted automatic backup - proceed
@@ -2251,11 +2246,7 @@ class Upgrade_2025_11_1(UpgradeStep):
         rich.print(
             "\n[green]✓ Database backup completed.[/green] You can now proceed with:"
         )
-        rich.print(f"  1. [cyan]nebari render -c {config_filename}[/cyan]")
-        rich.print(f"  2. [cyan]nebari deploy -c {config_filename}[/cyan]")
-        rich.print(
-            "\n[yellow]For detailed upgrade instructions, see:[/yellow] UPGRADE_STEPS.md\n"
-        )
+        rich.print(f"  [cyan]nebari deploy -c {config_filename}[/cyan]")
 
         rich.print("Ready to upgrade to Nebari version [green]2025.11.1[/green].")
 

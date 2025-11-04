@@ -9,55 +9,6 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
-## Release 2025.10.1 - October 11, 2025
-
-### Breaking Changes
-
-⚠️ **CRITICAL UPGRADE** - This release includes a major Keycloak upgrade that requires manual intervention.
-
-### What's Changed
-
-#### Keycloak Upgrade (15.0.2 → keycloakx 7.1.3)
-
-This release upgrades Keycloak from the `keycloak` chart (15.0.2, JBoss/WildFly) to the `keycloakx` chart (7.1.3, Quarkus). This is a major architectural change with the following impacts:
-
-**Key Changes:**
-- PostgreSQL is now deployed as a standalone Helm release instead of a subchart
-- Keycloak service name changes from `keycloak-headless` to `keycloak-keycloakx-http`
-- OAuth clients now require the `openid` scope explicitly
-- Startup scripts replaced with Python `post_deploy` hooks for user creation
-
-**Required Actions:**
-
-1. **Before upgrading**, you MUST backup your Keycloak PostgreSQL database:
-   ```bash
-   kubectl exec -n dev keycloak-postgresql-0 -- env PGPASSWORD=keycloak pg_dump -U keycloak -d keycloak > keycloak-backup.sql
-   ```
-
-2. Run the upgrade command:
-   ```bash
-   nebari upgrade -c nebari-config.yaml
-   ```
-   The upgrade step will prompt you to backup the database and can optionally perform the backup automatically if you have kubectl access.
-
-3. After upgrade, render and deploy:
-   ```bash
-   nebari render -c nebari-config.yaml
-   nebari deploy -c nebari-config.yaml
-   ```
-
-**For detailed upgrade instructions, see `UPGRADE_STEPS.md` in the repository.**
-
-**Affected Services:**
-- JupyterHub OAuth configuration updated to include `openid` scope
-- Grafana OAuth configuration updated to include `openid` scope
-- conda-store OAuth configuration updated to include `openid` scope
-- conda-store internal service URLs updated for new Keycloak service name
-
-**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2025.6.1...2025.10.1
-
----
-
 ## Release 2025.6.1 - June 06, 2025
 
 ### What's Changed
