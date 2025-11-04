@@ -2092,7 +2092,7 @@ class Upgrade_2025_11_1(UpgradeStep):
                 - Startup scripts replaced with Python post_deploy hooks
 
                 After this upgrade step completes, you will need to run:
-                      nebari deploy -c {config_filename}[/cyan] to apply the changes
+                      [cyan]nebari deploy -c {config_filename}[/cyan] to apply the changes
                 """
             )
         )
@@ -2100,19 +2100,19 @@ class Upgrade_2025_11_1(UpgradeStep):
             kubernetes.config.load_kube_config()
         except kubernetes.config.config_exception.ConfigException:
             rich.print(
-                "[red bold]No default kube configuration file was found. Make sure to [link=https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig]have one pointing to your Nebari cluster[/link] before upgrading.[/red bold]"
+                "[red bold]No default kube configuration file was found. Make sure to have one pointing to your cluster before upgrading.[/red bold] see docs: https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig"
                     )
             exit()
 
         current_kube_context = kubernetes.config.list_kube_config_contexts()[1]
         cluster_name = current_kube_context["context"]["cluster"]
-        rich.print(
-            f"\nThe following backup will be attempted on the [cyan bold]{cluster_name}[/cyan bold] cluster.\n"
-        )
 
         # Kubernetes config available - offer automatic backup
         rich.print(
             "\n[green]✓[/green] Kubernetes configuration detected. Nebari can backup the database automatically."
+        )
+        rich.print(
+            f"\nThe following backup will be attempted on the [cyan bold]{cluster_name}[/cyan bold] cluster.\n"
         )
 
         if not (kwargs.get("attempt_fixes", False) or Confirm.ask(
@@ -2122,11 +2122,11 @@ class Upgrade_2025_11_1(UpgradeStep):
             # User declined automatic backup
             rich.print("\n[yellow]You chose not to backup automatically.[/yellow]")
             rich.print(
-                "[yellow]Please ensure you have a backup before proceeding with deployment.[/yellow]"
+                "[yellow]Please ensure you have a backup if desired before proceeding with deployment.[/yellow]"
             )
 
             if not Confirm.ask(
-                "\nHave you successfully backed up your Keycloak database?",
+                "\nHave you successfully backed up your Keycloak database/would you like to proceed without backup?",
                 default=False,
             ):
                 rich.print(
@@ -2135,7 +2135,7 @@ class Upgrade_2025_11_1(UpgradeStep):
                 exit(1)
 
             rich.print(
-                "\n[green]✓ Database backup confirmed.[/green] You can now proceed with:"
+                "\nYou can now proceed with:"
             )
             rich.print(f"     [cyan]nebari deploy -c {config_filename}[/cyan]")
             rich.print("Ready to upgrade to Nebari version [green]2025.11.1[/green].")
@@ -2159,17 +2159,11 @@ class Upgrade_2025_11_1(UpgradeStep):
                 rich.print(
                     f"\n[yellow]Pod keycloak-postgresql-0 not found in namespace {namespace}.[/yellow]"
                 )
-                if not Confirm.ask(
-                    "\nDo you want to skip the backup and continue with the upgrade?",
-                    default=False,
-                ):
-                    rich.print(
-                        "[red]Upgrade cancelled. Please verify your Keycloak deployment.[/red]"
-                    )
-                    exit(1)
+                rich.print(
+                    "\nUpgrade cancelled due to keycloak backup failure. Please verify your Kube config is pointing at your Nebari cluster"
+                )
 
-                rich.print("[yellow]Skipping backup. Proceeding with upgrade...[/yellow]")
-                return config
+                exit(1)
 
             # Other API errors
             rich.print(f"[red]✗ Error checking for PostgreSQL pod:[/red] {e}")
