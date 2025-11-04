@@ -30,6 +30,11 @@ dbchecker:
 command:
   - "/opt/keycloak/bin/kc.sh"
 
+# Without this configured get the below error on startup:
+# "Error while trying to create a channel using the specified configuration 'kubernetes'"
+cache:
+  stack: jdbc-ping
+
 args:
   - "start"
 
