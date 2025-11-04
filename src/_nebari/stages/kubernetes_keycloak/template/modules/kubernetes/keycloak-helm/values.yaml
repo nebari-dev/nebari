@@ -47,7 +47,7 @@ cache:
 # Environment variables for Keycloak configuration
 extraEnv: |
   - name: KC_HOSTNAME
-    value: "tylertesting42.io"
+    value: "{{ .Values.external_url }}"
   - name: KC_HOSTNAME_PATH
     value: "/auth"
   - name: KC_HOSTNAME_STRICT
