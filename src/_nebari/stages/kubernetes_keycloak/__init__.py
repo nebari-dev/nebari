@@ -646,8 +646,8 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         run_command(verify_cmd)
         print("✓ Verification complete\n")
 
-        # Step 6.5: Clean up temporary file in pod
-        print(f"Step 6.5: Cleaning up temporary file in pod...")
+        # Step 7: Clean up temporary file in pod
+        print(f"Step 7: Cleaning up temporary file in pod...")
         cleanup_cmd = f"rm -f {remote_backup_path}"
         run_command(cleanup_cmd, show_output=False)
         print(f"✓ Removed {remote_backup_path}\n")
@@ -656,9 +656,9 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         print("DATABASE RESTORE SUCCESSFUL!")
         print("=" * 80)
 
-        # Step 7: Scale Keycloak back up
+        # Step 8: Scale Keycloak back up
         if original_replicas is not None:
-            print(f"\nStep 7: Scaling Keycloak statefulset back to {original_replicas} replicas...")
+            print(f"\nStep 8: Scaling Keycloak statefulset back to {original_replicas} replicas...")
             try:
                 statefulset = apps_api.read_namespaced_stateful_set(
                     name=keycloak_statefulset_name,
