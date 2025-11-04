@@ -56,6 +56,11 @@ resource "helm_release" "keycloak" {
     name  = "initial_root_password"
     value = var.initial_root_password
   }
+
+  set {
+    name  = "external_url"
+    value = var.external-url
+  }
 }
 
 # Track changes to values.yaml
