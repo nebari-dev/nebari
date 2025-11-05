@@ -2101,7 +2101,7 @@ class Upgrade_2025_11_1(UpgradeStep):
         except kubernetes.config.config_exception.ConfigException:
             rich.print(
                 "[red bold]No default kube configuration file was found. Make sure to have one pointing to your cluster before upgrading.[/red bold] see docs: https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig"
-                    )
+            )
             exit()
 
         current_kube_context = kubernetes.config.list_kube_config_contexts()[1]
@@ -2115,10 +2115,13 @@ class Upgrade_2025_11_1(UpgradeStep):
             f"\nThe following backup will be attempted on the [cyan bold]{cluster_name}[/cyan bold] cluster.\n"
         )
 
-        if not (kwargs.get("attempt_fixes", False) or Confirm.ask(
-            "\nWould you like Nebari to backup the Keycloak database for you now?",
-            default=True,
-        )):
+        if not (
+            kwargs.get("attempt_fixes", False)
+            or Confirm.ask(
+                "\nWould you like Nebari to backup the Keycloak database for you now?",
+                default=True,
+            )
+        ):
             # User declined automatic backup
             rich.print("\n[yellow]You chose not to backup automatically.[/yellow]")
             rich.print(
@@ -2134,9 +2137,7 @@ class Upgrade_2025_11_1(UpgradeStep):
                 )
                 exit(1)
 
-            rich.print(
-                "\nYou can now proceed with:"
-            )
+            rich.print("\nYou can now proceed with:")
             rich.print(f"     [cyan]nebari deploy -c {config_filename}[/cyan]")
             rich.print("Ready to upgrade to Nebari version [green]2025.11.1[/green].")
             return config
@@ -2174,31 +2175,31 @@ class Upgrade_2025_11_1(UpgradeStep):
 
         try:
             exec_command = [
-                '/bin/sh',
-                '-c',
-                'env PGPASSWORD=keycloak pg_dump -U keycloak -d keycloak'
+                "/bin/sh",
+                "-c",
+                "env PGPASSWORD=keycloak pg_dump -U keycloak -d keycloak",
             ]
 
             resp = stream(
                 api_instance.connect_get_namespaced_pod_exec,
-                name='keycloak-postgresql-0',
+                name="keycloak-postgresql-0",
                 namespace=namespace,
                 command=exec_command,
                 stderr=True,
                 stdin=False,
                 stdout=True,
                 tty=False,
-                _preload_content=False
+                _preload_content=False,
             )
 
             # Write the output to the backup file
             error_output = []
-            with open(backup_file, 'wb') as f:
+            with open(backup_file, "wb") as f:
                 while resp.is_open():
                     resp.update(timeout=1)
                     if resp.peek_stdout():
                         stdout_data = resp.read_stdout()
-                        f.write(stdout_data.encode('utf-8'))
+                        f.write(stdout_data.encode("utf-8"))
                     if resp.peek_stderr():
                         stderr_data = resp.read_stderr()
                         if stderr_data:
@@ -2208,29 +2209,27 @@ class Upgrade_2025_11_1(UpgradeStep):
 
             # Check if backup was successful
             if not backup_file.exists() or backup_file.stat().st_size == 0:
-                error_msg = '\n'.join(error_output) if error_output else "Backup file is empty or doesn't exist"
+                error_msg = (
+                    "\n".join(error_output)
+                    if error_output
+                    else "Backup file is empty or doesn't exist"
+                )
                 rich.print(f"[red]✗ Backup failed:[/red]\n{error_msg}")
                 exit(1)
 
             # Backup succeeded
             file_size = backup_file.stat().st_size
-            rich.print(
-                f"[green]✓ Backup successful![/green] Saved to {backup_file}"
-            )
-            rich.print(
-                f"[green]  Backup size:[/green] {file_size / 1024:.2f} KB"
-            )
+            rich.print(f"[green]✓ Backup successful![/green] Saved to {backup_file}")
+            rich.print(f"[green]  Backup size:[/green] {file_size / 1024:.2f} KB")
 
             # Show any warnings from stderr (pg_dump often writes info to stderr)
             if error_output:
                 for err in error_output:
-                    if 'NOTICE' in err or 'WARNING' in err:
+                    if "NOTICE" in err or "WARNING" in err:
                         rich.print(f"[yellow]{err.strip()}[/yellow]")
 
         except kubernetes.client.exceptions.ApiException as api_err:
-            rich.print(
-                f"[red]✗ Kubernetes API error during backup:[/red]\n{api_err}"
-            )
+            rich.print(f"[red]✗ Kubernetes API error during backup:[/red]\n{api_err}")
             exit(1)
         except Exception as e:
             rich.print(f"[red]✗ Unexpected error during backup:[/red] {e}")

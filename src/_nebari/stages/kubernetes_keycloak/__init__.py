@@ -339,15 +339,19 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             self._restore_keycloak_database(backup_file)
 
             # Rename backup file to prevent re-running restore on subsequent deploys
-            backup_file.rename(backup_file.with_suffix('.sql.restored'))
-            print(f"\n✓ Renamed backup file to {backup_file.with_suffix('.sql.restored')}")
+            backup_file.rename(backup_file.with_suffix(".sql.restored"))
+            print(
+                f"\n✓ Renamed backup file to {backup_file.with_suffix('.sql.restored')}"
+            )
             print("=" * 80 + "\n")
         else:
             print("No Keycloak database backup found, skipping restore")
 
         # Step 2: Create nebari-bot user
         keycloak_url = f"{stage_outputs['stages/' + self.name]['keycloak_credentials']['value']['url']}/auth/"
-        nebari_bot_password = stage_outputs["stages/" + self.name]["keycloak_nebari_bot_password"]["value"]
+        nebari_bot_password = stage_outputs["stages/" + self.name][
+            "keycloak_nebari_bot_password"
+        ]["value"]
         print("Creating nebari-bot user in Keycloak master realm...")
 
         max_attempts = 10
@@ -375,22 +379,24 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                     # Reset password to ensure it matches the expected value
                     # (Keycloak doesn't allow reading passwords for comparison)
                     admin.set_user_password(
-                        user_id=user_id,
-                        password=nebari_bot_password,
-                        temporary=False
+                        user_id=user_id, password=nebari_bot_password, temporary=False
                     )
                     print("Updated nebari-bot password to match expected value")
                 else:
                     # Create nebari-bot user
-                    user_id = admin.create_user({
-                        "username": "nebari-bot",
-                        "enabled": True,
-                        "credentials": [{
-                            "type": "password",
-                            "value": nebari_bot_password,
-                            "temporary": False
-                        }]
-                    })
+                    user_id = admin.create_user(
+                        {
+                            "username": "nebari-bot",
+                            "enabled": True,
+                            "credentials": [
+                                {
+                                    "type": "password",
+                                    "value": nebari_bot_password,
+                                    "temporary": False,
+                                }
+                            ],
+                        }
+                    )
                     print("Successfully created nebari-bot user")
 
                 # Assign admin role to nebari-bot user
@@ -416,7 +422,9 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                     print(f"Retrying in {retry_delay} seconds...")
                     time.sleep(retry_delay)
                 else:
-                    print(f"Failed to configure nebari-bot user after {max_attempts} attempts: {e}")
+                    print(
+                        f"Failed to configure nebari-bot user after {max_attempts} attempts: {e}"
+                    )
                     sys.exit(1)
 
     def _restore_keycloak_database(self, backup_file):
@@ -443,12 +451,13 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         apps_api = kubernetes.client.AppsV1Api()
 
         # Step 0: Scale down Keycloak to prevent active database connections
-        print(f"Step 0: Scaling down Keycloak statefulset '{keycloak_statefulset_name}' to 0 replicas...")
+        print(
+            f"Step 0: Scaling down Keycloak statefulset '{keycloak_statefulset_name}' to 0 replicas..."
+        )
         try:
             # Get current statefulset
             statefulset = apps_api.read_namespaced_stateful_set(
-                name=keycloak_statefulset_name,
-                namespace=namespace
+                name=keycloak_statefulset_name, namespace=namespace
             )
             original_replicas = statefulset.spec.replicas
             print(f"  Current replicas: {original_replicas}")
@@ -456,31 +465,31 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             # Scale to 0
             statefulset.spec.replicas = 0
             apps_api.patch_namespaced_stateful_set(
-                name=keycloak_statefulset_name,
-                namespace=namespace,
-                body=statefulset
+                name=keycloak_statefulset_name, namespace=namespace, body=statefulset
             )
-            print(f"  Scaled to 0 replicas")
+            print("  Scaled to 0 replicas")
 
             # Wait for pods to terminate
-            print(f"  Waiting for Keycloak pods to terminate...")
+            print("  Waiting for Keycloak pods to terminate...")
             max_wait = 60  # seconds
             wait_interval = 2
             elapsed = 0
             while elapsed < max_wait:
                 pods = api.list_namespaced_pod(
                     namespace=namespace,
-                    label_selector=f"app.kubernetes.io/name=keycloak"
+                    label_selector="app.kubernetes.io/name=keycloak",
                 )
                 if len(pods.items) == 0:
-                    print(f"  ✓ All Keycloak pods terminated")
+                    print("  ✓ All Keycloak pods terminated")
                     break
                 print(f"  Still waiting... ({len(pods.items)} pods remaining)")
                 time.sleep(wait_interval)
                 elapsed += wait_interval
 
             if elapsed >= max_wait:
-                print(f"  ⚠ Warning: Timed out waiting for pods to terminate, proceeding anyway")
+                print(
+                    "  ⚠ Warning: Timed out waiting for pods to terminate, proceeding anyway"
+                )
 
             print("✓ Keycloak scaled down\n")
 
@@ -493,7 +502,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         print(f"Checking if pod '{pod_name}' exists in namespace '{namespace}'...")
         try:
             api.read_namespaced_pod(name=pod_name, namespace=namespace)
-            print(f"✓ Pod found\n")
+            print("✓ Pod found\n")
         except kubernetes.client.exceptions.ApiException as e:
             if e.status == 404:
                 print(f"✗ Pod '{pod_name}' not found in namespace '{namespace}'")
@@ -507,8 +516,11 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             secret_name = "keycloak-postgres-standalone-postgresql"
             secret = api.read_namespaced_secret(name=secret_name, namespace=namespace)
             import base64
-            postgres_password = base64.b64decode(secret.data['postgres-password']).decode('utf-8')
-            db_password = base64.b64decode(secret.data['password']).decode('utf-8')
+
+            postgres_password = base64.b64decode(
+                secret.data["postgres-password"]
+            ).decode("utf-8")
+            db_password = base64.b64decode(secret.data["password"]).decode("utf-8")
             print("✓ Got database passwords\n")
         except Exception as e:
             print(f"✗ Error getting database passwords: {e}")
@@ -524,12 +536,12 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                 api.connect_get_namespaced_pod_exec,
                 name=pod_name,
                 namespace=namespace,
-                command=['/bin/sh', '-c', command],
+                command=["/bin/sh", "-c", command],
                 stderr=True,
                 stdin=False,
                 stdout=True,
                 tty=False,
-                _preload_content=False
+                _preload_content=False,
             )
 
             stdout_lines = []
@@ -541,17 +553,17 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                     data = resp.read_stdout()
                     stdout_lines.append(data)
                     if show_output:
-                        print(data, end='')
+                        print(data, end="")
                         sys.stdout.flush()
                 if resp.peek_stderr():
                     data = resp.read_stderr()
                     stderr_lines.append(data)
                     if show_output:
-                        print(data, end='', file=sys.stderr)
+                        print(data, end="", file=sys.stderr)
                         sys.stderr.flush()
 
             resp.close()
-            return ''.join(stdout_lines), ''.join(stderr_lines)
+            return "".join(stdout_lines), "".join(stderr_lines)
 
         # Helper function to copy file to pod using tar
         def copy_file_to_pod(local_path, remote_path):
@@ -564,7 +576,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
             # Create tar archive in memory
             tar_buffer = BytesIO()
-            with tarfile.open(fileobj=tar_buffer, mode='w') as tar:
+            with tarfile.open(fileobj=tar_buffer, mode="w") as tar:
                 tar.add(str(local_path), arcname=os.path.basename(remote_path))
 
             tar_buffer.seek(0)
@@ -572,7 +584,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
             # Extract tar in pod
             remote_dir = os.path.dirname(remote_path)
-            extract_cmd = ['tar', 'xf', '-', '-C', remote_dir or '/']
+            extract_cmd = ["tar", "xf", "-", "-C", remote_dir or "/"]
 
             resp = stream(
                 api.connect_get_namespaced_pod_exec,
@@ -583,19 +595,19 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                 stdin=True,
                 stdout=True,
                 tty=False,
-                _preload_content=False
+                _preload_content=False,
             )
 
             # Write tar data in chunks
             chunk_size = 1024 * 1024  # 1MB chunks
             for i in range(0, len(tar_data), chunk_size):
-                chunk = tar_data[i:i + chunk_size]
+                chunk = tar_data[i : i + chunk_size]
                 resp.write_stdin(chunk)
 
-            resp.write_stdin('')  # Signal EOF
+            resp.write_stdin("")  # Signal EOF
             resp.close()
 
-            print(f"  ✓ File copied successfully")
+            print("  ✓ File copied successfully")
 
         # Step 1: Drop existing database
         print(f"Step 1: Dropping database '{db_name}' (if exists)...")
@@ -622,15 +634,17 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         print("✓ Privileges granted\n")
 
         # Step 4: Copy backup file to pod
-        print(f"Step 4: Copying backup file to pod...")
+        print("Step 4: Copying backup file to pod...")
         remote_backup_path = "/tmp/keycloak-backup.sql"
         copy_file_to_pod(Path(backup_file), remote_backup_path)
-        print(f"✓ Backup file copied to pod\n")
+        print("✓ Backup file copied to pod\n")
 
         # Step 5: Restore the database from file
-        print(f"Step 5: Restoring database from backup...")
+        print("Step 5: Restoring database from backup...")
         print("This may take a few moments. Output will be shown below:\n")
-        print("Note: Warnings about 'public' schema permissions are expected and harmless.")
+        print(
+            "Note: Warnings about 'public' schema permissions are expected and harmless."
+        )
         print("=" * 80)
 
         restore_cmd = f"env PGPASSWORD={db_password} psql -U {db_user} -d {db_name} --set ON_ERROR_STOP=off -f {remote_backup_path}"
@@ -640,13 +654,13 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         print("\n✓ Restore completed!\n")
 
         # Step 6: Verify the restore
-        print(f"Step 6: Verifying restore by checking user count...")
+        print("Step 6: Verifying restore by checking user count...")
         verify_cmd = f"env PGPASSWORD={db_password} psql -U {db_user} -d {db_name} -c 'SELECT count(*) FROM user_entity;'"
         run_command(verify_cmd)
         print("✓ Verification complete\n")
 
         # Step 7: Clean up temporary file in pod
-        print(f"Step 7: Cleaning up temporary file in pod...")
+        print("Step 7: Cleaning up temporary file in pod...")
         cleanup_cmd = f"rm -f {remote_backup_path}"
         run_command(cleanup_cmd, show_output=False)
         print(f"✓ Removed {remote_backup_path}\n")
@@ -657,23 +671,28 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
         # Step 8: Scale Keycloak back up
         if original_replicas is not None:
-            print(f"\nStep 8: Scaling Keycloak statefulset back to {original_replicas} replicas...")
+            print(
+                f"\nStep 8: Scaling Keycloak statefulset back to {original_replicas} replicas..."
+            )
             try:
                 statefulset = apps_api.read_namespaced_stateful_set(
-                    name=keycloak_statefulset_name,
-                    namespace=namespace
+                    name=keycloak_statefulset_name, namespace=namespace
                 )
                 statefulset.spec.replicas = original_replicas
                 apps_api.patch_namespaced_stateful_set(
                     name=keycloak_statefulset_name,
                     namespace=namespace,
-                    body=statefulset
+                    body=statefulset,
                 )
                 print(f"✓ Keycloak scaled back to {original_replicas} replicas")
-                print("  Keycloak pods will start connecting to the restored database\n")
+                print(
+                    "  Keycloak pods will start connecting to the restored database\n"
+                )
             except kubernetes.client.exceptions.ApiException as e:
                 print(f"⚠ Warning: Could not scale up Keycloak statefulset: {e}")
-                print(f"  You may need to manually scale it back up: kubectl scale statefulset {keycloak_statefulset_name} --replicas={original_replicas} -n {namespace}\n")
+                print(
+                    f"  You may need to manually scale it back up: kubectl scale statefulset {keycloak_statefulset_name} --replicas={original_replicas} -n {namespace}\n"
+                )
 
     @contextlib.contextmanager
     def deploy(
