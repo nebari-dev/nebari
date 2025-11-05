@@ -2,17 +2,16 @@ import contextlib
 import enum
 import json
 import os
-from pathlib import Path
 import secrets
 import string
 import sys
 import time
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union
-
-from pydantic import Field, ValidationInfo, field_validator, model_validator
 
 from keycloak import KeycloakAdmin
 from keycloak.exceptions import KeycloakError
+from pydantic import Field, ValidationInfo, field_validator, model_validator
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -324,7 +323,6 @@ class KubernetesKeycloakStage(NebariTerraformStage):
     ):
         """Restore Keycloak database (if backup exists) and create nebari-bot user after Keycloak is deployed."""
 
-
         # Step 1: Restore database if backup exists
         backup_file = Path(self.output_directory) / "keycloak-backup.sql"
 
@@ -575,7 +573,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
             # Create tar archive in memory
             tar_buffer = BytesIO()
-            with tarfile.open(fileobj=tar_buffer, mode='w') as tar:
+            with tarfile.open(fileobj=tar_buffer, mode="w") as tar:
                 tar.add(str(local_path), arcname=remote_path.name)
 
             tar_buffer.seek(0)
@@ -583,8 +581,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
             # Extract tar in pod
             remote_dir = str(remote_path.parent)
-            extract_cmd = ['tar', 'xf', '-', '-C', remote_dir or '/']
-
+            extract_cmd = ["tar", "xf", "-", "-C", remote_dir or "/"]
 
             resp = stream(
                 api.connect_get_namespaced_pod_exec,
@@ -637,7 +634,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         print("Step 4: Copying backup file to pod...")
         remote_backup_path = "/tmp/keycloak-backup.sql"
         copy_file_to_pod(Path(backup_file), Path(remote_backup_path))
-        print(f"✓ Backup file copied to pod\n")
+        print("✓ Backup file copied to pod\n")
 
         # Step 5: Restore the database from file
         print("Step 5: Restoring database from backup...")
