@@ -2,6 +2,7 @@ import contextlib
 import enum
 import json
 import os
+from pathlib import Path
 import secrets
 import string
 import sys
@@ -9,6 +10,9 @@ import time
 from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import Field, ValidationInfo, field_validator, model_validator
+
+from keycloak import KeycloakAdmin
+from keycloak.exceptions import KeycloakError
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -319,12 +323,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
     ):
         """Restore Keycloak database (if backup exists) and create nebari-bot user after Keycloak is deployed."""
-        from pathlib import Path
 
-        import kubernetes
-        from keycloak import KeycloakAdmin
-        from keycloak.exceptions import KeycloakError
-        from kubernetes.stream import stream
 
         # Step 1: Restore database if backup exists
         backup_file = Path(self.output_directory) / "keycloak-backup.sql"
@@ -427,7 +426,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                     )
                     sys.exit(1)
 
-    def _restore_keycloak_database(self, backup_file):
+    def _restore_keycloak_database(self, backup_file: Path):
         """Restore PostgreSQL database from backup file using Kubernetes exec."""
         import base64
         import tarfile
@@ -528,7 +527,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             return
 
         # Helper function to run commands in pod
-        def run_command(command, show_output=True):
+        def run_command(command: str, show_output: bool = True):
             print(f"  Running: {command}")
             sys.stdout.flush()
 
@@ -566,25 +565,26 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             return "".join(stdout_lines), "".join(stderr_lines)
 
         # Helper function to copy file to pod using tar
-        def copy_file_to_pod(local_path, remote_path):
+        def copy_file_to_pod(local_path: Path, remote_path: Path):
             """
             Copy a file to pod using tar (similar to kubectl cp).
             More reliable than stdin streaming for large files.
             """
-            print(f"  Copying {local_path.name} to pod:{remote_path}")
+            print(f"  Copying {local_path.name} to pod:{remote_path.name}")
             print(f"  File size: {local_path.stat().st_size / 1024:.2f} KB")
 
             # Create tar archive in memory
             tar_buffer = BytesIO()
-            with tarfile.open(fileobj=tar_buffer, mode="w") as tar:
-                tar.add(str(local_path), arcname=os.path.basename(remote_path))
+            with tarfile.open(fileobj=tar_buffer, mode='w') as tar:
+                tar.add(str(local_path), arcname=remote_path.name)
 
             tar_buffer.seek(0)
             tar_data = tar_buffer.getvalue()
 
             # Extract tar in pod
-            remote_dir = os.path.dirname(remote_path)
-            extract_cmd = ["tar", "xf", "-", "-C", remote_dir or "/"]
+            remote_dir = str(remote_path.parent)
+            extract_cmd = ['tar', 'xf', '-', '-C', remote_dir or '/']
+
 
             resp = stream(
                 api.connect_get_namespaced_pod_exec,
@@ -636,8 +636,8 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         # Step 4: Copy backup file to pod
         print("Step 4: Copying backup file to pod...")
         remote_backup_path = "/tmp/keycloak-backup.sql"
-        copy_file_to_pod(Path(backup_file), remote_backup_path)
-        print("✓ Backup file copied to pod\n")
+        copy_file_to_pod(Path(backup_file), Path(remote_backup_path))
+        print(f"✓ Backup file copied to pod\n")
 
         # Step 5: Restore the database from file
         print("Step 5: Restoring database from backup...")
