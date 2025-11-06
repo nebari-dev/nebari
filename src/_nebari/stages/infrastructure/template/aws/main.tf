@@ -4,7 +4,7 @@ data "aws_availability_zones" "awszones" {
     values = ["opt-in-not-required"]
   }
 }
-
+# comment to trigger CI
 data "aws_partition" "current" {}
 
 locals {
