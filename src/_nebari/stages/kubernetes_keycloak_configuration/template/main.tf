@@ -142,122 +142,122 @@ resource "keycloak_realm_events" "realm_events" {
 resource "keycloak_realm_user_profile" "userprofile" {
   realm_id = keycloak_realm.main.id
 
-    unmanaged_attribute_policy = "ENABLED"
+  unmanaged_attribute_policy = "ENABLED"
 
-    # Username attribute
-    attribute {
-      name           = "username"
-      display_name   = "$${username}"
-      multi_valued   = false
+  # Username attribute
+  attribute {
+    name         = "username"
+    display_name = "$${username}"
+    multi_valued = false
 
-      permissions {
-        view = ["admin", "user"]
-        edit = ["admin", "user"]
-      }
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
 
-      validator {
-        name   = "length"
-        config = {
-          min = "3"
-          max = "255"
-        }
-      }
-
-      validator {
-        name = "username-prohibited-characters"
-      }
-
-      validator {
-        name = "up-username-not-idn-homograph"
+    validator {
+      name = "length"
+      config = {
+        min = "3"
+        max = "255"
       }
     }
 
-    # Email attribute
-    attribute {
-      name         = "email"
-      display_name = "$${email}"
-      multi_valued = false
-
-      required_for_roles = ["user"]
-
-      permissions {
-        view = ["admin", "user"]
-        edit = ["admin", "user"]
-      }
-
-      validator {
-        name = "email"
-      }
-
-      validator {
-        name   = "length"
-        config = {
-          max = "255"
-        }
-      }
+    validator {
+      name = "username-prohibited-characters"
     }
 
-    # First Name attribute
-    attribute {
-      name         = "firstName"
-      display_name = "$${firstName}"
-      multi_valued = false
-
-      #Below makes this attribute optional
-      required_for_roles = []
-      required_for_scopes = []
-
-      permissions {
-        view = ["admin", "user"]
-        edit = ["admin", "user"]
-      }
-
-      validator {
-        name   = "length"
-        config = {
-          max = "255"
-        }
-      }
-
-      validator {
-        name = "person-name-prohibited-characters"
-      }
-
-      annotations = {}
-    }
-
-    # Last Name attribute
-    attribute {
-      name         = "lastName"
-      display_name = "$${lastName}"
-      multi_valued = false
-
-      required_for_roles = []
-      required_for_scopes = []
-
-      permissions {
-        view = ["admin", "user"]
-        edit = ["admin", "user"]
-      }
-
-      validator {
-        name   = "length"
-        config = {
-          max = "255"
-        }
-      }
-
-      validator {
-        name = "person-name-prohibited-characters"
-      }
-
-      annotations = {}
-    }
-
-    # Group
-    group {
-      name                = "user-metadata"
-      display_header      = "User metadata"
-      display_description = "Attributes, which refer to user metadata"
+    validator {
+      name = "up-username-not-idn-homograph"
     }
   }
+
+  # Email attribute
+  attribute {
+    name         = "email"
+    display_name = "$${email}"
+    multi_valued = false
+
+    required_for_roles = ["user"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "email"
+    }
+
+    validator {
+      name = "length"
+      config = {
+        max = "255"
+      }
+    }
+  }
+
+  # First Name attribute
+  attribute {
+    name         = "firstName"
+    display_name = "$${firstName}"
+    multi_valued = false
+
+    #Below makes this attribute optional
+    required_for_roles  = []
+    required_for_scopes = []
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "length"
+      config = {
+        max = "255"
+      }
+    }
+
+    validator {
+      name = "person-name-prohibited-characters"
+    }
+
+    annotations = {}
+  }
+
+  # Last Name attribute
+  attribute {
+    name         = "lastName"
+    display_name = "$${lastName}"
+    multi_valued = false
+
+    required_for_roles  = []
+    required_for_scopes = []
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "length"
+      config = {
+        max = "255"
+      }
+    }
+
+    validator {
+      name = "person-name-prohibited-characters"
+    }
+
+    annotations = {}
+  }
+
+  # Group
+  group {
+    name                = "user-metadata"
+    display_header      = "User metadata"
+    display_description = "Attributes, which refer to user metadata"
+  }
+}

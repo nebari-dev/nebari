@@ -9,7 +9,7 @@ terraform {
       version = "2.35.1"
     }
     keycloak = {
-      source = "keycloak/keycloak"
+      source  = "keycloak/keycloak"
       version = "5.5.0"
     }
   }
