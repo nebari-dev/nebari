@@ -9,8 +9,8 @@ terraform {
       version = "2.35.1"
     }
     keycloak = {
-      source  = "mrparkers/keycloak"
-      version = "3.7.0"
+      source = "keycloak/keycloak"
+      version = "5.5.0"
     }
   }
   required_version = ">= 1.0"
