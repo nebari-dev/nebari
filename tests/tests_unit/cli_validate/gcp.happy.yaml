@@ -15,7 +15,8 @@ security:
 theme:
   jupyterhub:
     hub_title: Nebari - test
-    welcome: Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the
+    welcome:
+      Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the
       documentation</a>. If you have any questions or feedback, reach the team on
       <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support
       forums</a>.
@@ -26,4 +27,4 @@ certificate:
 google_cloud_platform:
   project: pytest-project
   region: us-central1
-  kubernetes_version: '1.20'
+  kubernetes_version: "1.20"

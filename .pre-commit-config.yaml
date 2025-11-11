@@ -45,13 +45,10 @@ repos:
     rev: v2.4.1
     hooks:
       - id: codespell
-        args:
-          [
-            "--write",
-          ]
+        args: ["--write"]
         language: python
         additional_dependencies:
-        - tomli
+          - tomli
 
   # python
   - repo: https://github.com/psf/black
@@ -82,3 +79,28 @@ repos:
       - id: terraform_fmt
         args:
           - --args=-write=true
+
+  # Autoformat: markdown, yaml to ensure that it doesn't need to be updated in other repos
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v2.6.1
+    hooks:
+      - id: prettier
+
+    # Misc...
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    # ref: https://github.com/pre-commit/pre-commit-hooks#hooks-available
+    hooks:
+      # Autoformat: Makes sure files end in a newline and only a newline.
+      - id: end-of-file-fixer
+
+      # Trims trailing whitespace.
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+
+      # Lint: Check for files with names that would conflict on a
+      # case-insensitive filesystem like MacOS HFS+ or Windows FAT.
+      - id: check-case-conflict
+
+      # Lint: Checks that non-binary executables have a proper shebang.
+      - id: check-executables-have-shebangs

@@ -37,20 +37,20 @@ loki:
       # The date of the first day that index buckets should be created.
       - from: "2024-03-01"
         index:
-            period: 24h
-            prefix: loki_index_
+          period: 24h
+          prefix: loki_index_
         object_store: s3
         schema: v11
         store: boltdb-shipper
   storage_config:
     boltdb_shipper:
-        # Directory where ingesters would write index files which would then be
-        # uploaded by shipper to configured storage
-        active_index_directory: /var/loki/compactor/data/index
-        # Cache location for restoring index files from storage for queries
-        cache_location: /var/loki/compactor/data/boltdb-cache
-        # Shared store for keeping index files
-        shared_store: s3
+      # Directory where ingesters would write index files which would then be
+      # uploaded by shipper to configured storage
+      active_index_directory: /var/loki/compactor/data/index
+      # Cache location for restoring index files from storage for queries
+      cache_location: /var/loki/compactor/data/boltdb-cache
+      # Shared store for keeping index files
+      shared_store: s3
 
 # Configuration for the write pod(s)
 write:

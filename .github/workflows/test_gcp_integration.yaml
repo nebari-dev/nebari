@@ -6,21 +6,21 @@ on:
   workflow_dispatch:
     inputs:
       image-tag:
-        description: 'Nebari image tag created by the nebari-docker-images repo'
+        description: "Nebari image tag created by the nebari-docker-images repo"
         required: true
         default: main
         type: string
       tf-log-level:
-        description: 'Change Terraform log levels'
+        description: "Change Terraform log levels"
         required: false
         default: info
         type: choice
         options:
-        - info
-        - warn
-        - debug
-        - trace
-        - error
+          - info
+          - warn
+          - debug
+          - trace
+          - error
 
 env:
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
@@ -50,11 +50,11 @@ jobs:
           pip install .[dev]
           playwright install
 
-      - name: 'Authenticate to GCP'
-        uses: 'google-github-actions/auth@v1'
+      - name: "Authenticate to GCP"
+        uses: "google-github-actions/auth@v1"
         with:
-            workload_identity_provider: ${{ secrets.GCP_WORKFLOW_PROVIDER }}
-            service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ secrets.GCP_WORKFLOW_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Set required environment variables
         run: |

@@ -15,8 +15,7 @@ runs:
       if: github.event_name != 'schedule'
       shell: bash
       env: ${{ env }}
-      run:
-        python ${{ github.action_path }}/render_template.py ${{inputs.filename }}
+      run: python ${{ github.action_path }}/render_template.py ${{inputs.filename }}
 
     - uses: JasonEtco/create-an-issue@v2
       # Only render template and create an issue in case the workflow is a scheduled one

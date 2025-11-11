@@ -9,7 +9,7 @@ jobs:
     name: Test PyPi release
     runs-on: ubuntu-latest
     permissions:
-      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
       - name: Set up python
         uses: actions/setup-python@v5

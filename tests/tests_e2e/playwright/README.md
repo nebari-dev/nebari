@@ -1,4 +1,3 @@
-
 # Nebari Integration Testing with Playwright
 
 ## How Does It Work?
@@ -68,21 +67,23 @@ Below is an example of how you might update the **Setup** and **Running the Play
    nebari keycloak add-user --user <username> -p <password> --config <NEBARI_CONFIG_PATH>
    ```
 
-*Note:* If you see the warning:
+_Note:_ If you see the warning:
+
 ```
 BEWARE: your OS is not officially supported by Playwright; downloading fallback build
 ```
+
 it is not critical. Playwright should still work despite the warning.
 
 ## Running the Playwright Tests
 
 You can run the Playwright tests with `pytest`.
+
 ```bash
 pytest tests_e2e/playwright/test_playwright.py --numprocesses auto
 ```
 
 > **Important**: Due to how Pytest manages async code; Playwright’s sync calls can conflict with default Pytest concurrency settings, and using `--numprocesses auto` helps mitigate potential thread-blocking issues.
-
 
 Videos of the test playback will be available in `$PWD/videos/`. To disabled the browser
 runtime preview of what is happening while the test runs, pass the `--headed` option to `pytest`. You
@@ -174,6 +175,7 @@ Parameterized decorators in your test setup allow you to run tests with differen
 
 To easy the control over the initial setup of spawning the user instance and login, we
 already provider two base decorators that can be used in your test:
+
 - `server_parameterized`: Allows to login and spin a new instance of the server, based
   on the provided instance type. Allows for the nav.page to be run within the JupyterLab environment.
 - ` login_parameterized`: Allow login to Nebari and sets you test workspace to the main
@@ -189,6 +191,7 @@ def test_role_button(navigator, is_admin):
     assert _ == is_admin
     # Perform tests specific to the user role...
 ```
+
 In the example above, we used the `login_parameterized` decorator which will log in as an user
 (based on the KEYCLOAK_USERNAME and KEYCLOAK_PASSWORD) and and let you wander under the logged workspace,
 we attest for the presence of the "Admin Button" in the page (which does not exist).
@@ -197,7 +200,6 @@ If your test suit presents a need for a more complex sequence of actions or spec
 parsing around the contents present in each page, you can create
 your own handler to execute the auxiliary actions while the test is running. Check the
 `handlers.py` over some examples of how that's being done.
-
 
 ## Debugging Playwright tests
 
@@ -208,6 +210,7 @@ debugging option within the tests execution you can pass the `PWDEBUG=1` variabl
 your test execution command.
 
 For example, to run a single test with the debug mode enabled, you can use the following
+
 ```bash
 PWDEBUG=1 pytest -s test_playwright.py::test_notebook --numprocesses 1
 ```

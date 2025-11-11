@@ -1,0 +1,69 @@
+# Copyright (c) Nebari Development Team.
+# Distributed under the terms of the Modified BSD License.
+
+name: default
+channels:
+  - conda-forge
+dependencies:
+  # general
+  - pip
+
+  # jupyterhub/jupyterlab
+  - nb_conda_kernels
+  - ipython > 7
+  - jupyter-server-proxy >=4.4.0
+  - "jupyter_server>=2.13.0"
+  - jupyterlab==4.4.2
+  - jupyter_client
+  - jupyter_console
+  - jupyterhub==5.3.0
+  - nbconvert
+  - nbval
+
+  # jupyterhub extension
+
+  # jupyterlab extensions
+  - dask_labextension >= 5.3.0
+  - jupyterlab-git >=0.30.0
+  - sidecar >=0.5.0
+  - ipywidgets >= 8.0.0
+  - ipyleaflet >=0.13.5
+  - pyviz_comms >=3.0.3
+  - jupyter-resource-usage >=0.6.0
+  - nbgitpuller
+  - jupyterlab_code_formatter
+  - jupyterlab-spellchecker >= 0.7.3
+  - jupyterlab-pioneer
+  - jupyter-ai
+  - jupyterlab-favorites >=3.2.1
+  - jupyter-scheduler >=2.8.0,<3.0.0 # >=2.8 due to https://github.com/conda-forge/jupyter_scheduler-feedstock/issues/46
+
+  # viz tools
+  - param
+  - python-graphviz
+  - plotly >=5.0
+  - ipympl >=0.9.6
+  - bokeh >=3.5.2
+
+  # testing, docs, linting
+  - pytest
+  - hypothesis
+  - flake8
+  - sphinx
+  - pytest-cov
+  - black
+  - isort
+  - importnb
+  - git-lfs
+
+  - pip:
+      # vscode jupyterlab launcher
+      - git+https://github.com/betatim/vscode-binder
+      - jupyterlab_nvdashboard==0.12.0
+      - argo-jupyter-scheduler==2024.6.1
+      - jhub-apps==2025.2.1
+      - jupyterlab-nebari-mode==0.3.0
+      - jupyterlab-conda-store==2024.11.1
+      - jupyterlab-launchpad==1.0.3
+      - jupyterlab-gallery==0.6.3
+      - jupyterlab-jhub-apps==0.3.1
