@@ -57,12 +57,6 @@ jobs:
           tenant-id: ${{ secrets.ARM_TENANT_ID }}
           subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
-      - name: Get OIDC token for Terraform
-        run: |
-          # Request OIDC token from GitHub
-          OIDC_TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r '.value')
-          echo "ARM_OIDC_TOKEN=$OIDC_TOKEN" >> $GITHUB_ENV
-
       - name: Integration Tests
         run: |
           pytest --version
@@ -75,5 +69,4 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_USE_OIDC: "true"
-          ARM_OIDC_TOKEN: ${{ env.ARM_OIDC_TOKEN }}
           CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
