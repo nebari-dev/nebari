@@ -856,8 +856,40 @@ class KeycloakAPI:
         -------
         requests.Response
             Response containing group data
+
+        Note
+        ----
+        In Keycloak v26+, subgroups are no longer included in this response.
+        Use get_group_children() to fetch subgroups separately.
         """
         return self._make_admin_request(f"groups/{group_id}")
+
+    def get_group_children(
+        self, group_id: str, brief_representation: bool = False
+    ) -> requests.Response:
+        """Get children (subgroups) of a group.
+
+        Parameters
+        ----------
+        group_id : str
+            The Keycloak parent group ID
+        brief_representation : bool
+            If True, returns only basic info (id, name, path, parentId).
+            If False, returns complete representations with role mappings and attributes.
+
+        Returns
+        -------
+        requests.Response
+            Response containing list of child groups
+
+        Note
+        ----
+        This endpoint is the proper way to get subgroups in Keycloak v26+.
+        """
+        endpoint = f"groups/{group_id}/children"
+        if brief_representation:
+            endpoint += "?briefRepresentation=true"
+        return self._make_admin_request(endpoint)
 
     def delete_group(self, group_id: str) -> requests.Response:
         """Delete a group and verify deletion.
