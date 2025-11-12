@@ -28,7 +28,7 @@ resource "keycloak_realm" "main" {
     ignore_changes = [
       # We want user to have control over attributes we are not managing
       # If attribute is added above remove it from this list
-      # https://registry.terraform.io/providers/mrparkers/keycloak/latest/docs/resources/realm
+      # https://registry.terraform.io/providers/keycloak/keycloak/latest/docs/resources/realm
       attributes,
       registration_allowed,
       registration_email_as_username,
