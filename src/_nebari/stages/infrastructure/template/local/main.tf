@@ -6,7 +6,7 @@ terraform {
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "2.16.0"
+      version = "3.8.0"
     }
     kubectl = {
       source  = "gavinbunney/kubectl"
@@ -48,7 +48,7 @@ resource "kind_cluster" "default" {
 
     node {
       role  = "general"
-      image = "kindest/node:v1.32.0"
+      image = "kindest/node:v1.32.5"
     }
   }
 }
