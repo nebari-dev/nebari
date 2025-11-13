@@ -1,10 +1,16 @@
 data "google_client_config" "main" {
 }
 
+data "google_container_engine_versions" "main" {
+  location       = var.location
+  version_prefix = "${var.kubernetes_version}."
+}
+
 resource "google_container_cluster" "main" {
-  name               = var.name
-  location           = var.location
-  min_master_version = var.kubernetes_version
+  name                = var.name
+  location            = var.location
+  min_master_version  = data.google_container_engine_versions.main.latest_master_version
+  deletion_protection = false
 
   node_locations = var.availability_zones
 
@@ -57,6 +63,10 @@ resource "google_container_cluster" "main" {
     }
   }
 
+  workload_identity_config {
+    workload_pool = "${var.project_id}.svc.id.goog"
+  }
+
   lifecycle {
     ignore_changes = [
       node_locations
@@ -70,7 +80,7 @@ resource "google_container_node_pool" "main" {
   name     = local.merged_node_groups[count.index].name
   location = var.location
   cluster  = google_container_cluster.main.name
-  version  = var.kubernetes_version
+  version  = data.google_container_engine_versions.main.latest_node_version
 
   initial_node_count = local.merged_node_groups[count.index].min_size
 
@@ -115,6 +125,13 @@ resource "google_container_node_pool" "main" {
       }
     }
     tags = var.tags
+  }
+
+  lifecycle {
+    ignore_changes = [
+      # GCP automatically adds resource labels for node pools (e.g., goog-gke-accelerator-type)
+      node_config[0].resource_labels,
+    ]
   }
 
 }

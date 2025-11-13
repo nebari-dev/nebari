@@ -14,7 +14,7 @@
 | :---------- | :-----|
 |   Project   | [![License](https://img.shields.io/badge/License-BSD%203--Clause-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://opensource.org/licenses/BSD-3-Clause) [![Nebari documentation](https://img.shields.io/badge/%F0%9F%93%96%20Read-the%20docs-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://www.nebari.dev/docs/welcome) [![PyPI](https://img.shields.io/pypi/v/nebari)](https://badge.fury.io/py/nebari) [![conda version](https://img.shields.io/conda/vn/conda-forge/nebari)]((https://anaconda.org/conda-forge/nebari))  |
 |  Community  | [![GH discussions](https://img.shields.io/badge/%F0%9F%92%AC%20-Participate%20in%20discussions-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://github.com/nebari-dev/nebari/discussions) [![Open an issue](https://img.shields.io/badge/%F0%9F%93%9D%20Open-an%20issue-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://github.com/nebari-dev/nebari/issues/new/choose) [![Community guidelines](https://img.shields.io/badge/🤝%20Community-guidelines-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://www.nebari.dev/docs/community/) |
-|     CI      | [![Kubernetes Tests](https://github.com/nebari-dev/nebari/actions/workflows/test_local_integration.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/kubernetes_test.yaml) [![Tests](https://github.com/nebari-dev/nebari/actions/workflows/test.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/test.yaml) [![Test Nebari Provider](https://github.com/nebari-dev/nebari/actions/workflows/test-provider.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/test-provider.yaml)|
+|     CI      | [![Kubernetes Tests](https://github.com/nebari-dev/nebari/actions/workflows/test_local_integration.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/test_local_integration.yaml) [![Tests](https://github.com/nebari-dev/nebari/actions/workflows/test.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/test.yaml) [![Test Nebari Provider](https://github.com/nebari-dev/nebari/actions/workflows/test-provider.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/test-provider.yaml)|
 | Cloud Providers | [![AWS Deployment Status](https://github.com/nebari-dev/nebari/actions/workflows/test_aws_integration.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/test_aws_integration.yaml) [![Azure Deployment Status](https://github.com/nebari-dev/nebari/actions/workflows/test_azure_integration.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/test_azure_integration.yaml) [![GCP Deployment Status](https://github.com/nebari-dev/nebari/actions/workflows/test_gcp_integration.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/test_gcp_integration.yaml)|
 
 ## Table of contents
@@ -27,20 +27,12 @@
   - [Install Nebari](#install-nebari)
 - [Usage 🚀](#usage-)
 - [Nebari HPC](#nebari-hpc)
-- [Contributing to Nebari 👩🏻‍💻](#contributing-to-nebari-)
+- [Contributing to Nebari 👩🏻‍💻](#contributing-to-nebari-%E2%80%8D)
   - [Installing the Development version of Nebari ⚙️](#installing-the-development-version-of-nebari-️)
   - [Questions? 🤔](#questions-)
 - [Code of Conduct 📖](#code-of-conduct-)
 - [Ongoing Support](#ongoing-support)
 - [License](#license)
-
-> **⚠️ Warning ⚠️**
-> The `2023.10.1` release includes the initial implementation of a [Pluggy-based](https://pluggy.readthedocs.io/en/stable/) extension mechanism, for more details refer [here](https://www.nebari.dev/docs/community/plugins).
-> This version also fully deprecates CDS Dashboards as it is no longer compatible with the newer versions of JupyterHub.
-> For more details on all of changes included in this release, please refer to our [release notes](./RELEASE.md).
-> After you've installed version `2023.10.1`, you can update your `nebari-config.yaml` by running `nebari upgrade -c nebari-config.yaml`, please
-> follow the upgrades instructions output by this command.
-> And please make sure to [back up your data before attempting an upgrade](https://www.nebari.dev/docs/how-tos/manual-backup).
 
 Automated data science platform. From [JupyterHub](https://jupyter.org/hub "Multi-user version of the Notebook") to Cloud environments with
 [Dask Gateway](https://docs.dask.org/ "Parallel computing in Python").
@@ -137,8 +129,8 @@ For detailed step-by-step instructions on how to deploy Nebari, check the [Nebar
 
 ## Nebari HPC
 
-An HPC version of Nebari is currently not available. There is one under development for Nebari's precursor QHub.
-Curious? Check out the [QHub HPC](https://github.com/Quansight/qhub-hpc) repository.
+An HPC version of Nebari is available for SLURM-based high-performance computing environments.
+Check out the [Nebari SLURM](https://github.com/nebari-dev/nebari-slurm) repository.
 
 ## Contributing to Nebari 👩🏻‍💻
 
@@ -167,7 +159,7 @@ Getting help:
 
 ## Code of Conduct 📖
 
-To guarantee a welcoming and friendly community, we require all community members to follow our [Code of Conduct](https://github.com/Quansight/.github/blob/master/CODE_OF_CONDUCT.md).
+To guarantee a welcoming and friendly community, we require all community members to follow our [Code of Conduct](https://github.com/nebari-dev/.github/blob/main/CODE_OF_CONDUCT.md).
 
 ## Ongoing Support
 

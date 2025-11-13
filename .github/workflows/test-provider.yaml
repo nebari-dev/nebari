@@ -102,7 +102,7 @@ jobs:
 
       - name: 'Azure login'
         if: ${{ matrix.provider == 'azure' }}
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           client-id: ${{ secrets.ARM_CLIENT_ID }}
           tenant-id: ${{ secrets.ARM_TENANT_ID }}
@@ -113,15 +113,19 @@ jobs:
           pip install --upgrade pip
           pip install .[dev]
 
+      - name: Create test directory
+        run: mkdir -p "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"
+
       - name: Nebari Initialize
         run: |
           nebari init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.nebari.dev" --auth-provider password --disable-prompt --ci-provider ${{ matrix.cicd }}
           cat "nebari-config.yaml"
+        working-directory: "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"
 
       - name: Nebari Render
         run: |
-          nebari render -c "nebari-config.yaml" -o "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"
-          cp "nebari-config.yaml" "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment/nebari-config.yaml"
+          nebari render -c "nebari-config.yaml"
+        working-directory: "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"
 
       - name: Nebari Render Artifact
         uses: actions/upload-artifact@master

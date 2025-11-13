@@ -56,11 +56,12 @@ classifiers = [
 
 dependencies = [
     "auth0-python==4.7.1",
-    "azure-identity==1.12.0",
+    "azure-identity==1.16.1",
     "azure-mgmt-containerservice==26.0.0",
     "azure-mgmt-resource==23.0.1",
     "bcrypt==4.0.1",
     "boto3==1.34.63",
+    "click<8.2.0",      # Pinning click temporarily while https://github.com/fastapi/typer/discussions/1215 is resolved
     "cloudflare==2.11.7",
     "google-auth>=2.31.0,<3.0.0",
     "google-cloud-compute==1.19.1",

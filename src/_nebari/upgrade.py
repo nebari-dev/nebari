@@ -1807,6 +1807,252 @@ class Upgrade_2025_4_1(UpgradeStep):
         return config
 
 
+class Upgrade_2025_4_2(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2025.4.2
+    """
+
+    version = "2025.4.2"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+
+        rich.print("Ready to upgrade to Nebari version [green]2025.4.2[/green].")
+
+        return config
+
+
+class Upgrade_2025_6_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2025.6.1
+    """
+
+    version = "2025.6.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+
+        rich.print("Ready to upgrade to Nebari version [green]2025.6.1[/green].")
+
+        return config
+
+
+class Upgrade_2025_10_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2025.10.1
+
+    This upgrade includes:
+    - Patching deprecated Bitnami images to avoid deployment issues during Helm chart upgrades
+    """
+
+    version = "2025.10.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        # Define the deprecated Bitnami images that need to be patched via Helm
+        # Format: release_name, chart (direct .tgz URL), set_values (list of --set flags)
+        # Note: Using direct URLs to .tgz files to avoid needing to add repos
+        deprecated_helm_releases = [
+            {
+                "name": "keycloak",
+                "chart": "https://github.com/codecentric/helm-charts/releases/download/keycloak-15.0.2/keycloak-15.0.2.tgz",
+                "description": "Keycloak PostgreSQL",
+                "set_values": [
+                    "postgresql.image.registry=docker.io",
+                    "postgresql.image.repository=bitnamilegacy/postgresql",
+                    "postgresql.image.tag=11.14.0",
+                ],
+            },
+            {
+                "name": "nebari-conda-store-postgresql",
+                "chart": "https://charts.bitnami.com/bitnami/postgresql-10.13.12.tgz",
+                "description": "Conda-store PostgreSQL",
+                "set_values": [
+                    "image.registry=docker.io",
+                    "image.repository=bitnamilegacy/postgresql",
+                    "image.tag=11.14.0",
+                ],
+            },
+            {
+                "name": "nebari-conda-store-minio",
+                "chart": "https://charts.bitnami.com/bitnami/minio-6.7.4.tgz",
+                "description": "Conda-store MinIO",
+                "set_values": [
+                    "image.registry=docker.io",
+                    "image.repository=bitnamilegacy/minio",
+                    "image.tag=2021.4.22",
+                ],
+            },
+            {
+                "name": "nebari-conda-store-redis",
+                "chart": "https://charts.bitnami.com/bitnami/redis-17.0.6.tgz",
+                "description": "Conda-store Redis",
+                "set_values": [
+                    "image.registry=docker.io",
+                    "image.repository=bitnamilegacy/redis",
+                    "image.tag=7.0.4-debian-11-r4",
+                ],
+            },
+        ]
+
+        loki_minio_release = {
+            "name": None,  # Will be determined from config
+            "chart": "https://charts.bitnami.com/bitnami/minio-6.7.4.tgz",
+            "description": "Loki MinIO",
+            "set_values": [
+                "image.registry=docker.io",
+                "image.repository=bitnamilegacy/minio",
+                "image.tag=2021.4.22",
+            ],
+        }
+
+        # Filter releases based on enabled services
+        releases_to_patch = []
+
+        # PostgreSQL for Keycloak is always enabled if keycloak is enabled
+        if config.get("security", {}).get("keycloak", {}).get("enabled", True):
+            releases_to_patch.append(deprecated_helm_releases[0])
+
+        # PostgreSQL, MinIO, and Redis for conda-store
+        if config.get("conda_store", {}).get("enabled", True):
+            releases_to_patch.append(deprecated_helm_releases[1])
+            releases_to_patch.append(deprecated_helm_releases[2])
+            releases_to_patch.append(deprecated_helm_releases[3])
+
+        # MinIO for Loki (monitoring)
+        if config.get("monitoring", {}).get("enabled", True):
+            # Get the minio release name from config (defaults to "nebari-loki-minio")
+            loki_minio_name = (
+                config.get("monitoring", {})
+                .get("overrides", {})
+                .get("minio-release-name", "nebari-loki-minio")
+            )
+            loki_minio_release["name"] = loki_minio_name
+            releases_to_patch.append(loki_minio_release)
+
+        if releases_to_patch:
+            namespace = config.get("namespace", "dev")
+
+            rich.print(
+                "\n ⚠️  Warning ⚠️"
+                "\n-> [red bold]Nebari version 2025.10.1 updates Bitnami images that have been deprecated.[/red bold]"
+                "\n-> [red bold]Before upgrading, the following Helm releases need to be patched to avoid deployment issues during Helm chart upgrades.[/red bold]"
+                "\n-> For more information, see: [link=https://github.com/nebari-dev/nebari/issues/3137]https://github.com/nebari-dev/nebari/issues/3137[/link]"
+            )
+
+            # Display releases to be patched
+            rich.print("\n[cyan bold]Helm releases to be patched:[/cyan bold]")
+            for release in releases_to_patch:
+                rich.print(f"  • {release['description']} ({release['name']})")
+
+            run_patches = kwargs.get("attempt_fixes", False) or Confirm.ask(
+                "\nDo you want Nebari to run the Helm upgrade commands for you? (You'll confirm each command individually)",
+                default=False,
+            )
+
+            # Prepare helm commands for manual execution (all using direct .tgz URLs)
+            commands = "[cyan bold]"
+            for release in releases_to_patch:
+                set_flags = " ".join([f"--set {val}" for val in release["set_values"]])
+                commands += f"helm upgrade {release['name']} {release['chart']} --reuse-values {set_flags} --namespace {namespace}\n"
+            commands += "[/cyan bold]"
+
+            # Use a rich console with a larger width to print commands without wrapping
+            console = rich.console.Console(width=220)
+
+            if run_patches:
+                from _nebari.provider.helm import run_helm_subprocess
+
+                try:
+                    kubernetes.config.load_kube_config()
+                except kubernetes.config.config_exception.ConfigException:
+                    rich.print(
+                        "[red bold]No default kube configuration file was found. Make sure to [link=https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig]have one pointing to your Nebari cluster[/link] before upgrading.[/red bold]"
+                    )
+                    exit()
+
+                current_kube_context = kubernetes.config.list_kube_config_contexts()[1]
+                cluster_name = current_kube_context["context"]["cluster"]
+                rich.print(
+                    f"\nThe following Helm upgrade commands will be run for the [cyan bold]{cluster_name}[/cyan bold] cluster.\n"
+                )
+
+                # Patch the images using Helm upgrade --reuse-values with direct chart URLs
+                for release in releases_to_patch:
+                    # Build the command for display
+                    set_flags = " ".join(
+                        [f"--set {val}" for val in release["set_values"]]
+                    )
+                    command_str = f"helm upgrade {release['name']} {release['chart']} --reuse-values {set_flags} --namespace {namespace}"
+
+                    rich.print(
+                        f"\n[cyan bold]Next command for {release['description']}:[/cyan bold]"
+                    )
+                    console.print(f"\t[cyan]{command_str}[/cyan]")
+
+                    if not kwargs.get("attempt_fixes", False):
+                        run_command = Confirm.ask(
+                            f"\nRun this command for {release['description']}?",
+                            default=True,
+                        )
+                        if not run_command:
+                            rich.print(
+                                f"[yellow]⊘[/yellow] Skipped {release['description']} ({release['name']})"
+                            )
+                            continue
+
+                    try:
+                        helm_args = [
+                            "upgrade",
+                            release["name"],
+                            release["chart"],
+                            "--reuse-values",
+                            "--namespace",
+                            namespace,
+                        ]
+                        for set_value in release["set_values"]:
+                            helm_args.extend(["--set", set_value])
+
+                        run_helm_subprocess(helm_args)
+                        rich.print(
+                            f"[green]✓[/green] Patched {release['description']} ({release['name']})"
+                        )
+                    except Exception as e:
+                        rich.print(
+                            f"[yellow]⚠[/yellow] Could not patch {release['description']} ({release['name']}): {e}"
+                        )
+
+                rich.print(
+                    "\n[green]Helm release patching complete.[/green] The pods will restart with the new images."
+                )
+            else:
+                rich.print(
+                    "[red bold]Before upgrading, you need to manually patch the deprecated Bitnami images using Helm. To do that, please run the following commands:[/red bold]"
+                )
+                console.print(textwrap.indent(commands, prefix="\t"))
+
+                _ = Prompt.ask("Hit enter to continue")
+                continue_ = Confirm.ask(
+                    "Have you patched the deprecated Bitnami images using the Helm commands above?",
+                    default=False,
+                )
+                if not continue_:
+                    rich.print(
+                        f"[red bold]You must patch the deprecated Bitnami images using Helm before upgrading to [green]{self.version}[/green].[/bold red]"
+                    )
+                    exit()
+
+        rich.print("\nReady to upgrade to Nebari version [green]2025.10.1[/green].")
+
+        return config
+
+
 __rounded_version__ = str(rounded_ver_parse(__version__))
 
 # Manually-added upgrade steps must go above this line

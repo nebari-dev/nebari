@@ -16,12 +16,14 @@ def nebari_subcommand(cli: typer.Typer):
         config_filename: pathlib.Path = typer.Option(
             ..., "-c", "--config", help="nebari configuration file path"
         ),
-        output_directory: pathlib.Path = typer.Option(
-            "./",
-            "-o",
-            "--output",
-            help="output directory",
-        ),
+        # TODO: Remove -o/--output argument until it is safe to use
+        # See: https://github.com/nebari-dev/nebari/issues/1716
+        # output_directory: pathlib.Path = typer.Option(
+        #     "./",
+        #     "-o",
+        #     "--output",
+        #     help="output directory",
+        # ),
         disable_render: bool = typer.Option(
             False,
             "--disable-render",
@@ -47,7 +49,8 @@ def nebari_subcommand(cli: typer.Typer):
             config = read_configuration(config_filename, config_schema=config_schema)
 
             if not disable_render:
-                render_template(output_directory, config, stages)
+                # Use hardcoded "./" since output_directory parameter was removed
+                render_template("./", config, stages)
 
             destroy_configuration(config, stages)
 
