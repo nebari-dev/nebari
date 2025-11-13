@@ -682,9 +682,44 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                     body=statefulset,
                 )
                 print(f"✓ Keycloak scaled back to {original_replicas} replicas")
-                print(
-                    "  Keycloak pods will start connecting to the restored database\n"
-                )
+
+                # Wait for StatefulSet to be ready
+                print("  Waiting for Keycloak to be ready...")
+                max_wait = 300  # 5 minutes
+                wait_interval = 5
+                elapsed = 0
+
+                while elapsed < max_wait:
+                    statefulset = apps_api.read_namespaced_stateful_set(
+                        name=keycloak_statefulset_name, namespace=namespace
+                    )
+
+                    ready_replicas = statefulset.status.ready_replicas or 0
+                    current_replicas = statefulset.status.current_replicas or 0
+
+                    if (
+                        ready_replicas == original_replicas
+                        and current_replicas == original_replicas
+                    ):
+                        print(
+                            f"  ✓ Keycloak is ready ({ready_replicas}/{original_replicas} replicas)"
+                        )
+                        break
+
+                    print(
+                        f"  Still waiting... ({ready_replicas}/{original_replicas} ready)"
+                    )
+                    time.sleep(wait_interval)
+                    elapsed += wait_interval
+
+                if elapsed >= max_wait:
+                    print("  ⚠ Warning: Timed out waiting for StatefulSet to be ready")
+                    print("  The StatefulSet may still be starting up")
+                else:
+                    print(
+                        "  Keycloak pods are ready and connected to the restored database\n"
+                    )
+
             except kubernetes.client.exceptions.ApiException as e:
                 print(f"⚠ Warning: Could not scale up Keycloak statefulset: {e}")
                 print(
