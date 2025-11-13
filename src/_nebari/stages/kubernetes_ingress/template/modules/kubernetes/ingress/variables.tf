@@ -90,3 +90,27 @@ variable "additional-arguments" {
   type        = list(string)
   default     = []
 }
+
+variable "hsts-enabled" {
+  description = "Enable HSTS (HTTP Strict Transport Security) headers"
+  type        = bool
+  default     = false
+}
+
+variable "hsts-max-age" {
+  description = "HSTS max-age in seconds (default 300s / 5 minutes; increase to 31536000 for production)"
+  type        = number
+  default     = 300
+}
+
+variable "hsts-include-subdomains" {
+  description = "Include subdomains in HSTS policy"
+  type        = bool
+  default     = true
+}
+
+variable "hsts-preload" {
+  description = "Enable HSTS preload"
+  type        = bool
+  default     = false
+}
