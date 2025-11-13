@@ -102,7 +102,7 @@ jobs:
 
       - name: 'Azure login'
         if: ${{ matrix.provider == 'azure' }}
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           client-id: ${{ secrets.ARM_CLIENT_ID }}
           tenant-id: ${{ secrets.ARM_TENANT_ID }}
