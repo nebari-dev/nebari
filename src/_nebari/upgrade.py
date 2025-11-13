@@ -2096,23 +2096,59 @@ class Upgrade_2025_11_1(UpgradeStep):
                 """
             )
         )
-        try:
-            kubernetes.config.load_kube_config()
-        except kubernetes.config.config_exception.ConfigException:
-            rich.print(
-                "[red bold]No default kube configuration file was found. Make sure to have one pointing to your cluster before upgrading.[/red bold] see docs: https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig"
-            )
-            exit()
+        # Get all available contexts
+        contexts, active_context = kubernetes.config.list_kube_config_contexts()
 
-        current_kube_context = kubernetes.config.list_kube_config_contexts()[1]
+        if not contexts:
+            rich.print(
+                "[red bold]No kubectl contexts found in your kube configuration.[/red bold] See docs: https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig"
+            )
+            exit(1)
+
+        # Display available contexts
+        rich.print(
+            "\n[cyan]Below are available kubectl contexts for kubernetes. Please select the context for your cluster[/cyan]"
+        )
+        for i, ctx in enumerate(contexts):
+            context_name = ctx["name"]
+            is_active = " [green](current)[/green]" if ctx == active_context else ""
+            rich.print(f"  {i + 1}. {context_name} {is_active}")
+
+        # Add option for context not present
+        rich.print(
+            f"  {len(contexts) + 1}. [yellow]Desired context not present[/yellow]"
+        )
+
+        # Let user choose
+        choice = Prompt.ask(
+            "\n[cyan]Select context number[/cyan]",
+            choices=[str(i + 1) for i in range(len(contexts) + 1)],
+        )
+        selected_index = int(choice) - 1
+
+        # Handle "context not present" option
+        if selected_index == len(contexts):
+            rich.print(
+                "\n[yellow]Please add your desired kubectl context before proceeding.[/yellow]"
+            )
+            rich.print(
+                "See docs: [link=https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig]https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig[/link]"
+            )
+            exit(1)
+
+        current_kube_context = contexts[selected_index]
         cluster_name = current_kube_context["context"]["cluster"]
+
+        # Set the selected context as active
+        kubernetes.config.load_kube_config(context=current_kube_context["name"])
+
+        rich.print(
+            f"\n[green]✓ Using context:[/green] {current_kube_context['name']} -> {cluster_name}"
+        )
 
         # Kubernetes config available - offer automatic backup
         rich.print(
             "\n[green]✓[/green] Kubernetes configuration detected. Nebari can backup the database automatically."
-        )
-        rich.print(
-            f"\nThe following backup will be attempted on the [cyan bold]{cluster_name}[/cyan bold] cluster.\n"
         )
 
         if not (
@@ -2123,24 +2159,11 @@ class Upgrade_2025_11_1(UpgradeStep):
             )
         ):
             # User declined automatic backup
-            rich.print("\n[yellow]You chose not to backup automatically.[/yellow]")
+
             rich.print(
-                "[yellow]Please ensure you have a backup if desired before proceeding with deployment.[/yellow]"
+                f"\n[red bold]You must backup the Keycloak database before upgrading to {self.version}.[/red bold]"
             )
-
-            if not Confirm.ask(
-                "\nHave you successfully backed up your Keycloak database/would you like to proceed without backup?",
-                default=False,
-            ):
-                rich.print(
-                    f"\n[red bold]You must backup the Keycloak database before upgrading to {self.version}.[/red bold]"
-                )
-                exit(1)
-
-            rich.print("\nYou can now proceed with:")
-            rich.print(f"     [cyan]nebari deploy -c {config_filename}[/cyan]")
-            rich.print("Ready to upgrade to Nebari version [green]2025.11.1[/green].")
-            return config
+            exit(1)
 
         # User accepted automatic backup - proceed
         rich.print(
