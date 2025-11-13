@@ -162,6 +162,7 @@ resource "helm_release" "jupyterhub" {
             token_url            = module.jupyterhub-openid-client.config.token_url
             userdata_url         = module.jupyterhub-openid-client.config.userinfo_url
             realm_api_url        = module.jupyterhub-openid-client.config.realm_api_url
+            scope                = ["openid", "profile", "email"]
             login_service        = "Keycloak"
             username_claim       = "preferred_username"
             claim_groups_key     = "groups"
