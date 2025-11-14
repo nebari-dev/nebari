@@ -102,12 +102,24 @@ def test_upgrade_4_0(
             return False
         elif prompt == TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION:
             return attempt_fixes
+        elif (
+            prompt
+            == "\nWould you like Nebari to backup the Keycloak database for you now?"
+        ):
+            # Always backup in tests so upgrade can complete
+            return True
         # All other prompts will be answered with "y"
         else:
             return True
 
+    def mock_prompt_ask(prompt, **kwargs):
+        # Mock context selection for 2025.11.1 upgrade
+        if "Select context number" in prompt:
+            return "1"  # Select first context
+        return ""
+
     monkeypatch.setattr(Confirm, "ask", mock_input)
-    monkeypatch.setattr(Prompt, "ask", lambda x: "")
+    monkeypatch.setattr(Prompt, "ask", mock_prompt_ask)
 
     from kubernetes import config as _kube_config
     from kubernetes.client import ApiextensionsV1Api as _ApiextensionsV1Api
@@ -127,15 +139,27 @@ def test_upgrade_4_0(
 
         return MonkeypatchApiResponse
 
+    def monkey_patch_read_namespaced_pod(*args, **kwargs):
+        # Mock the pod exists for keycloak backup
+        class MockPod:
+            metadata = type("obj", (object,), {"name": "keycloak-postgresql-0"})
+
+        return MockPod()
+
     monkeypatch.setattr(
         _kube_config,
         "load_kube_config",
         lambda *args, **kwargs: None,
     )
+    # Mock kubectl contexts for 2025.11.1 upgrade
+    mock_contexts = [
+        {"name": "test-context", "context": {"cluster": "test-cluster"}},
+    ]
+    mock_active_context = mock_contexts[0]
     monkeypatch.setattr(
         _kube_config,
         "list_kube_config_contexts",
-        lambda *args, **kwargs: [None, {"context": {"cluster": "test"}}],
+        lambda *args, **kwargs: (mock_contexts, mock_active_context),
     )
     monkeypatch.setattr(
         _ApiextensionsV1Api,
@@ -162,8 +186,67 @@ def test_upgrade_4_0(
         "list_namespaced_daemon_set",
         monkey_patch_list_namespaced_daemon_set,
     )
+    monkeypatch.setattr(
+        _CoreV1Api,
+        "read_namespaced_pod",
+        monkey_patch_read_namespaced_pod,
+    )
 
+    # Mock connect_get_namespaced_pod_exec to prevent real API calls
+    def monkey_patch_connect_pod_exec(*args, **kwargs):
+        # This should not be called if stream mock works, but add as safety
+        class MockExecResponse:
+            def read_stdout(self):
+                return "-- PostgreSQL database dump\n"
+
+            def read_stderr(self):
+                return ""
+
+        return MockExecResponse()
+
+    monkeypatch.setattr(
+        _CoreV1Api,
+        "connect_get_namespaced_pod_exec",
+        monkey_patch_connect_pod_exec,
+    )
+
+    # Mock kubernetes stream for database backup
+    class MockStreamResponse:
+        def __init__(self):
+            self._open = True
+            self._stdout_data = "-- PostgreSQL database dump\n-- Dump completed\n"
+            self._read_count = 0
+
+        def is_open(self):
+            # Close after reading data
+            return self._read_count < 1
+
+        def peek_stdout(self):
+            return self._read_count < 1
+
+        def read_stdout(self):
+            self._read_count += 1
+            return self._stdout_data
+
+        def peek_stderr(self):
+            return False
+
+        def read_stderr(self):
+            return ""
+
+        def update(self, timeout=1):
+            pass
+
+        def close(self):
+            self._open = False
+
+    def mock_stream(*args, **kwargs):
+        return MockStreamResponse()
+
+    # Patch stream in the upgrade module where it's imported
     from _nebari import upgrade as _upgrade
+
+    monkeypatch.setattr(_upgrade, "stream", mock_stream)
 
     def monkey_patch_get_keycloak_admin(*args, **kwargs):
         return MockKeycloakAdmin()
@@ -234,6 +317,13 @@ def test_upgrade_4_0(
     tmp_qhub_config_backup = Path(tmp_path, f"{old_qhub_config_path.name}.old.backup")
 
     assert orig_contents == tmp_qhub_config_backup.read_text()
+
+    # Check Keycloak database backup file was created (from 2025.11.1 upgrade)
+    keycloak_backup_file = Path(tmp_path, "keycloak-backup.sql")
+    assert keycloak_backup_file.exists()
+    # Verify backup contains postgres dump content
+    backup_content = keycloak_backup_file.read_text()
+    assert "PostgreSQL database dump" in backup_content
 
 
 @pytest.mark.parametrize(
