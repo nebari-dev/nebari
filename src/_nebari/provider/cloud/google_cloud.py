@@ -4,8 +4,9 @@ import os
 from typing import List, Set
 
 import google.api_core.exceptions
-from google.auth import load_credentials_from_dict, load_credentials_from_file
+from google.auth import load_credentials_from_dict
 from google.cloud import compute_v1, container_v1, iam_admin_v1, storage
+from google.oauth2 import service_account
 
 from _nebari.constants import GCP_ENV_DOCS
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
@@ -32,7 +33,9 @@ def load_credentials():
     # to determine if the credentials are stored as a file or not before
     # reading them
     if credentials.endswith(".json"):
-        loaded_credentials, _ = load_credentials_from_file(credentials, scopes=scopes)
+        loaded_credentials = service_account.Credentials.from_service_account_file(
+            credentials, scopes=scopes
+        )
     else:
         loaded_credentials, _ = load_credentials_from_dict(
             json.loads(credentials), scopes=scopes
