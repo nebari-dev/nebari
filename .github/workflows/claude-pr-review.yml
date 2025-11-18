@@ -1,0 +1,79 @@
+name: Claude PR Review
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  review:
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/claude review')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check team membership
+        uses: ./.github/actions/check-team-membership
+        with:
+          org: nebari-dev
+          team: Contributors
+          username: ${{ github.event.comment.user.login }}
+          issue_number: ${{ github.event.issue.number }}
+          comment_type: pr
+          github_token: ${{ github.token }}
+
+      - name: Get PR branch
+        id: pr
+        run: |
+          PR_DATA=$(gh pr view ${{ github.event.issue.number }} --repo ${{ github.repository }} --json headRefName)
+          echo "branch=$(echo $PR_DATA | jq -r '.headRefName')" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Extract custom instructions
+        id: instructions
+        run: |
+          COMMENT="${{ github.event.comment.body }}"
+          # Extract everything after "/claude review"
+          CUSTOM_INSTRUCTIONS=$(echo "$COMMENT" | sed -n 's/.*\/claude review\s*//p')
+
+          if [ -z "$CUSTOM_INSTRUCTIONS" ]; then
+            echo "instructions=No additional instructions provided." >> $GITHUB_OUTPUT
+          else
+            echo "instructions<<EOF" >> $GITHUB_OUTPUT
+            echo "$CUSTOM_INSTRUCTIONS" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout PR branch
+        run: |
+          git fetch origin ${{ steps.pr.outputs.branch }}
+          git checkout ${{ steps.pr.outputs.branch }}
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          track_progress: true
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.issue.number }}
+            REQUESTED BY: @${{ github.event.comment.user.login }}
+
+            ADDITIONAL INSTRUCTIONS:
+            ${{ steps.instructions.outputs.instructions }}
+
+            Review this pull request focusing on:
+            - Code quality and best practices
+            - Potential bugs or issues
+            - Security implications
+            - Performance considerations
+
+            Use inline comments for specific issues.
+            Post a summary when complete.
+
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
