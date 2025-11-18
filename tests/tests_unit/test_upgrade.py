@@ -248,6 +248,15 @@ def test_upgrade_4_0(
 
     monkeypatch.setattr(_upgrade, "stream", mock_stream)
 
+    # Mock helm subprocess to prevent actual helm commands from running
+    def mock_run_helm_subprocess(*args, **kwargs):
+        # Don't actually run helm, just return successfully
+        pass
+
+    from _nebari.provider import helm as _helm
+
+    monkeypatch.setattr(_helm, "run_helm_subprocess", mock_run_helm_subprocess)
+
     def monkey_patch_get_keycloak_admin(*args, **kwargs):
         return MockKeycloakAdmin()
 
@@ -319,11 +328,16 @@ def test_upgrade_4_0(
     assert orig_contents == tmp_qhub_config_backup.read_text()
 
     # Check Keycloak database backup file was created (from 2025.11.1 upgrade)
-    keycloak_backup_file = Path(tmp_path, "keycloak-backup.sql")
-    assert keycloak_backup_file.exists()
-    # Verify backup contains postgres dump content
-    backup_content = keycloak_backup_file.read_text()
-    assert "PostgreSQL database dump" in backup_content
+    # Only check if the current version is >= 2025.11.1
+    current_version = rounded_ver_parse(__version__)
+    target_version = rounded_ver_parse("2025.11.1")
+
+    if current_version >= target_version:
+        keycloak_backup_file = Path(tmp_path, "keycloak-backup.sql")
+        assert keycloak_backup_file.exists()
+        # Verify backup contains postgres dump content
+        backup_content = keycloak_backup_file.read_text()
+        assert "PostgreSQL database dump" in backup_content
 
 
 @pytest.mark.parametrize(
