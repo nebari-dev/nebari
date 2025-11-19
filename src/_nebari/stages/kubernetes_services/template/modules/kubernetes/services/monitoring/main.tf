@@ -251,7 +251,7 @@ resource "helm_release" "prometheus-grafana" {
             allow_sign_up            = "true"
             client_id                = "$__env{grafana-oauth-client-id}"
             client_secret            = "$__env{grafana-oauth-client-secret}"
-            scopes                   = "profile"
+            scopes                   = "openid profile email"
             auth_url                 = module.grafana-client-id.config.authentication_url
             token_url                = module.grafana-client-id.config.token_url
             api_url                  = module.grafana-client-id.config.userinfo_url
