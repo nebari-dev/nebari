@@ -2089,7 +2089,6 @@ class Upgrade_2025_11_1(UpgradeStep):
                 - PostgreSQL moved from subchart to standalone deployment
                 - Keycloak service name changes from [green]keycloak-headless[/green] to [green]keycloak-keycloakx-http[/green]
                 - OAuth clients now require [green]openid[/green] scope explicitly
-                - Startup scripts replaced with Python post_deploy hooks
 
                 After this upgrade step completes, you will need to run:
                       [cyan]nebari deploy -c {config_filename}[/cyan] to apply the changes
