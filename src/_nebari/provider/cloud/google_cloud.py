@@ -37,14 +37,25 @@ def load_credentials():
         with open(credentials, "r") as f:
             cred_data = json.load(f)
 
-        # Check if this is a traditional service account (has client_email)
-        # vs workload identity federation (has type: external_account)
+        # Check if this is a traditional service account vs workload identity federation
         if cred_data.get("type") == "service_account":
+            # Traditional service account JSON format:
+            # {"type": "service_account", "project_id": "...", "private_key_id": "...",
+            #  "private_key": "...", "client_email": "...", "client_id": "...",
+            #  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            #  "token_uri": "https://oauth2.googleapis.com/token",
+            #  "auth_provider_x509_cert_url": "...", "client_x509_cert_url": "..."}
+            # See: https://cloud.google.com/iam/docs/keys-create-delete#creating
             loaded_credentials = service_account.Credentials.from_service_account_file(
                 credentials, scopes=scopes
             )
         else:
-            # Workload identity federation or other external account types
+            # Workload identity federation or other external account types:
+            # {"type": "external_account", "audience": "//iam.googleapis.com/...",
+            #  "subject_token_type": "urn:ietf:params:oauth:token-type:jwt",
+            #  "token_url": "https://sts.googleapis.com/v1/token",
+            #  "credential_source": {...}, "service_account_impersonation_url": "..."}
+            # See: https://google.aip.dev/auth/4117
             loaded_credentials, _ = load_credentials_from_file(
                 credentials, scopes=scopes
             )
