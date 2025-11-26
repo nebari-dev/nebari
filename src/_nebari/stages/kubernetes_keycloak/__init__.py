@@ -459,18 +459,16 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         apps_api = kubernetes.client.AppsV1Api()
 
         # Step 0: Scale down Keycloak to prevent active database connections
+        # Keycloak statefulset always runs with 1 replica
+        original_replicas = 1
         print(
             f"Step 0: Scaling down Keycloak statefulset '{keycloak_statefulset_name}' to 0 replicas..."
         )
         try:
-            # Get current statefulset
+            # Get current statefulset and scale to 0
             statefulset = apps_api.read_namespaced_stateful_set(
                 name=keycloak_statefulset_name, namespace=namespace
             )
-            original_replicas = statefulset.spec.replicas
-            print(f"  Current replicas: {original_replicas}")
-
-            # Scale to 0
             statefulset.spec.replicas = 0
             apps_api.patch_namespaced_stateful_set(
                 name=keycloak_statefulset_name, namespace=namespace, body=statefulset
@@ -504,7 +502,6 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         except kubernetes.client.exceptions.ApiException as e:
             print(f"⚠ Warning: Could not scale down Keycloak statefulset: {e}")
             print("Proceeding with restore anyway...\n")
-            original_replicas = None
 
         # Check if pod exists
         print(f"Checking if pod '{pod_name}' exists in namespace '{namespace}'...")
@@ -677,65 +674,64 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         print("DATABASE RESTORE SUCCESSFUL!")
         print("=" * 80)
 
-        # Step 8: Scale Keycloak back up
-        if original_replicas is not None:
-            print(
-                f"\nStep 8: Scaling Keycloak statefulset back to {original_replicas} replicas..."
+        # Step 8: Scale Keycloak back up to 1 replica
+        print(
+            f"\nStep 8: Scaling Keycloak statefulset back to {original_replicas} replicas..."
+        )
+        try:
+            statefulset = apps_api.read_namespaced_stateful_set(
+                name=keycloak_statefulset_name, namespace=namespace
             )
-            try:
+            statefulset.spec.replicas = original_replicas
+            apps_api.patch_namespaced_stateful_set(
+                name=keycloak_statefulset_name,
+                namespace=namespace,
+                body=statefulset,
+            )
+            print(f"✓ Keycloak scaled back to {original_replicas} replicas")
+
+            # Wait for StatefulSet to be ready
+            print("  Waiting for Keycloak to be ready...")
+            max_wait = 300  # 5 minutes
+            wait_interval = 5
+            elapsed = 0
+
+            while elapsed < max_wait:
                 statefulset = apps_api.read_namespaced_stateful_set(
                     name=keycloak_statefulset_name, namespace=namespace
                 )
-                statefulset.spec.replicas = original_replicas
-                apps_api.patch_namespaced_stateful_set(
-                    name=keycloak_statefulset_name,
-                    namespace=namespace,
-                    body=statefulset,
-                )
-                print(f"✓ Keycloak scaled back to {original_replicas} replicas")
 
-                # Wait for StatefulSet to be ready
-                print("  Waiting for Keycloak to be ready...")
-                max_wait = 300  # 5 minutes
-                wait_interval = 5
-                elapsed = 0
+                ready_replicas = statefulset.status.ready_replicas or 0
+                current_replicas = statefulset.status.current_replicas or 0
 
-                while elapsed < max_wait:
-                    statefulset = apps_api.read_namespaced_stateful_set(
-                        name=keycloak_statefulset_name, namespace=namespace
-                    )
-
-                    ready_replicas = statefulset.status.ready_replicas or 0
-                    current_replicas = statefulset.status.current_replicas or 0
-
-                    if (
-                        ready_replicas == original_replicas
-                        and current_replicas == original_replicas
-                    ):
-                        print(
-                            f"  ✓ Keycloak is ready ({ready_replicas}/{original_replicas} replicas)"
-                        )
-                        break
-
+                if (
+                    ready_replicas == original_replicas
+                    and current_replicas == original_replicas
+                ):
                     print(
-                        f"  Still waiting... ({ready_replicas}/{original_replicas} ready)"
+                        f"  ✓ Keycloak is ready ({ready_replicas}/{original_replicas} replicas)"
                     )
-                    time.sleep(wait_interval)
-                    elapsed += wait_interval
+                    break
 
-                if elapsed >= max_wait:
-                    print("  ⚠ Warning: Timed out waiting for StatefulSet to be ready")
-                    print("  The StatefulSet may still be starting up")
-                else:
-                    print(
-                        "  Keycloak pods are ready and connected to the restored database\n"
-                    )
-
-            except kubernetes.client.exceptions.ApiException as e:
-                print(f"⚠ Warning: Could not scale up Keycloak statefulset: {e}")
                 print(
-                    f"  You may need to manually scale it back up: kubectl scale statefulset {keycloak_statefulset_name} --replicas={original_replicas} -n {namespace}\n"
+                    f"  Still waiting... ({ready_replicas}/{original_replicas} ready)"
                 )
+                time.sleep(wait_interval)
+                elapsed += wait_interval
+
+            if elapsed >= max_wait:
+                print("  ⚠ Warning: Timed out waiting for StatefulSet to be ready")
+                print("  The StatefulSet may still be starting up")
+            else:
+                print(
+                    "  Keycloak pods are ready and connected to the restored database\n"
+                )
+
+        except kubernetes.client.exceptions.ApiException as e:
+            print(f"⚠ Warning: Could not scale up Keycloak statefulset: {e}")
+            print(
+                f"  You may need to manually scale it back up: kubectl scale statefulset {keycloak_statefulset_name} --replicas={original_replicas} -n {namespace}\n"
+            )
 
     @contextlib.contextmanager
     def deploy(
