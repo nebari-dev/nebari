@@ -1,3 +1,4 @@
+import base64
 import contextlib
 import enum
 import json
@@ -5,12 +6,16 @@ import os
 import secrets
 import string
 import sys
+import tarfile
 import time
+from io import BytesIO
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union
 
+import kubernetes
 from keycloak import KeycloakAdmin
 from keycloak.exceptions import KeycloakError
+from kubernetes.stream import stream
 from pydantic import Field, ValidationInfo, field_validator, model_validator
 
 from _nebari.stages.base import NebariTerraformStage
@@ -261,8 +266,6 @@ class KubernetesKeycloakStage(NebariTerraformStage):
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_check: bool = False
     ):
-        from keycloak import KeycloakAdmin
-        from keycloak.exceptions import KeycloakError
 
         keycloak_url = f"{stage_outputs['stages/' + self.name]['keycloak_credentials']['value']['url']}/auth/"
 
@@ -437,14 +440,6 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
     def _restore_keycloak_database(self, backup_file: Path):
         """Restore PostgreSQL database from backup file using Kubernetes exec."""
-        import base64
-        import tarfile
-        from io import BytesIO
-        from pathlib import Path
-
-        import kubernetes
-        from kubernetes.stream import stream
-
         # Configuration - these should match your new postgres deployment
         namespace = self.config.namespace
         keycloak_statefulset_name = "keycloak-keycloakx"
@@ -520,8 +515,6 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         try:
             secret_name = "keycloak-postgres-standalone-postgresql"
             secret = api.read_namespaced_secret(name=secret_name, namespace=namespace)
-            import base64
-
             postgres_password = base64.b64decode(
                 secret.data["postgres-password"]
             ).decode("utf-8")
