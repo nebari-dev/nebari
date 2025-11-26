@@ -534,7 +534,11 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
         # Helper function to run commands in pod
         def run_command(command: str, show_output: bool = True):
-            print(f"  Running: {command}")
+            # Mask password in output
+            masked_command = command.replace(postgres_password, "***").replace(
+                db_password, "***"
+            )
+            print(f"  Running: {masked_command}")
             sys.stdout.flush()
 
             resp = stream(
