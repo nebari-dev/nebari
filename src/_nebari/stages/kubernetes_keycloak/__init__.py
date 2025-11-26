@@ -333,14 +333,25 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             print(f"Found backup file: {backup_file}")
             print(f"Size: {backup_file.stat().st_size / 1024:.2f} KB\n")
 
-            self._restore_keycloak_database(backup_file)
+            try:
+                self._restore_keycloak_database(backup_file)
 
-            # Rename backup file to prevent re-running restore on subsequent deploys
-            backup_file.rename(backup_file.with_suffix(".sql.restored"))
-            print(
-                f"\n✓ Renamed backup file to {backup_file.with_suffix('.sql.restored')}"
-            )
-            print("=" * 80 + "\n")
+                # Rename backup file to prevent re-running restore on subsequent deploys
+                backup_file.rename(backup_file.with_suffix(".sql.restored"))
+                print(
+                    f"\n✓ Renamed backup file to {backup_file.with_suffix('.sql.restored')}"
+                )
+                print("=" * 80 + "\n")
+            except Exception as e:
+                backup_file.rename(backup_file.with_suffix(".sql.failed_restore"))
+                print("\n" + "=" * 80)
+                print("ERROR: KEYCLOAK DATABASE RESTORE FAILED")
+                print("=" * 80)
+                print(f"Error: {e}")
+                print(f"Backup file location: {backup_file.absolute()}")
+                print("\nThe backup file has been preserved for manual recovery.")
+                print("=" * 80 + "\n")
+                raise
         else:
             print("No Keycloak database backup found, skipping restore")
 
