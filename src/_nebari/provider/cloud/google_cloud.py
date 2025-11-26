@@ -4,7 +4,7 @@ import os
 from typing import List, Set
 
 import google.api_core.exceptions
-from google.auth import load_credentials_from_dict
+from google.auth import load_credentials_from_dict, load_credentials_from_file
 from google.cloud import compute_v1, container_v1, iam_admin_v1, storage
 from google.oauth2 import service_account
 
@@ -33,9 +33,32 @@ def load_credentials():
     # to determine if the credentials are stored as a file or not before
     # reading them
     if credentials.endswith(".json"):
-        loaded_credentials = service_account.Credentials.from_service_account_file(
-            credentials, scopes=scopes
-        )
+        # Read the file to determine credential type
+        with open(credentials, "r") as f:
+            cred_data = json.load(f)
+
+        # Check if this is a traditional service account vs workload identity federation
+        if cred_data.get("type") == "service_account":
+            # Traditional service account JSON format:
+            # {"type": "service_account", "project_id": "...", "private_key_id": "...",
+            #  "private_key": "...", "client_email": "...", "client_id": "...",
+            #  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            #  "token_uri": "https://oauth2.googleapis.com/token",
+            #  "auth_provider_x509_cert_url": "...", "client_x509_cert_url": "..."}
+            # See: https://cloud.google.com/iam/docs/keys-create-delete#creating
+            loaded_credentials = service_account.Credentials.from_service_account_file(
+                credentials, scopes=scopes
+            )
+        else:
+            # Workload identity federation or other external account types:
+            # {"type": "external_account", "audience": "//iam.googleapis.com/...",
+            #  "subject_token_type": "urn:ietf:params:oauth:token-type:jwt",
+            #  "token_url": "https://sts.googleapis.com/v1/token",
+            #  "credential_source": {...}, "service_account_impersonation_url": "..."}
+            # See: https://google.aip.dev/auth/4117
+            loaded_credentials, _ = load_credentials_from_file(
+                credentials, scopes=scopes
+            )
     else:
         loaded_credentials, _ = load_credentials_from_dict(
             json.loads(credentials), scopes=scopes
