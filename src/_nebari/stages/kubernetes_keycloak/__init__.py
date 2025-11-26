@@ -440,10 +440,8 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
     def _restore_keycloak_database(self, backup_file: Path):
         """Restore PostgreSQL database from backup file using Kubernetes exec."""
-        # Configuration - these should match your new postgres deployment
+        # Configuration
         namespace = self.config.namespace
-        keycloak_statefulset_name = "keycloak-keycloakx"
-        pod_name = "keycloak-postgres-standalone-postgresql-0"
         db_user = "keycloak"
         db_name = "keycloak"
         postgres_user = "postgres"
@@ -452,6 +450,19 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         kubernetes.config.load_kube_config()
         api = kubernetes.client.CoreV1Api()
         apps_api = kubernetes.client.AppsV1Api()
+
+        # Find Keycloak StatefulSet by label
+        statefulsets = apps_api.list_namespaced_stateful_set(
+            namespace=namespace, label_selector="app.kubernetes.io/name=keycloakx"
+        )
+        keycloak_statefulset_name = statefulsets.items[0].metadata.name
+
+        # Find PostgreSQL pod by label
+        postgres_pods = api.list_namespaced_pod(
+            namespace=namespace,
+            label_selector="app.kubernetes.io/name=postgresql,app.kubernetes.io/component=primary",
+        )
+        postgres_pod_name = postgres_pods.items[0].metadata.name
 
         # Step 0: Scale down Keycloak to prevent active database connections
         # Keycloak statefulset always runs with 1 replica
@@ -499,13 +510,17 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             print("Proceeding with restore anyway...\n")
 
         # Check if pod exists
-        print(f"Checking if pod '{pod_name}' exists in namespace '{namespace}'...")
+        print(
+            f"Checking if pod '{postgres_pod_name}' exists in namespace '{namespace}'..."
+        )
         try:
-            api.read_namespaced_pod(name=pod_name, namespace=namespace)
+            api.read_namespaced_pod(name=postgres_pod_name, namespace=namespace)
             print("✓ Pod found\n")
         except kubernetes.client.exceptions.ApiException as e:
             if e.status == 404:
-                print(f"✗ Pod '{pod_name}' not found in namespace '{namespace}'")
+                print(
+                    f"✗ Pod '{postgres_pod_name}' not found in namespace '{namespace}'"
+                )
                 print("Skipping database restore - pod may not be ready yet")
                 return
             raise
@@ -536,7 +551,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
             resp = stream(
                 api.connect_get_namespaced_pod_exec,
-                name=pod_name,
+                name=postgres_pod_name,
                 namespace=namespace,
                 command=["/bin/sh", "-c", command],
                 stderr=True,
@@ -590,7 +605,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
             resp = stream(
                 api.connect_get_namespaced_pod_exec,
-                name=pod_name,
+                name=postgres_pod_name,
                 namespace=namespace,
                 command=extract_cmd,
                 stderr=True,
