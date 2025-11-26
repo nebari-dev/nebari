@@ -536,9 +536,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             db_password = base64.b64decode(secret.data["password"]).decode("utf-8")
             print("✓ Got database passwords\n")
         except Exception as e:
-            print(f"✗ Error getting database passwords: {e}")
-            print("Skipping database restore")
-            return
+            raise (f"✗ Error getting database passwords: {e}")
 
         # Helper function to run commands in pod
         def run_command(command: str, show_output: bool = True):
