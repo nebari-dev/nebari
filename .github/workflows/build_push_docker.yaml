@@ -111,7 +111,7 @@ jobs:
       - name: "Build docker images 🐳"
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./docker/
           file: "Dockerfile"
           target: ${{ matrix.dockerfile }}
           tags: ${{ steps.meta.outputs.tags }}

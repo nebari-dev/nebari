@@ -67,7 +67,7 @@ jobs:
       - name: Build Image 🛠
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./docker/
           file: "Dockerfile"
           target: ${{ matrix.dockerfile }}
           push: false
