@@ -9,13 +9,13 @@ on:
     branches:
       - "*"
     paths:
-      - "Dockerfile"
-      - "dask-worker/*"
-      - "jupyterhub/*"
-      - "jupyterlab/*"
-      - "nebari-workflow-controller/*"
+      - "./docker/Dockerfile"
+      - "./docker/dask-worker/*"
+      - "./docker/jupyterhub/*"
+      - "./docker/jupyterlab/*"
+      - "./docker/nebari-workflow-controller/*"
 
-      - "scripts/*"
+      - "./docker/scripts/*"
 
       - ".github/workflows/build-push-docker.yaml"
     tags:
