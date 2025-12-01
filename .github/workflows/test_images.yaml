@@ -3,7 +3,7 @@ name: Test Docker images
 on:
   pull_request:
     paths:
-      - "./docker/Dockerfile.*"
+      - "./docker/Dockerfile"
 
       - "./docker/dask-worker/*"
       - "./docker/jupyterhub/*"
