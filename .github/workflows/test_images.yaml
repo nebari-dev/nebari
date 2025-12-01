@@ -3,13 +3,13 @@ name: Test Docker images
 on:
   pull_request:
     paths:
-      - "Dockerfile.*"
+      - "./docker/Dockerfile.*"
 
-      - "dask-worker/*"
-      - "jupyterhub/*"
-      - "jupyterlab/*"
+      - "./docker/dask-worker/*"
+      - "./docker/jupyterhub/*"
+      - "./docker/jupyterlab/*"
 
-      - "scripts/*"
+      - "./docker/scripts/*"
 
       - ".github/workflows/build-push-docker.yaml"
       - ".github/workflows/test-images.yaml"
