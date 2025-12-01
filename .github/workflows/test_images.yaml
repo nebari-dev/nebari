@@ -36,6 +36,7 @@ jobs:
           - jupyterlab
           - jupyterhub
           - dask-worker
+          - nebari-workflow-controller
         platform:
           - gpu
           - cpu
