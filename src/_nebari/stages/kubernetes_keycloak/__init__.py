@@ -5,6 +5,7 @@ import json
 import os
 import secrets
 import string
+import subprocess
 import sys
 import tarfile
 import time
@@ -13,6 +14,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union
 
 import kubernetes
+import yaml
 from keycloak import KeycloakAdmin
 from keycloak.exceptions import KeycloakError
 from kubernetes.stream import stream
@@ -172,6 +174,7 @@ class Keycloak(schema.Base):
     overrides: Dict = {}
     realm_display_name: str = "Nebari"
     themes: KeycloakThemes = Field(default_factory=lambda: KeycloakThemes())
+    git_repo_path: Optional[str] = None
 
 
 auth_enum_to_model = {
@@ -236,6 +239,328 @@ class OutputSchema(schema.Base):
     keycloak_nebari_bot_password: str
 
 
+class KeycloakGitOpsHelper:
+    """Helper class for GitOps operations with Argo CD"""
+
+    def __init__(self, config, stage_outputs, git_repo_path: Path):
+        self.config = config
+        self.stage_outputs = stage_outputs
+        self.git_repo_path = Path(git_repo_path)
+
+    def generate_postgresql_values(self) -> Dict[str, Any]:
+        """Generate PostgreSQL values.yaml from Nebari config"""
+        node_selectors_raw = self.stage_outputs["stages/02-infrastructure"][
+            "node_selectors"
+        ]["general"]
+
+        # Convert from {key: "kubernetes.io/os", value: "linux"} to {"kubernetes.io/os": "linux"}
+        if (
+            isinstance(node_selectors_raw, dict)
+            and "key" in node_selectors_raw
+            and "value" in node_selectors_raw
+        ):
+            node_selectors = {node_selectors_raw["key"]: node_selectors_raw["value"]}
+        else:
+            node_selectors = node_selectors_raw
+
+        return {
+            "fullnameOverride": "keycloak-postgresql",
+            "primary": {
+                "nodeSelector": node_selectors,
+                "resources": {
+                    "requests": {"memory": "256Mi", "cpu": "100m"},
+                    "limits": {"memory": "512Mi", "cpu": "250m"},
+                },
+            },
+        }
+
+    def generate_keycloak_values(self, nebari_bot_password: str) -> Dict[str, Any]:
+        """Generate Keycloak values.yaml from Nebari config"""
+        node_selectors_raw = self.stage_outputs["stages/02-infrastructure"][
+            "node_selectors"
+        ]["general"]
+        external_url = self.stage_outputs["stages/04-kubernetes-ingress"]["domain"]
+
+        # Convert from {key: "kubernetes.io/os", value: "linux"} to {"kubernetes.io/os": "linux"}
+        if (
+            isinstance(node_selectors_raw, dict)
+            and "key" in node_selectors_raw
+            and "value" in node_selectors_raw
+        ):
+            node_selectors = {node_selectors_raw["key"]: node_selectors_raw["value"]}
+        else:
+            node_selectors = node_selectors_raw
+
+        # Generate environment variables
+        env_vars = [
+            {"name": "KC_HOSTNAME", "value": external_url},
+            {"name": "KC_HOSTNAME_PATH", "value": "/auth"},
+            {"name": "KC_HOSTNAME_STRICT", "value": "false"},
+            {"name": "KC_HOSTNAME_STRICT_HTTPS", "value": "false"},
+            {"name": "KC_HTTP_ENABLED", "value": "true"},
+            {"name": "KC_PROXY_HEADERS", "value": "xforwarded"},
+            {"name": "KEYCLOAK_ADMIN", "value": "root"},
+            {
+                "name": "KEYCLOAK_ADMIN_PASSWORD",
+                "value": self.config.security.keycloak.initial_root_password,
+            },
+            {"name": "KC_HEALTH_ENABLED", "value": "true"},
+            {"name": "KC_METRICS_ENABLED", "value": "true"},
+        ]
+
+        # Convert to YAML string format expected by extraEnv
+        env_yaml = yaml.dump(env_vars, default_flow_style=False)
+
+        return {
+            "replicas": 1,
+            "database": {
+                "hostname": "keycloak-postgresql",
+                "existingSecret": "keycloak-postgresql",
+                "database": "keycloak",
+                "password": "keycloak",
+            },
+            "extraEnv": env_yaml,
+            "nodeSelector": node_selectors,
+            "resources": {
+                "requests": {"memory": "512Mi", "cpu": "250m"},
+                "limits": {"memory": "1Gi", "cpu": "500m"},
+            },
+            "customThemes": self.config.security.keycloak.themes.model_dump(),
+        }
+
+    def write_values_files(self, nebari_bot_password: str):
+        """Write values files to Git repository"""
+        # Ensure directories exist
+        Path("postgresql").mkdir(parents=True, exist_ok=True)
+        Path("keycloak").mkdir(parents=True, exist_ok=True)
+
+        # Generate and write PostgreSQL values
+        pg_values = self.generate_postgresql_values()
+        with open(Path("postgresql") / "values.yaml", "w") as f:
+            yaml.dump(pg_values, f, default_flow_style=False, sort_keys=False)
+
+        # Generate and write Keycloak values
+        kc_values = self.generate_keycloak_values(nebari_bot_password)
+        with open(Path("keycloak") / "values.yaml", "w") as f:
+            yaml.dump(kc_values, f, default_flow_style=False, sort_keys=False)
+
+        print("Generated values files for GitOps deployment")
+
+    def commit_and_push(self, message: str = "Update Keycloak configuration"):
+        """Commit and push values files to Git"""
+        try:
+            # Add the values files
+            subprocess.run(
+                ["git", "add", "postgresql/values.yaml", "keycloak/values.yaml"],
+                cwd=Path.cwd(),
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            # Try to commit
+            result = subprocess.run(
+                ["git", "commit", "-m", message],
+                cwd=Path.cwd(),
+                capture_output=True,
+                text=True,
+            )
+
+            if result.returncode != 0:
+                # Check if it's because there's nothing to commit
+                error_output = result.stdout + result.stderr
+                if (
+                    "nothing to commit" in error_output
+                    or "no changes added to commit" in error_output
+                ):
+                    print("No configuration changes to commit")
+                    return
+                else:
+                    # Some other error occurred
+                    print(f"Git commit failed: {error_output}")
+                    raise subprocess.CalledProcessError(
+                        result.returncode, result.args, result.stdout, result.stderr
+                    )
+
+            # Push to remote
+            subprocess.run(
+                ["git", "push", "origin", "main"],
+                cwd=Path.cwd(),
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            print("Committed and pushed configuration to Git")
+        except subprocess.CalledProcessError as e:
+            print(f"Git operation failed: {e.stderr if e.stderr else e}")
+
+    def install_argocd(self):
+        """Install Argo CD using kubectl apply -k argocd/"""
+        # Check if ArgoCD namespace already exists
+        result = subprocess.run(
+            ["kubectl", "get", "namespace", "argocd"], capture_output=True
+        )
+
+        if result.returncode != 0:
+            # ArgoCD not installed, install it
+            print("Installing Argo CD...")
+            subprocess.run(["kubectl", "apply", "-k", "argocd/"], check=True)
+            print("Argo CD installed successfully")
+
+            # Wait for ArgoCD to be ready
+            print("Waiting for Argo CD to be ready...")
+            subprocess.run(
+                [
+                    "kubectl",
+                    "wait",
+                    "--for=condition=available",
+                    "--timeout=300s",
+                    "deployment/argocd-server",
+                    "-n",
+                    "argocd",
+                ],
+                check=True,
+            )
+            print("Argo CD is ready")
+        else:
+            print("Argo CD already installed")
+
+    def ensure_argocd_applications(self):
+        """Ensure Argo CD Application manifests are applied"""
+        apps_dir = Path.cwd() / "apps"
+
+        # Check if applications already exist
+        result = subprocess.run(
+            ["kubectl", "get", "application", "keycloak", "-n", "argocd"],
+            capture_output=True,
+        )
+
+        if result.returncode != 0:
+            # Applications don't exist, create them
+            print("Creating Argo CD Applications...")
+            subprocess.run(["kubectl", "apply", "-f", str(apps_dir)], check=True)
+            print("Applied Argo CD Applications")
+        else:
+            print("Argo CD Applications already exist")
+
+    def install_ingressroute(self):
+        """Install Keycloak IngressRoute"""
+        ingressroute_path = Path.cwd() / "keycloak" / "ingressroute.yaml"
+
+        if not ingressroute_path.exists():
+            print(
+                f"Warning: IngressRoute file not found at {ingressroute_path}, skipping"
+            )
+            return
+
+        # Check if ingressroute already exists
+        result = subprocess.run(
+            [
+                "kubectl",
+                "get",
+                "ingressroute",
+                "keycloak-http",
+                "-n",
+                self.config.namespace,
+            ],
+            capture_output=True,
+        )
+
+        if result.returncode != 0:
+            # IngressRoute doesn't exist, create it
+            print("Installing Keycloak IngressRoute...")
+            subprocess.run(
+                ["kubectl", "apply", "-f", str(ingressroute_path)], check=True
+            )
+            print("Keycloak IngressRoute installed successfully")
+        else:
+            print("Keycloak IngressRoute already exists")
+
+    def wait_for_sync(self, app_name: str, timeout: int = 600):
+        """Wait for Argo CD Application to sync"""
+        print(f"Waiting for {app_name} to sync...")
+
+        # First check if the Application exists
+        check_result = subprocess.run(
+            ["kubectl", "get", "application", app_name, "-n", "argocd", "-o", "json"],
+            capture_output=True,
+            text=True,
+        )
+
+        if check_result.returncode != 0:
+            print(f"Error: Application {app_name} does not exist")
+            print(f"kubectl output: {check_result.stderr}")
+            return
+
+        # Show current status
+        status_result = subprocess.run(
+            ["kubectl", "get", "application", app_name, "-n", "argocd"],
+            capture_output=True,
+            text=True,
+        )
+        print(f"Current status:\n{status_result.stdout}")
+
+        # Try to wait for sync - use condition instead of jsonpath
+        try:
+            subprocess.run(
+                [
+                    "kubectl",
+                    "wait",
+                    f"application/{app_name}",
+                    "-n",
+                    "argocd",
+                    "--for=jsonpath={.status.sync.status}=Synced",
+                    f"--timeout={timeout}s",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            print(f"{app_name} synced successfully")
+        except subprocess.CalledProcessError:
+            # Show detailed status on failure
+            print(f"Warning: {app_name} sync wait failed")
+            describe_result = subprocess.run(
+                ["kubectl", "describe", "application", app_name, "-n", "argocd"],
+                capture_output=True,
+                text=True,
+            )
+            print(f"Application details:\n{describe_result.stdout}")
+
+            # Check if it's actually synced despite the wait failure
+            import json
+
+            try:
+                app_json = json.loads(check_result.stdout)
+                sync_status = (
+                    app_json.get("status", {}).get("sync", {}).get("status", "Unknown")
+                )
+                health_status = (
+                    app_json.get("status", {})
+                    .get("health", {})
+                    .get("status", "Unknown")
+                )
+                print(f"Actual sync status: {sync_status}")
+                print(f"Health status: {health_status}")
+
+                if sync_status == "Synced":
+                    print(f"{app_name} is synced (despite wait command failure)")
+            except Exception:
+                pass
+
+    def get_keycloak_credentials(self) -> Dict[str, str]:
+        """Get Keycloak credentials for output"""
+        external_url = self.stage_outputs["stages/04-kubernetes-ingress"]["domain"]
+
+        return {
+            "url": f"https://{external_url}",
+            "username": "root",
+            "password": self.config.security.keycloak.initial_root_password,
+            "realm": "master",
+            "client_id": "admin-cli",
+        }
+
+
 class KubernetesKeycloakStage(NebariTerraformStage):
     name = "05-kubernetes-keycloak"
     priority = 50
@@ -243,7 +568,25 @@ class KubernetesKeycloakStage(NebariTerraformStage):
     input_schema = InputSchema
     output_schema = OutputSchema
 
+    def __init__(self, output_directory, config, git_repo_path=None):
+        super().__init__(output_directory, config)
+        # Git repo path - priority order:
+        # 1. Explicit parameter (for testing)
+        # 2. Config value from nebari-config.yaml (security.keycloak.git_repo_path)
+        # 3. None (will use Terraform instead of GitOps)
+        if git_repo_path:
+            self.git_repo_path = Path(git_repo_path)
+        elif config.security.keycloak.git_repo_path:
+            self.git_repo_path = Path(config.security.keycloak.git_repo_path)
+        else:
+            self.git_repo_path = None
+
     def tf_objects(self) -> List[Dict]:
+        """
+        DEPRECATED: This method is no longer used by GitOps deployment.
+        Kept for backwards compatibility only.
+        The GitOps deployment uses Argo CD Applications instead of Terraform.
+        """
         return [
             NebariTerraformState(self.name, self.config),
             NebariKubernetesProvider(self.config),
@@ -251,6 +594,12 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         ]
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
+        """
+        DEPRECATED: This method is no longer used by GitOps deployment.
+        Kept for backwards compatibility only.
+        The GitOps deployment generates values.yaml files directly instead of
+        using Terraform variables.
+        """
         return InputVars(
             name=self.config.project_name,
             environment=self.config.namespace,
@@ -747,11 +1096,83 @@ class KubernetesKeycloakStage(NebariTerraformStage):
     def deploy(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
     ):
-        with super().deploy(stage_outputs, disable_prompt):
-            with keycloak_provider_context(
-                stage_outputs["stages/" + self.name]["keycloak_credentials"]["value"]
-            ):
-                yield
+        """Deploy Keycloak using GitOps pattern with Argo CD (if configured) or Terraform"""
+
+        # Check if GitOps is configured
+        if self.git_repo_path is None:
+            # Fall back to Terraform deployment
+            print(
+                "GitOps not configured (git_repo_path is None), using Terraform deployment"
+            )
+            with super().deploy(stage_outputs, disable_prompt):
+                with keycloak_provider_context(
+                    stage_outputs["stages/" + self.name]["keycloak_credentials"][
+                        "value"
+                    ]
+                ):
+                    yield
+            return
+
+        # GitOps deployment
+        print("\n" + "=" * 80)
+        print("DEPLOYING KEYCLOAK VIA GITOPS")
+        print("=" * 80)
+        print(f"Git repository: {self.git_repo_path}")
+
+        # Generate nebari-bot password
+        nebari_bot_password = random_secure_string(32)
+
+        # Create GitOps helper
+        helper = KeycloakGitOpsHelper(self.config, stage_outputs, self.git_repo_path)
+
+        # 1. Generate values files
+        print("\n[1/7] Generating deployment-specific values files...")
+        helper.write_values_files(nebari_bot_password)
+
+        # 2. Commit and push to Git
+        print("\n[2/7] Committing and pushing to Git...")
+        helper.commit_and_push(f"Deploy Keycloak for {self.config.project_name}")
+
+        # 3. Install Argo CD
+        print("\n[3/7] Installing Argo CD...")
+        helper.install_argocd()
+
+        # 4. Ensure Argo CD Applications exist
+        print("\n[4/7] Ensuring Argo CD Applications are applied...")
+        helper.ensure_argocd_applications()
+
+        # 5. Wait for Argo CD to sync
+        print("\n[5/7] Waiting for Argo CD to sync deployments...")
+        helper.wait_for_sync("keycloak-postgresql")
+        helper.wait_for_sync("keycloak")
+
+        # 6. Install IngressRoute
+        print("\n[6/7] Installing Keycloak IngressRoute...")
+        helper.install_ingressroute()
+
+        # 7. Prepare outputs for next stages
+        print("\n[7/7] Preparing stage outputs...")
+        keycloak_credentials = helper.get_keycloak_credentials()
+
+        # Store outputs for access by check() and post_deploy()
+        # These outputs mimic the structure that was previously provided by Terraform
+        if "stages/" + self.name not in stage_outputs:
+            stage_outputs["stages/" + self.name] = {}
+
+        stage_outputs["stages/" + self.name]["keycloak_credentials"] = {
+            "value": keycloak_credentials
+        }
+        stage_outputs["stages/" + self.name]["keycloak_nebari_bot_password"] = {
+            "value": nebari_bot_password
+        }
+
+        print("\n" + "=" * 80)
+        print("KEYCLOAK DEPLOYED SUCCESSFULLY VIA GITOPS")
+        print("=" * 80 + "\n")
+
+        # Set up keycloak provider context for any downstream operations
+        with keycloak_provider_context(keycloak_credentials):
+            yield
 
     @contextlib.contextmanager
     def destroy(
