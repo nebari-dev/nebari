@@ -65,6 +65,12 @@ variable "jhub-apps-overrides" {
   default     = "{}"
 }
 
+variable "jhub-apps-additional-services" {
+  description = ""
+  type        = list(map(any))
+  default     = [{}]
+}
+
 variable "cloud-provider" {
   description = "Name of cloud provider."
   type        = string

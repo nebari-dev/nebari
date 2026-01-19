@@ -192,6 +192,7 @@ module "jupyterhub" {
   jhub-apps-enabled                                  = var.jhub-apps-enabled
   node-taint-tolerations                             = var.node-taint-tolerations
   jhub-apps-overrides                                = var.jhub-apps-overrides
+  jhub-apps-additional-services                      = var.jhub-apps-additional-services
 
   extra-mounts = {
     "/etc/dask" = {

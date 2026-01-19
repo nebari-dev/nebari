@@ -274,9 +274,33 @@ class ArgoWorkflows(schema.Base):
     nebari_workflow_controller: NebariWorkflowController = NebariWorkflowController()
 
 
+class JhubAppsAdditionalService(schema.Base):
+    """
+    List of additional external services to display in JupyterHub's services menu.
+    Services with `pinned=True` will also appear in the quick access section
+    for easy access.
+
+    - `name` (required): Display name of the service
+    - `url` (required): URL path for the service
+    - `description` (optional): Description of the service shown in the UI
+    - `pinned` (optional): Whether the service should appear in the quick access
+    section (default: `False`)
+    - `thumbnail` (optional): URL or base64-encoded data URL for the service icon
+    (e.g., `"https://..."` or `"data:image/png;base64,..."`)
+
+    """
+
+    name: str
+    url: str
+    description: Optional[str] = None
+    pinned: Optional[bool] = None
+    thumbnail: Optional[str] = None
+
+
 class JHubApps(schema.Base):
     enabled: bool = False
-    overrides: Dict = {}
+    overrides: Dict[str, Any] = Field(default_factory=dict)
+    additional_services: List[JhubAppsAdditionalService] = Field(default_factory=list)
 
 
 class MonitoringOverrides(schema.Base):
@@ -558,6 +582,10 @@ class JupyterhubInputVars(schema.Base):
     argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
     jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
     jhub_apps_overrides: str = Field(alias="jhub-apps-overrides")
+    jhub_apps_additional_services: List[JhubAppsAdditionalService] = Field(
+        alias="jhub-apps-additional-services",
+        default_factory=list,
+    )
     cloud_provider: str = Field(alias="cloud-provider")
     jupyterlab_preferred_dir: Optional[str] = Field(alias="jupyterlab-preferred-dir")
     shared_fs_type: SharedFsEnum
@@ -753,6 +781,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             argo_workflows_enabled=self.config.argo_workflows.enabled,
             jhub_apps_enabled=self.config.jhub_apps.enabled,
             jhub_apps_overrides=json.dumps(self.config.jhub_apps.overrides),
+            jhub_apps_additional_services=self.config.jhub_apps.additional_services,
             initial_repositories=str(self.config.jupyterlab.initial_repositories),
             jupyterlab_default_settings=self.config.jupyterlab.default_settings,
             jupyterlab_gallery_settings=self.config.jupyterlab.gallery_settings,
