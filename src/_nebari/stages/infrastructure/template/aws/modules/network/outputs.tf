@@ -3,9 +3,14 @@ output "security_group_id" {
   value       = aws_security_group.main.id
 }
 
-output "subnet_ids" {
-  description = "AWS VPC subnet ids"
-  value       = aws_subnet.main[*].id
+output "public_subnet_ids" {
+  description = "AWS VPC public subnet ids"
+  value       = aws_subnet.public[*].id
+}
+
+output "private_subnet_ids" {
+  description = "AWS VPC private subnet ids"
+  value       = aws_subnet.private[*].id
 }
 
 output "vpc_id" {
