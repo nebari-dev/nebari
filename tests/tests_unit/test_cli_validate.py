@@ -93,15 +93,13 @@ def test_cli_validate_from_env():
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
         assert tmp_file.exists() is False
 
-        nebari_config = yaml.safe_load(
-            """
+        nebari_config = yaml.safe_load("""
 provider: aws
 project_name: test
 amazon_web_services:
   region: us-east-1
   kubernetes_version: '1.19'
-        """
-        )
+        """)
 
         with open(tmp_file.resolve(), "w") as f:
             yaml.dump(nebari_config, f)
@@ -167,12 +165,10 @@ def test_cli_validate_error_from_env(
         assert tmp_file.exists() is False
 
         nebari_config = {
-            **yaml.safe_load(
-                f"""
+            **yaml.safe_load(f"""
 provider: {provider}
 project_name: test
-        """
-            ),
+        """),
             **addl_config,
         }
 
@@ -265,12 +261,10 @@ def test_cli_validate_error_missing_cloud_env(
         assert tmp_file.exists() is False
 
         nebari_config = {
-            **yaml.safe_load(
-                f"""
+            **yaml.safe_load(f"""
 provider: {provider}
 project_name: test
-        """
-            ),
+        """),
             **addl_config,
         }
 

@@ -36,13 +36,11 @@ def generate_lint_message(config):
     # lint/validate nebari-config.yaml
     all_pass, messages, validate_code = nebari_validate(config)
 
-    pass_lint = textwrap.dedent(
-        """
+    pass_lint = textwrap.dedent("""
             This is an automatic response from the Nebari linter.
             I just wanted to let you know that I linted your `nebari-config.yaml` in your PR and I didn't find any
             problems.
-            """
-    )
+            """)
 
     # it should be better to parse this messages first
     bad_lint = (
@@ -56,12 +54,10 @@ def generate_lint_message(config):
 
     if not pr_config:
         status = "no configuration file"
-        message = textwrap.dedent(
-            """
+        message = textwrap.dedent("""
             This is an automatic response from the Nebari linter.
             I was trying to look for the `nebari-config.yaml` file to lint for you, but couldn't find any...
-            """
-        )
+            """)
 
     elif all_pass:
         status = "Success"

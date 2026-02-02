@@ -124,8 +124,7 @@ def parse_yaml(stdout_str: str, headers: list):
 
 
 def test_parse_table():
-    table_str = dedent(
-        """                      Keycloak Users (Count: 3)
+    table_str = dedent("""                      Keycloak Users (Count: 3)
         ┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━┓
         ┃ Username     ┃ Email                    ┃ Groups                   ┃
         ┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━┩
@@ -133,8 +132,7 @@ def test_parse_table():
         │ test-admin   │ test-admin@example.com   │ ['admin']                │
         │ test-nogroup │ test-nogroup@example.com │ []                       │
         └──────────────┴──────────────────────────┴──────────────────────────┘
-        """
-    )
+        """)
     expected = [
         {
             "username": "test-dev",
@@ -160,14 +158,12 @@ def test_parse_table():
 
 
 def test_parse_yaml():
-    yaml_str = dedent(
-        """
+    yaml_str = dedent("""
         - name: test
           roles:
             - allow-test-to-pass
             - other-role
-        """
-    )
+        """)
     expected = [
         {
             "name": "test",
