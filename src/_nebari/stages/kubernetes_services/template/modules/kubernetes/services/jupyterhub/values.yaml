@@ -5,6 +5,10 @@ hub:
     pvc:
       storage: 1Gi
   baseUrl: "/"
+  # Allow hub pod to connect to itself via K8s Service for jhub-apps verification
+  # See https://z2jh.jupyter.org/en/stable/administrator/security.html#allowing-additional-inbound-network-connections-ingress
+  labels:
+    hub.jupyter.org/network-access-hub: "true"
 
   networkPolicy:
     ingress:
