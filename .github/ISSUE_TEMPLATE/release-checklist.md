@@ -58,6 +58,7 @@ Release captain responsible - <@gh_username>
 ## Cut the official release
 
 _If there were changes to the following packages, handle their releases before cutting a new release for Nebari_
+
 - [ ] [Cut PyPI release for `nebari-workflow-controller`](https://github.com/nebari-dev/nebari-workflow-controller)
 - [ ] [Cut PyPI release for `argo-jupyter-scheduler`](https://github.com/nebari-dev/argo-jupyter-scheduler)
 

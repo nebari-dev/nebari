@@ -5,10 +5,7 @@
     {
       "username": "example-user",
       "enabled": true,
-      "groups": [
-        "admin",
-        "users"
-      ]
+      "groups": ["admin", "users"]
     }
   ],
   "groups": []

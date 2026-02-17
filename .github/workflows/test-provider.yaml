@@ -78,12 +78,12 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: 'Authenticate to GCP'
+      - name: "Authenticate to GCP"
         if: ${{ matrix.provider == 'gcp' }}
-        uses: 'google-github-actions/auth@v1'
+        uses: "google-github-actions/auth@v1"
         with:
           token_format: access_token
-          create_credentials_file: 'true'
+          create_credentials_file: "true"
           workload_identity_provider: ${{ secrets.GCP_WORKFLOW_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
@@ -92,7 +92,7 @@ jobs:
         run: |
           echo "GOOGLE_CREDENTIALS=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}" >> $GITHUB_ENV
 
-      - name: 'Authenticate to AWS'
+      - name: "Authenticate to AWS"
         if: ${{ matrix.provider == 'aws' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -100,7 +100,7 @@ jobs:
           role-session-name: github-action
           aws-region: us-east-1
 
-      - name: 'Azure login'
+      - name: "Azure login"
         if: ${{ matrix.provider == 'azure' }}
         uses: azure/login@v2
         with:

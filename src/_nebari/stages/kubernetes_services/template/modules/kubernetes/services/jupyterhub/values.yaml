@@ -39,15 +39,15 @@ proxy:
 
       egress:
         - ports:
-          - port: 53
-            protocol: UDP
-          - port: 53
-            protocol: TCP
-          - port: 10202
-            protocol: TCP
+            - port: 53
+              protocol: UDP
+            - port: 53
+              protocol: TCP
+            - port: 10202
+              protocol: TCP
         - to:
-          - ipBlock:
-              cidr: 0.0.0.0/0
+            - ipBlock:
+                cidr: 0.0.0.0/0
 
 scheduling:
   userScheduler:
@@ -63,7 +63,7 @@ imagePullSecrets:
 
 singleuser:
   defaultUrl: "/lab"
-  startTimeout: 600  # 10 minutes
+  startTimeout: 600 # 10 minutes
   profileList: []
   storage:
     type: static

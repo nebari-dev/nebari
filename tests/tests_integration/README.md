@@ -21,7 +21,6 @@ pytest -vvv -s --cloud aws
 This will deploy on Nebari on Amazon Web Services, run tests on the deployment
 and then teardown the cluster.
 
-
 ## Azure
 
 ```bash
@@ -40,7 +39,6 @@ pytest -vvv -s --cloud azure
 
 This will deploy on Nebari on Azure, run tests on the deployment
 and then teardown the cluster.
-
 
 ## Google Cloud Platform
 

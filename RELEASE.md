@@ -12,6 +12,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 ## Release 2025.6.1 - June 06, 2025
 
 ### What's Changed
+
 - Enable resource monitoring for cirun runners by @aktech in https://github.com/nebari-dev/nebari/pull/3047
 - Add filesystem scan in Trivy GHA workflow to scan Python dependencies by @marcelovilla in https://github.com/nebari-dev/nebari/pull/3045
 - Pin click to avoid incompatibility issues with Typer by @marcelovilla in https://github.com/nebari-dev/nebari/pull/3051
@@ -26,6 +27,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 > NOTE: You may notice messages like groups: cannot find name for group ID <number> when using the terminal. These warnings are harmless and do not affect system functionality or permissions. We're aware of the issue and it will be resolved in the next version.
 
 ### What's Changed
+
 - Upgrade verify-changed-files action by @marcelovilla in https://github.com/nebari-dev/nebari/pull/3037
 - Monkeypatch version validator to avoid failing tests by @marcelovilla in https://github.com/nebari-dev/nebari/pull/3039
 - Upgrade azure-identity by @marcelovilla in https://github.com/nebari-dev/nebari/pull/3038
@@ -35,6 +37,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 ## Release 2025.4.1 - April 11, 2025
 
 ### What's Changed
+
 - [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/2969
 - Add extra services checks to kuberhealthy by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2978
 - Add workflow to run conda-store user journey tests by @soapy1 in https://github.com/nebari-dev/nebari/pull/2895
@@ -58,6 +61,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 ## Release 2025.3.1 - March 14, 2025
 
 ### What's Changed
+
 - fix buffer full deadlock by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2929
 - support KubeSpawner profile_options by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2937
 - fix ansi color reset bug by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2970
@@ -79,6 +83,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 > 1.31).
 
 ### What's Changed
+
 - fix bug to allow --import-plugin to work by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2864
 - Add azure kubernetes policy add-on by @viniciusdc in https://github.com/nebari-dev-nebari/pull/2888
 - Yaml config sets by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/287-
@@ -102,7 +107,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 - @soapy1 made their first contribution in https://github.com/nebari-dev/nebari/pull2891
 - @smokestacklightnin made their first contribution in https://github.com/nebari-dev
-/nebari/pull/2839
+  /nebari/pull/2839
 - @kernel-loophole made their first contribution in https://github.com/nebari-dev/nebari/pull/2916
 
 **Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.12.1...2025.2.1
@@ -112,6 +117,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 > NOTE: Support for DigitalOcean has been removed in this release. If you plan to deploy Nebari on DigitalOcean, you first need to independently create a Kubernetes cluster and then use the `existing` deployment option.
 
 ### What's Changed
+
 - Precommit typos by @blakerosenthal in https://github.com/nebari-dev/nebari/pull/2731
 - fix typo in KubernetesCredentials by @blakerosenthal in https://github.com/nebari-dev/nebari/pull/2729
 - handle branch rename from develop to main in github actions by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2748
@@ -152,6 +158,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 - update gcp instance validation by @dcmcand in https://github.com/nebari-dev/nebari/pull/2875
 
 ### New Contributors
+
 - @jcbolling made their first contribution in https://github.com/nebari-dev/nebari/pull/2850
 
 **Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.11.1...2024.12.1

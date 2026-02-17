@@ -10,7 +10,6 @@ on:
       - prereleased
   workflow_dispatch:
 
-
 concurrency:
   group: ${{ github.ref_name }}
   cancel-in-progress: true
