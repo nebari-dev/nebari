@@ -168,8 +168,6 @@ jobs:
 
       - name: "Set up conda-store conda env"
         uses: conda-incubator/setup-miniconda@v3.3.0
-        env:
-          CONDA: /home/runnerx/miniconda3
         with:
             environment-file: conda-store/conda-store-server/environment-dev.yaml
             miniforge-version: latest
