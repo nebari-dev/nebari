@@ -168,6 +168,9 @@ jobs:
 
       - name: "Set up conda-store conda env"
         uses: conda-incubator/setup-miniconda@v3.3.0
+        env:
+          # Isolate the second install of Conda/Miniforge
+          CONDA: ${{ runner.temp }}/conda-store-miniforge
         with:
             environment-file: conda-store/conda-store-server/environment-dev.yaml
             miniforge-version: latest
