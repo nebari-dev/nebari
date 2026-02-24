@@ -167,7 +167,7 @@ jobs:
           path: conda-store
 
       - name: "Set up conda-store conda env"
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v3.3.0
         env:
           CONDA: /home/runnerx/miniconda3
         with:
