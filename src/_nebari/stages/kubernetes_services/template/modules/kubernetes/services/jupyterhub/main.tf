@@ -71,6 +71,7 @@ resource "helm_release" "jupyterhub" {
         argo-workflows-enabled        = var.argo-workflows-enabled
         home-pvc                      = var.home-pvc.name
         shared-pvc                    = var.shared-pvc.name
+        home-storage-mode             = var.home-storage-mode
         conda-store-pvc               = var.conda-store-pvc
         conda-store-mount             = var.conda-store-mount
         default-conda-store-namespace = var.default-conda-store-namespace
@@ -189,12 +190,29 @@ resource "helm_release" "jupyterhub" {
         }
       }
 
-      singleuser = {
-        image = var.jupyterlab-image
-        nodeSelector = {
-          "${local.singleuser_nodeselector_key}" = var.user-node-group.value
-        }
-      }
+      singleuser = merge(
+        {
+          image = var.jupyterlab-image
+          nodeSelector = {
+            "${local.singleuser_nodeselector_key}" = var.user-node-group.value
+          }
+        },
+        var.home-storage-mode == "per_user" ? {
+          storage = {
+            type     = "dynamic"
+            capacity = var.home-storage-size
+            dynamic = {
+              storageClass       = var.home-storage-class
+              pvcNameTemplate    = "home-{username}"
+              storageAccessModes = ["ReadWriteOnce"]
+            }
+            # Clear extraVolumeMounts - the profile code handles /home/shared via
+            # base_profile_home_shared_mount(). The default values.yaml has extraVolumeMounts
+            # that reference "home" volume which doesn't exist in dynamic storage mode.
+            extraVolumeMounts = []
+          }
+        } : {}
+      )
 
       scheduling = {
         userScheduler = {
