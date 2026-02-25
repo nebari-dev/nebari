@@ -88,7 +88,7 @@ c.GenericOAuthAuthentication.oauth_callback_url = (
 )
 c.GenericOAuthAuthentication.client_id = config["openid-config"]["client_id"]
 c.GenericOAuthAuthentication.client_secret = config["openid-config"]["client_secret"]
-c.GenericOAuthAuthentication.access_scope = "profile"
+c.GenericOAuthAuthentication.access_scope = "openid profile email"
 c.GenericOAuthAuthentication.user_data_key = "preferred_username"
 c.GenericOAuthAuthentication.tls_verify = False
 

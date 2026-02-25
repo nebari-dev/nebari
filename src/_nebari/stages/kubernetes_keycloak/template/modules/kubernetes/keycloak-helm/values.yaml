@@ -1,7 +1,7 @@
-# https://github.com/codecentric/helm-charts/blob/keycloak-15.0.2/charts/keycloak/values.yaml
+# Updated for keycloakx chart (Quarkus-based Keycloak)
+# https://github.com/codecentric/helm-charts/tree/master/charts/keycloakx
+
 ingress:
-  # Helm chart (14.0 anyway) will only define Ingress records, not IngressRoute as required by Traefik, so
-  # we will need to define our own IngressRoute elsewhere.
   enabled: false
 
 image:
@@ -10,50 +10,83 @@ image:
 imagePullSecrets:
   - name: "extcrcreds"
 
+# Database configuration - connect to standalone PostgreSQL
+# Points to the standalone PostgreSQL we migrated data to
+database:
+  vendor: postgres
+  hostname: keycloak-postgres-standalone-postgresql
+  port: 5432
+  database: keycloak
+  username: keycloak
+  # Password is read from the auto-generated secret
+  existingSecret: keycloak-postgres-standalone-postgresql
+  existingSecretPasswordKey: password
+
+# Enable database readiness check
+dbchecker:
+  enabled: true
+
+# Command to start Keycloak (required for Quarkus-based Keycloak)
+command:
+  - "/opt/keycloak/bin/kc.sh"
+
+# Without this configured get the below error on startup:
+# "Error while trying to create a channel using the specified configuration 'kubernetes'"
+cache:
+  stack: jdbc-ping
+
+args:
+  - "start"
+
+# HTTP configuration
+http:
+  relativePath: "/auth"
+
+# Proxy configuration for Keycloak behind Traefik
+proxy:
+  enabled: true
+  mode: edge
+
+# Environment variables for Keycloak configuration
 extraEnv: |
-  - name: PROXY_ADDRESS_FORWARDING
+  - name: KC_HOSTNAME
+    value: "{{ .Values.external_url }}"
+  - name: KC_HOSTNAME_PATH
+    value: "/auth"
+  - name: KC_HOSTNAME_STRICT
+    value: "false"
+  - name: KC_HOSTNAME_STRICT_HTTPS
+    value: "false"
+  - name: KC_HTTP_ENABLED
     value: "true"
-
-startupScripts:
-  keycloak.cli: |
-    {{- .Files.Get "scripts/keycloak.cli" | nindent 2 }}
-
-  nebariadminuser.sh: |
-    /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u root -p "{{ .Values.initial_root_password }}"
-    /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u nebari-bot -p "{{ .Values.nebari_bot_password }}"
-
-  mv-custom-themes.sh: |
-    #!/bin/sh
-    printf '=%.0s' {1..73}
-    echo "Start moving custom themes to /opt/jboss/keycloak/themes"
-
-    if [ -d /opt/data/custom-themes/themes ]; then
-      echo 'Copying custom themes from /opt/data/custom-themes/themes to /opt/jboss/keycloak/themes'
-      cp -r /opt/data/custom-themes/themes/* /opt/jboss/keycloak/themes/
-    else
-      echo 'No custom themes found in /opt/data/custom-themes'
-    fi
-
-    echo "Finished moving custom themes"
-    printf '=%.0s' {1..73}
+  - name: KC_PROXY_HEADERS
+    value: "xforwarded"
+  - name: KEYCLOAK_ADMIN
+    value: "root"
+  - name: KEYCLOAK_ADMIN_PASSWORD
+    value: "{{ .Values.initial_root_password }}"
+  - name: KC_HEALTH_ENABLED
+    value: "true"
+  - name: KC_METRICS_ENABLED
+    value: "true"
 
 extraInitContainers: |
   - command:
     - sh
     - -c
     - |
-      if [ ! -f /data/keycloak-metrics-spi-2.5.3.jar ]; then
-        wget https://github.com/aerogear/keycloak-metrics-spi/releases/download/2.5.3/keycloak-metrics-spi-2.5.3.jar -P /data/ &&
-        export SHA256SUM=9b3f52f842a66dadf5ff3cc3a729b8e49042d32f84510a5d73d41a2e39f29a96 &&
-        if ! (echo "$SHA256SUM  /data/keycloak-metrics-spi-2.5.3.jar" | sha256sum -c)
+      if [ ! -f /data/keycloak-metrics-spi-7.0.0.jar ]; then
+        wget https://github.com/aerogear/keycloak-metrics-spi/releases/download/7.0.0/keycloak-metrics-spi-7.0.0.jar -P /data/ &&
+        export SHA256SUM=e7ec72ab1699e57a25b61cb5e3ef1c532ec9858ed6931c1b491d3368f5d007b8 &&
+        if ! (echo "$SHA256SUM  /data/keycloak-metrics-spi-7.0.0.jar" | sha256sum -c)
           then
             echo "Error: Checksum not verified" && exit 1
           else
-            chown 1000:1000 /data/keycloak-metrics-spi-2.5.3.jar &&
-            chmod 777 /data/keycloak-metrics-spi-2.5.3.jar
+            chown 1000:1000 /data/keycloak-metrics-spi-7.0.0.jar &&
+            chmod 644 /data/keycloak-metrics-spi-7.0.0.jar
         fi
       else
-        echo "File /data/keycloak-metrics-spi-2.5.3.jar already exists. Skipping download."
+        echo "File /data/keycloak-metrics-spi-7.0.0.jar already exists. Skipping download."
       fi
     image: busybox:1.36
     name: initialize-spi-metrics-jar
@@ -62,44 +95,73 @@ extraInitContainers: |
     volumeMounts:
       - name: metrics-plugin
         mountPath: /data
-  {{- if .Values.customThemes.enabled }}
-  - env:
-    - name: GIT_SYNC_REPO
-      value: {{ .Values.customThemes.repository }}
-    - name: GIT_SYNC_BRANCH
-      value: {{ .Values.customThemes.branch }}
-    - name: GIT_SYNC_ONE_TIME
-      value: "true"
-    - name: GIT_SYNC_GROUP_WRITE
-      value: "true"
-    - name: GIT_SYNC_ROOT
-      value: /opt/data/custom-themes
-    - name: GIT_SYNC_DEST
-      value: themes
-    - name: GIT_SYNC_SSH
-      value: "false"
-    image: k8s.gcr.io/git-sync:v3.1.5
-    imagePullPolicy: IfNotPresent
-    name: keycloak-git-sync
-    resources: {}
-    securityContext:
-      runAsGroup: 1000
-      runAsUser: 0
-    terminationMessagePath: /dev/termination-log
-    terminationMessagePolicy: File
-    volumeMounts:
-    - mountPath: /opt/data/custom-themes
-      name: custom-themes
-  {{- end }}
+# Custom themes are not supported initially with v26 upgrade
+  # {{- if .Values.customThemes.enabled }}
+  # - env:
+  #   - name: GIT_SYNC_REPO
+  #     value: {{ .Values.customThemes.repository }}
+  #   - name: GIT_SYNC_BRANCH
+  #     value: {{ .Values.customThemes.branch }}
+  #   - name: GIT_SYNC_ONE_TIME
+  #     value: "true"
+  #   - name: GIT_SYNC_GROUP_WRITE
+  #     value: "true"
+  #   - name: GIT_SYNC_ROOT
+  #     value: /opt/data/custom-themes
+  #   - name: GIT_SYNC_DEST
+  #     value: themes
+  #   - name: GIT_SYNC_SSH
+  #     value: "false"
+  #   image: registry.k8s.io/git-sync/git-sync:v4.3.0
+  #   imagePullPolicy: IfNotPresent
+  #   name: keycloak-git-sync
+  #   resources: {}
+  #   securityContext:
+  #     runAsGroup: 1000
+  #     runAsUser: 0
+  #   terminationMessagePath: /dev/termination-log
+  #   terminationMessagePolicy: File
+  #   volumeMounts:
+  #   - mountPath: /opt/data/custom-themes
+  #     name: custom-themes
+  # - command:
+  #   - sh
+  #   - -c
+  #   - |
+  #     if [ -d /opt/data/custom-themes/themes ]; then
+  #       echo 'Copying custom themes from /opt/data/custom-themes/themes to /themes'
+  #       cp -r /opt/data/custom-themes/themes/* /themes/
+  #     else
+  #       echo 'No custom themes found in /opt/data/custom-themes'
+  #     fi
+  #   image: busybox:1.36
+  #   name: move-custom-themes
+  #   securityContext:
+  #     runAsUser: 0
+  #   volumeMounts:
+  #   - mountPath: /opt/data/custom-themes
+  #     name: custom-themes
+  #   - mountPath: /themes
+  #     name: theme-data
+  # {{- end }}
 
 extraVolumeMounts: |
   - name: metrics-plugin
-    mountPath: /opt/jboss/keycloak/providers/
-  - mountPath: /opt/data/custom-themes
-    name: custom-themes
+    mountPath: /opt/keycloak/providers/
+# Custom themes are not supported initially with v26 upgrade
+  # {{- if .Values.customThemes.enabled }}
+  # - mountPath: /opt/keycloak/themes
+  #   name: theme-data
+  # {{- end }}
 
 extraVolumes: |
   - name: metrics-plugin
     emptyDir: {}
-  - name: custom-themes
-    emptyDir: {}
+
+# Custom themes are not supported initially with v26 upgrade
+  # {{- if .Values.customThemes.enabled }}
+  # - name: custom-themes
+  #   emptyDir: {}
+  # - name: theme-data
+  #   emptyDir: {}
+  # {{- end }}

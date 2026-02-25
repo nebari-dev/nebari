@@ -3,6 +3,10 @@ module "extension" {
 
   source = "./modules/nebariextension"
 
+  providers = {
+    keycloak = keycloak
+  }
+
   name             = "nebari-ext-${each.key}"
   namespace        = var.environment
   image            = each.value.image

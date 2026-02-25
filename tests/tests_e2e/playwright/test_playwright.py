@@ -10,7 +10,7 @@ def test_login_logout(navigator):
     expect(navigator.page.get_by_text(navigator.username)).to_be_visible()
 
     navigator.logout()
-    expect(navigator.page.get_by_text("Sign in with Keycloak")).to_be_visible()
+    expect(navigator.page.get_by_text("You are logged out").first).to_be_visible()
 
 
 @pytest.mark.parametrize(
