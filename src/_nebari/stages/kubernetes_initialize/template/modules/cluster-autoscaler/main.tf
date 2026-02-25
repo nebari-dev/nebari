@@ -4,12 +4,18 @@ resource "helm_release" "autoscaler" {
 
   repository = "https://kubernetes.github.io/autoscaler"
   chart      = "cluster-autoscaler"
-  version    = "9.19.0"
+  version    = "9.52.1"
 
   values = concat([
     jsonencode({
       rbac = {
         create = true
+        serviceAccount = {
+          name = "cluster-autoscaler"
+          annotations = {
+            "eks.amazonaws.com/role-arn" = var.iam_role_arn
+          }
+        }
       }
 
       cloudProvider = "aws"

@@ -18,3 +18,8 @@ variable "overrides" {
   type        = list(string)
   default     = []
 }
+
+variable "iam_role_arn" {
+  description = "IAM role ARN for Cluster Autoscaler (IRSA)"
+  type        = string
+}
