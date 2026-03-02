@@ -1330,8 +1330,7 @@ class Upgrade_2024_6_1(UpgradeStep):
             provider_full_name = provider_enum_name_map[provider]
             if not config.get(provider_full_name, {}).get("node_groups", {}):
                 try:
-                    text = textwrap.dedent(
-                        f"""
+                    text = textwrap.dedent(f"""
                         The default node groups for GCP have been changed to cost efficient e2 family nodes reducing the running cost of Nebari on GCP by ~50%.
                         This change will affect your current deployment, and will result in ~15 minutes of downtime during the upgrade step as the node groups are switched out, but shouldn't result in data loss.
 
@@ -1342,8 +1341,7 @@ class Upgrade_2024_6_1(UpgradeStep):
 
                         Would you like to upgrade to the cost effective node groups [purple]{config_filename}[/purple]?
                         If not, select "N" and the old default node groups will be added to the nebari config file.
-                    """
-                    )
+                    """)
                     continue_ = kwargs.get("attempt_fixes", False) or Confirm.ask(
                         text,
                         default=True,
@@ -1369,8 +1367,7 @@ class Upgrade_2024_6_1(UpgradeStep):
                 except KeyError:
                     pass
             else:
-                text = textwrap.dedent(
-                    """
+                text = textwrap.dedent("""
                     The default node groups for GCP have been changed to cost efficient e2 family nodes reducing the running cost of Nebari on GCP by ~50%.
                     Consider upgrading your node group instance types to the new default configuration.
 
@@ -1379,8 +1376,7 @@ class Upgrade_2024_6_1(UpgradeStep):
                     As always, make sure to backup data before upgrading.  See https://www.nebari.dev/docs/how-tos/manual-backup for more information.
 
                     The new default node groups instances are:
-                """
-                )
+                """)
                 text += json.dumps(
                     {
                         "general": {"instance": "e2-highmem-4"},
@@ -1466,8 +1462,7 @@ class Upgrade_2024_11_1(UpgradeStep):
 
         rich.print("\n ⚠️ Upgrade Warning ⚠️")
 
-        text = textwrap.dedent(
-            """
+        text = textwrap.dedent("""
             Please ensure no users are currently logged in prior to deploying this
             update.
 
@@ -1488,8 +1483,7 @@ class Upgrade_2024_11_1(UpgradeStep):
             mounted.
 
             For more details check our [green][link=https://www.nebari.dev/docs/references/release/]release notes[/link][/green].
-            """
-        )
+            """)
         rich.print(text)
         keycloak_admin = None
 
@@ -1521,15 +1515,11 @@ class Upgrade_2024_11_1(UpgradeStep):
                 )
             except ValueError as e:
                 if "invalid_grant" in str(e):
-                    rich.print(
-                        textwrap.dedent(
-                            """
+                    rich.print(textwrap.dedent("""
                             [red bold]Failed to connect to the Keycloak server.[/red bold]\n
                             [yellow]Please set the [bold]KEYCLOAK_ADMIN_USERNAME[/bold] and [bold]KEYCLOAK_ADMIN_PASSWORD[/bold]
                             environment variables with the Keycloak root credentials and try again.[/yellow]
-                            """
-                        )
-                    )
+                            """))
                     exit()
                 else:
                     # Handle other exceptions
@@ -1632,8 +1622,7 @@ class Upgrade_2025_2_1(UpgradeStep):
     ):
         rich.print("\n ⚠️ Upgrade Warning ⚠️")
 
-        text = textwrap.dedent(
-            """
+        text = textwrap.dedent("""
             In this release, we have updated our maximum supported Kubernetes version from 1.29 to 1.31.
             Please note that Nebari will NOT automatically upgrade your running Kubernetes version as part of
             the redeployment process.
@@ -1644,8 +1633,7 @@ class Upgrade_2025_2_1(UpgradeStep):
 
             For more information on upgrading Kubernetes for your specific cloud provider, please visit:
             https://www.nebari.dev/docs/how-tos/kubernetes-version-upgrade
-            """
-        )
+            """)
         rich.print(text)
 
         # If the Nebari provider is Azure, we must handle a major version upgrade
@@ -1656,9 +1644,7 @@ class Upgrade_2025_2_1(UpgradeStep):
 
         if config.get("provider", "") == "azure":
             rich.print("\n ⚠️ Azure Provider Upgrade Notice ⚠️")
-            rich.print(
-                textwrap.dedent(
-                    """
+            rich.print(textwrap.dedent("""
                     In this Nebari release, the Azure Terraform provider has been upgraded
                     from version 3.97.1 to 4.7.0. This major update includes internal schema
                     changes for certain resources, most notably the `azurerm_storage_account`.
@@ -1669,9 +1655,7 @@ class Upgrade_2025_2_1(UpgradeStep):
 
                     For detailed information on the Azure provider 4.x changes, please visit:
                     https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/4.0-upgrade-guide
-                    """
-                )
-            )
+                    """))
 
             # Prompt user for confirmation
             continue_ = kwargs.get("attempt_fixes", False) or Confirm.ask(
@@ -1752,8 +1736,7 @@ class Upgrade_2025_4_1(UpgradeStep):
         ]:
             rich.print("\n ⚠️  Node Taints Update ⚠️")
 
-            text = textwrap.dedent(
-                """
+            text = textwrap.dedent("""
                 Starting with Nebari version 2025.4.1, node taints will be automatically applied to all non-general node groups by default.
                 Node taints help ensure that specific workloads run only on designated nodes,
                 improving resource utilization and isolation. This change will include:
@@ -1763,8 +1746,7 @@ class Upgrade_2025_4_1(UpgradeStep):
 
                 If you prefer not to use node taints, you can opt out by adding `taints: []`
                 to each node group definition in your nebari-config.yaml file.
-                """
-            )
+                """)
             rich.print(text)
 
             provider_full_name = provider_enum_name_map.get(provider)
