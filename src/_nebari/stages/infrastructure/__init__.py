@@ -625,8 +625,8 @@ class AmazonWebServicesProvider(schema.Base):
                     )
 
         # check if kms key is valid
-        available_kms_keys = amazon_web_services.kms_key_arns(data["region"])
-        if "eks_kms_arn" in data and data["eks_kms_arn"] is not None:
+        if data.get("eks_kms_arn") is not None:
+            available_kms_keys = amazon_web_services.kms_key_arns(data["region"])
             key_id = [
                 id for id in available_kms_keys.keys() if id in data["eks_kms_arn"]
             ]
