@@ -9,10 +9,10 @@ data "aws_partition" "current" {}
 
 locals {
   # Only override_network if both existing_subnet_ids and existing_security_group_id are not null.
-  override_network  = (var.existing_subnet_ids != null) && (var.existing_security_group_id != null)
-  subnet_ids        = local.override_network ? var.existing_subnet_ids : module.network[0].subnet_ids
-  security_group_id = local.override_network ? var.existing_security_group_id : module.network[0].security_group_id
-  partition         = data.aws_partition.current.partition
+  override_network   = (var.existing_subnet_ids != null) && (var.existing_security_group_id != null)
+  private_subnet_ids = local.override_network ? var.existing_subnet_ids : module.network[0].private_subnet_ids
+  security_group_id  = local.override_network ? var.existing_security_group_id : module.network[0].security_group_id
+  partition          = data.aws_partition.current.partition
 }
 
 # ==================== ACCOUNTING ======================
@@ -50,6 +50,7 @@ module "network" {
 
   vpc_cidr_block         = var.vpc_cidr_block
   aws_availability_zones = length(var.availability_zones) >= 2 ? var.availability_zones : slice(sort(data.aws_availability_zones.awszones.names), 0, 2)
+  region                 = var.region
 }
 
 
@@ -70,7 +71,7 @@ module "efs" {
   name = "${local.cluster_name}-jupyterhub-shared"
   tags = local.additional_tags
 
-  efs_subnets         = local.subnet_ids
+  efs_subnets         = local.private_subnet_ids
   efs_security_groups = [local.security_group_id]
 }
 
@@ -88,7 +89,7 @@ module "kubernetes" {
   region             = var.region
   kubernetes_version = var.kubernetes_version
 
-  cluster_subnets         = local.subnet_ids
+  cluster_subnets         = local.private_subnet_ids
   cluster_security_groups = [local.security_group_id]
 
   node_group_additional_policies = [
