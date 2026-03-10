@@ -39,7 +39,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          conda install grayskull conda-build conda-verify
+          conda install conda-build conda-verify
+          pip install grayskull
           pip install build
 
       - name: Conda list
