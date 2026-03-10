@@ -127,6 +127,12 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
             name  = "LOG_LEVEL"
             value = "trace"
           }
+
+          env {
+            name  = "PROVIDERS_GENERIC_OAUTH_SCOPE"
+            value = "openid profile email"
+          }
+
           env {
             name  = "AUTH_HOST"
             value = var.external-url

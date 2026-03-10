@@ -19,6 +19,7 @@ import kubernetes.client
 import kubernetes.config
 import requests
 import rich
+from kubernetes.stream import stream
 from packaging.version import Version
 from pydantic import ValidationError
 from rich.prompt import Confirm, Prompt
@@ -1847,6 +1848,7 @@ class Upgrade_2025_10_1(UpgradeStep):
 
     This upgrade includes:
     - Patching deprecated Bitnami images to avoid deployment issues during Helm chart upgrades
+
     """
 
     version = "2025.10.1"
@@ -2049,6 +2051,219 @@ class Upgrade_2025_10_1(UpgradeStep):
                     exit()
 
         rich.print("\nReady to upgrade to Nebari version [green]2025.10.1[/green].")
+        return config
+
+
+class Upgrade_2025_11_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2025.11.1
+
+    This upgrade includes a major Keycloak upgrade from the `keycloak` chart (15.0.2)
+    to the `keycloakx` chart (7.1.3). The old keycloak chart includes PostgreSQL as a
+    subchart, but the new keycloakx chart does not. Users must backup their Keycloak
+    PostgreSQL database before upgrading to prevent data loss.
+    """
+
+    version = "2025.11.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+
+        namespace = config.get("namespace", "dev")
+
+        rich.print("\n ⚠️  CRITICAL UPGRADE WARNING ⚠️")
+        rich.print(
+            textwrap.dedent(
+                f"""
+                This version includes a major [bold red]Keycloak upgrade[/bold red] from the [green]keycloak[/green] chart (15.0.2)
+                to the [green]keycloakx[/green] chart (7.1.3). This upgrade changes the underlying architecture
+                from JBoss/WildFly to Quarkus.
+
+                [bold yellow]IMPORTANT:[/bold yellow] The old keycloak chart includes PostgreSQL as a subchart dependency,
+                but the new keycloakx chart does not. To prevent data loss, you [bold red]MUST[/bold red] backup your
+                Keycloak PostgreSQL database [bold red]BEFORE[/bold red] running [cyan]nebari deploy[/cyan].
+
+                [bold]Key changes:[/bold]
+                - PostgreSQL moved from subchart to standalone deployment
+                - Keycloak service name changes from [green]keycloak-headless[/green] to [green]keycloak-keycloakx-http[/green]
+                - OAuth clients now require [green]openid[/green] scope explicitly
+
+                After this upgrade step completes, you will need to run:
+                      [cyan]nebari deploy -c {config_filename}[/cyan] to apply the changes
+                """
+            )
+        )
+        # Get all available contexts
+        contexts, active_context = kubernetes.config.list_kube_config_contexts()
+
+        if not contexts:
+            rich.print(
+                "[red bold]No kubectl contexts found in your kube configuration.[/red bold] See docs: https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig"
+            )
+            exit(1)
+
+        # Display available contexts
+        rich.print(
+            "\n[cyan]Below are available kubectl contexts for kubernetes. Please select the context for your cluster[/cyan]"
+        )
+        for i, ctx in enumerate(contexts):
+            context_name = ctx["name"]
+            is_active = " [green](current)[/green]" if ctx == active_context else ""
+            rich.print(f"  {i + 1}. {context_name} {is_active}")
+
+        # Add option for context not present
+        rich.print(
+            f"  {len(contexts) + 1}. [yellow]Desired context not present[/yellow]"
+        )
+
+        # Let user choose
+        choice = Prompt.ask(
+            "\n[cyan]Select context number[/cyan]",
+            choices=[str(i + 1) for i in range(len(contexts) + 1)],
+        )
+        selected_index = int(choice) - 1
+
+        # Handle "context not present" option
+        if selected_index == len(contexts):
+            rich.print(
+                "\n[yellow]Please add your desired kubectl context before proceeding.[/yellow]"
+            )
+            rich.print(
+                "See docs: [link=https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig]https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig[/link]"
+            )
+            exit(1)
+
+        current_kube_context = contexts[selected_index]
+        cluster_name = current_kube_context["context"]["cluster"]
+
+        # Set the selected context as active
+        kubernetes.config.load_kube_config(context=current_kube_context["name"])
+
+        rich.print(
+            f"\n[green]✓ Using context:[/green] {current_kube_context['name']} -> {cluster_name}"
+        )
+
+        # Kubernetes config available - offer automatic backup
+        rich.print(
+            "\n[green]✓[/green] Kubernetes configuration detected. Nebari can backup the database automatically."
+        )
+
+        if not (
+            kwargs.get("attempt_fixes", False)
+            or Confirm.ask(
+                "\nWould you like Nebari to backup the Keycloak database for you now?",
+                default=True,
+            )
+        ):
+            # User declined automatic backup
+
+            rich.print(
+                f"\n[red bold]You must backup the Keycloak database before upgrading to {self.version}.[/red bold]"
+            )
+            exit(1)
+
+        # User accepted automatic backup - proceed
+        rich.print(
+            "\n[cyan]Backing up Keycloak database using Kubernetes API...[/cyan]\n"
+        )
+
+        api_instance = kubernetes.client.CoreV1Api()
+        backup_file = config_filename.parent / "keycloak-backup.sql"
+
+        # Check if the old PostgreSQL pod exists
+        try:
+            api_instance.read_namespaced_pod(
+                name="keycloak-postgresql-0", namespace=namespace
+            )
+        except kubernetes.client.exceptions.ApiException as e:
+            if e.status == 404:
+                rich.print(
+                    f"\n[yellow]Pod keycloak-postgresql-0 not found in namespace {namespace}.[/yellow]"
+                )
+                rich.print(
+                    "\nUpgrade cancelled due to keycloak backup failure. Please verify your Kube config is pointing at your Nebari cluster"
+                )
+
+                exit(1)
+
+            # Other API errors
+            rich.print(f"[red]✗ Error checking for PostgreSQL pod:[/red] {e}")
+            exit(1)
+
+        # Execute pg_dump command in the pod
+        rich.print(f"[green]Creating backup at:[/green] {backup_file}\n")
+
+        try:
+            exec_command = [
+                "/bin/sh",
+                "-c",
+                "env PGPASSWORD=keycloak pg_dump -U keycloak -d keycloak",
+            ]
+
+            resp = stream(
+                api_instance.connect_get_namespaced_pod_exec,
+                name="keycloak-postgresql-0",
+                namespace=namespace,
+                command=exec_command,
+                stderr=True,
+                stdin=False,
+                stdout=True,
+                tty=False,
+                _preload_content=False,
+            )
+
+            # Write the output to the backup file
+            error_output = []
+            with open(backup_file, "wb") as f:
+                while resp.is_open():
+                    resp.update(timeout=1)
+                    if resp.peek_stdout():
+                        stdout_data = resp.read_stdout()
+                        f.write(stdout_data.encode("utf-8"))
+                    if resp.peek_stderr():
+                        stderr_data = resp.read_stderr()
+                        if stderr_data:
+                            error_output.append(stderr_data)
+
+            resp.close()
+
+            # Check if backup was successful
+            if not backup_file.exists() or backup_file.stat().st_size == 0:
+                error_msg = (
+                    "\n".join(error_output)
+                    if error_output
+                    else "Backup file is empty or doesn't exist"
+                )
+                rich.print(f"[red]✗ Backup failed:[/red]\n{error_msg}")
+                exit(1)
+
+            # Backup succeeded
+            file_size = backup_file.stat().st_size
+            rich.print(f"[green]✓ Backup successful![/green] Saved to {backup_file}")
+            rich.print(f"[green]  Backup size:[/green] {file_size / 1024:.2f} KB")
+
+            # Show any warnings from stderr (pg_dump often writes info to stderr)
+            if error_output:
+                for err in error_output:
+                    if "NOTICE" in err or "WARNING" in err:
+                        rich.print(f"[yellow]{err.strip()}[/yellow]")
+
+        except kubernetes.client.exceptions.ApiException as api_err:
+            rich.print(f"[red]✗ Kubernetes API error during backup:[/red]\n{api_err}")
+            exit(1)
+        except Exception as e:
+            rich.print(f"[red]✗ Unexpected error during backup:[/red] {e}")
+            exit(1)
+
+        # Backup complete - provide next steps
+        rich.print(
+            "\n[green]✓ Database backup completed.[/green] You can now proceed with:"
+        )
+        rich.print(f"  [cyan]nebari deploy -c {config_filename}[/cyan]")
+
+        rich.print("Ready to upgrade to Nebari version [green]2025.11.1[/green].")
 
         return config
 
