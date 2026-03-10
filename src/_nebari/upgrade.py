@@ -2054,9 +2054,9 @@ class Upgrade_2025_10_1(UpgradeStep):
         return config
 
 
-class Upgrade_2025_11_1(UpgradeStep):
+class Upgrade_2026_3_1(UpgradeStep):
     """
-    Upgrade step for Nebari version 2025.11.1
+    Upgrade step for Nebari version 2026.3.1
 
     This upgrade includes a major Keycloak upgrade from the `keycloak` chart (15.0.2)
     to the `keycloakx` chart (7.1.3). The old keycloak chart includes PostgreSQL as a
@@ -2064,7 +2064,7 @@ class Upgrade_2025_11_1(UpgradeStep):
     PostgreSQL database before upgrading to prevent data loss.
     """
 
-    version = "2025.11.1"
+    version = "2026.3.1"
 
     @override
     def _version_specific_upgrade(
@@ -2263,7 +2263,7 @@ class Upgrade_2025_11_1(UpgradeStep):
         )
         rich.print(f"  [cyan]nebari deploy -c {config_filename}[/cyan]")
 
-        rich.print("Ready to upgrade to Nebari version [green]2025.11.1[/green].")
+        rich.print("Ready to upgrade to Nebari version [green]2026.3.1[/green].")
 
         return config
 
