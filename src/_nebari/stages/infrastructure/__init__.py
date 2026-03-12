@@ -135,7 +135,7 @@ class GCPInputVars(schema.Base):
     ip_allocation_policy: Optional[Dict[str, str]] = None
     master_authorized_networks_config: Optional[Dict[str, str]] = None
     private_cluster_config: Optional[GCPPrivateClusterConfig] = None
-    node_group_image_type: GCPNodeGroupImageTypeEnum = None
+    node_group_image_type: Optional[GCPNodeGroupImageTypeEnum] = None
 
 
 class AzureNodeGroupInputVars(schema.Base):
