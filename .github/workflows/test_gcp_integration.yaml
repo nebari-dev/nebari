@@ -1,8 +1,6 @@
 name: GCP Deployment
 
 on:
-  schedule:
-    - cron: "0 0 * * MON"
   workflow_dispatch:
     inputs:
       image-tag:
