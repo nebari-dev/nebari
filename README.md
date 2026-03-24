@@ -5,7 +5,6 @@
 >
 > This project has been superseded by [nebari-infrastructure-core (NIC)](https://github.com/nebari-dev/nebari-infrastructure-core), which takes a composable, modular approach to infrastructure management. See the NIC design documents in that repository for the reasoning behind this transition.
 >
-> Existing Nebari users should refer to the NIC repository for migration guidance.
 
 ---
 
