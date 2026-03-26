@@ -106,6 +106,24 @@ variable "shared_fs_type" {
 
 }
 
+variable "home-storage-mode" {
+  description = "Storage mode for user home directories: 'shared' or 'per_user'"
+  type        = string
+  default     = "per_user"
+}
+
+variable "home-storage-size" {
+  description = "Size of per-user home directory PVC"
+  type        = string
+  default     = "10Gi"
+}
+
+variable "home-storage-class" {
+  description = "Storage class for per-user home directories (null = cluster default)"
+  type        = string
+  default     = null
+}
+
 locals {
   jupyterhub-fs       = var.shared_fs_type
   jupyterhub-pvc-name = "jupyterhub-${var.environment}-share"
@@ -180,6 +198,10 @@ module "jupyterhub" {
   home-pvc = local.jupyterhub-pvc
 
   shared-pvc = local.jupyterhub-pvc
+
+  home-storage-mode  = var.home-storage-mode
+  home-storage-size  = var.home-storage-size
+  home-storage-class = var.home-storage-class
 
   conda-store-pvc                                    = module.kubernetes-conda-store-server.pvc.name
   conda-store-mount                                  = "/home/conda"

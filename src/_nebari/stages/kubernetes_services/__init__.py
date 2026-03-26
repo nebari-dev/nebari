@@ -60,6 +60,16 @@ class SharedFsEnum(str, enum.Enum):
         return representer.represent_str(node.value)
 
 
+@schema.yaml_object(schema.yaml)
+class HomeStorageEnum(str, enum.Enum):
+    shared = "shared"  # Current behavior (NFS with subPath)
+    per_user = "per_user"  # New: dynamic PVC per user
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
+
+
 class DefaultImages(schema.Base):
     jupyterhub: str = f"quay.io/nebari/nebari-jupyterhub:{set_docker_image_tag()}"
     jupyterlab: str = f"quay.io/nebari/nebari-jupyterlab:{set_docker_image_tag()}"
@@ -73,6 +83,18 @@ class Storage(schema.Base):
     )
     conda_store: str = "200Gi"
     shared_filesystem: str = "200Gi"
+    home_storage: HomeStorageEnum = Field(
+        default=HomeStorageEnum.per_user,
+        description="Storage mode for user home directories: 'per_user' for individual PVCs, 'shared' for NFS with subPath",
+    )
+    home_storage_size: str = Field(
+        default="10Gi",
+        description="Size of per-user home directory PVC (only applies when home_storage='per_user')",
+    )
+    home_storage_class: Optional[str] = Field(
+        default=None,
+        description="Storage class for per-user home PVCs (null uses cluster default)",
+    )
 
 
 class JupyterHubTheme(schema.Base):
@@ -561,6 +583,9 @@ class JupyterhubInputVars(schema.Base):
     cloud_provider: str = Field(alias="cloud-provider")
     jupyterlab_preferred_dir: Optional[str] = Field(alias="jupyterlab-preferred-dir")
     shared_fs_type: SharedFsEnum
+    home_storage_mode: str = Field(alias="home-storage-mode")
+    home_storage_size: str = Field(alias="home-storage-size")
+    home_storage_class: Optional[str] = Field(alias="home-storage-class", default=None)
     user_taint_tolerations: Optional[List[Toleration]] = Field(
         alias="node-taint-tolerations"
     )
@@ -764,6 +789,9 @@ class KubernetesServicesStage(NebariTerraformStage):
                 if self.config.storage.type == SharedFsEnum.efs
                 else self.config.storage.type
             ),
+            home_storage_mode=self.config.storage.home_storage.value,
+            home_storage_size=self.config.storage.home_storage_size,
+            home_storage_class=self.config.storage.home_storage_class,
         )
 
         dask_gateway_vars = DaskGatewayInputVars(
