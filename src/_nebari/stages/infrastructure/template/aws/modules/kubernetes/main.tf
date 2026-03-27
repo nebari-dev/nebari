@@ -89,7 +89,7 @@ resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = var.node_groups[count.index].name
   node_role_arn   = aws_iam_role.node-group.arn
-  subnet_ids      = var.node_groups[count.index].single_subnet ? [element(var.cluster_subnets, 0)] : var.cluster_subnets
+  subnet_ids      = var.node_groups[count.index].single_subnet ? [element(var.cluster_subnets, length(var.cluster_subnets) - 1)] : var.cluster_subnets
 
   instance_types = split(",", var.node_groups[count.index].instance_type)
   capacity_type  = var.node_groups[count.index].spot ? "SPOT" : "ON_DEMAND"
