@@ -16,4 +16,9 @@ module "kubernetes-ingress" {
   load-balancer-annotations = var.load-balancer-annotations
   load-balancer-ip          = var.load-balancer-ip
   additional-arguments      = var.additional-arguments
+
+  hsts-enabled            = var.hsts-enabled
+  hsts-max-age            = var.hsts-max-age
+  hsts-include-subdomains = var.hsts-include-subdomains
+  hsts-preload            = var.hsts-preload
 }

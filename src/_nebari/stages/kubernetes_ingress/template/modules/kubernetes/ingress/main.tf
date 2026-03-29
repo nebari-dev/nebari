@@ -35,6 +35,12 @@ locals {
     disabled    = []
   }
   add-certificate = local.certificate-settings[var.certificate-service]
+
+  # HSTS middleware configuration
+  hsts-middleware = var.hsts-enabled ? [
+    "--entrypoints.websecure.http.middlewares=${var.namespace}-${var.name}-hsts@kubernetescrd",
+    "--entrypoints.minio.http.middlewares=${var.namespace}-${var.name}-hsts@kubernetescrd",
+  ] : []
 }
 
 
@@ -308,6 +314,7 @@ resource "kubernetes_deployment" "main" {
             "--log.level=${var.loglevel}",
             ],
             local.add-certificate,
+            local.hsts-middleware,
             var.additional-arguments,
           )
 
