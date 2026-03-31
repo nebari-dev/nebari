@@ -1,0 +1,44 @@
+name: 'Check Team Membership'
+description: 'Verify that the user is a member of the authorized team'
+inputs:
+  org:
+    description: 'GitHub organization name'
+    required: true
+  team:
+    description: 'Team name (slug)'
+    required: true
+  username:
+    description: 'GitHub username to check'
+    required: true
+  issue_number:
+    description: 'Issue or PR number for posting error message'
+    required: true
+  comment_type:
+    description: 'Type of comment (issue or pr)'
+    required: true
+    default: 'issue'
+  github_token:
+    description: 'GitHub token for API access'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Check team membership
+      shell: bash
+      run: |
+        TEAM_CHECK=$(gh api \
+          /orgs/${{ inputs.org }}/teams/${{ inputs.team }}/memberships/${{ inputs.username }} \
+          --silent 2>&1 || echo "not_member")
+
+        if [[ "$TEAM_CHECK" == *"not_member"* ]] || [[ "$TEAM_CHECK" == *"404"* ]]; then
+          if [[ "${{ inputs.comment_type }}" == "pr" ]]; then
+            gh pr comment ${{ inputs.issue_number }} --repo ${{ github.repository }} \
+              --body "⚠️ Only members of @${{ inputs.org }}/${{ inputs.team }} can trigger Claude actions."
+          else
+            gh issue comment ${{ inputs.issue_number }} --repo ${{ github.repository }} \
+              --body "⚠️ Only members of @${{ inputs.org }}/${{ inputs.team }} can trigger Claude actions."
+          fi
+          exit 1
+        fi
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
