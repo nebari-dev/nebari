@@ -28,7 +28,7 @@ resource "keycloak_realm" "main" {
     ignore_changes = [
       # We want user to have control over attributes we are not managing
       # If attribute is added above remove it from this list
-      # https://registry.terraform.io/providers/mrparkers/keycloak/latest/docs/resources/realm
+      # https://registry.terraform.io/providers/keycloak/keycloak/latest/docs/resources/realm
       attributes,
       registration_allowed,
       registration_email_as_username,
@@ -87,6 +87,11 @@ resource "keycloak_default_groups" "default" {
     for g in var.default_groups :
     keycloak_group.groups[g].id
   ]
+
+  depends_on = [
+    keycloak_realm.main,
+    keycloak_group.groups
+  ]
 }
 
 data "keycloak_realm" "master" {
@@ -132,4 +137,127 @@ resource "keycloak_realm_events" "realm_events" {
   events_listeners = [
     "jboss-logging", "metrics-listener",
   ]
+}
+
+resource "keycloak_realm_user_profile" "userprofile" {
+  realm_id = keycloak_realm.main.id
+
+  unmanaged_attribute_policy = "ENABLED"
+
+  # Username attribute
+  attribute {
+    name         = "username"
+    display_name = "$${username}"
+    multi_valued = false
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "length"
+      config = {
+        min = "3"
+        max = "255"
+      }
+    }
+
+    validator {
+      name = "username-prohibited-characters"
+    }
+
+    validator {
+      name = "up-username-not-idn-homograph"
+    }
+  }
+
+  # Email attribute
+  attribute {
+    name         = "email"
+    display_name = "$${email}"
+    multi_valued = false
+
+    required_for_roles = ["user"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "email"
+    }
+
+    validator {
+      name = "length"
+      config = {
+        max = "255"
+      }
+    }
+  }
+
+  # First Name attribute
+  attribute {
+    name         = "firstName"
+    display_name = "$${firstName}"
+    multi_valued = false
+
+    #Below makes this attribute optional
+    required_for_roles  = []
+    required_for_scopes = []
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "length"
+      config = {
+        max = "255"
+      }
+    }
+
+    validator {
+      name = "person-name-prohibited-characters"
+    }
+
+    annotations = {}
+  }
+
+  # Last Name attribute
+  attribute {
+    name         = "lastName"
+    display_name = "$${lastName}"
+    multi_valued = false
+
+    required_for_roles  = []
+    required_for_scopes = []
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "length"
+      config = {
+        max = "255"
+      }
+    }
+
+    validator {
+      name = "person-name-prohibited-characters"
+    }
+
+    annotations = {}
+  }
+
+  # Group
+  group {
+    name                = "user-metadata"
+    display_header      = "User metadata"
+    display_description = "Attributes, which refer to user metadata"
+  }
 }

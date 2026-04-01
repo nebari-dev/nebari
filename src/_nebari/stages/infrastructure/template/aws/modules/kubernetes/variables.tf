@@ -94,3 +94,8 @@ variable "permissions_boundary" {
   type        = string
   default     = null
 }
+
+variable "environment" {
+  description = "Namespace/environment for Kubernetes resources (used in IRSA trust policies)"
+  type        = string
+}

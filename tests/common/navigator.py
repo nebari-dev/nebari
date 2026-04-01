@@ -114,7 +114,11 @@ class LoginNavigator(NavigatorMixin):
     def logout(self):
         """Logout from Nebari deployment."""
         self.page.get_by_role("button", name="Logout").click()
-        self.page.wait_for_load_state
+        self.page.wait_for_load_state("networkidle")
+
+        # Keycloak has a second logout button
+        self.page.locator("#kc-logout").click()
+        self.page.wait_for_load_state("networkidle")
 
     def _login_google(self):
         logger.debug(">>> Sign in via Google and start the server")
@@ -136,7 +140,7 @@ class LoginNavigator(NavigatorMixin):
 
         self.page.get_by_role("button", name="Sign in with Keycloak").click()
         self.page.get_by_label("Username").fill(self.username)
-        self.page.get_by_label("Password").fill(self.password)
+        self.page.get_by_role("textbox", name="Password").fill(self.password)
         self.page.get_by_role("button", name="Sign In").click()
         self.page.wait_for_load_state()
 
