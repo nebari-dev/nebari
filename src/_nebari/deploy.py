@@ -70,7 +70,9 @@ def deploy_configuration(
         username = "root"
         password = config.security.keycloak.initial_root_password
         if password:
-            print(f"Kubecloak master realm username={username} password={password}")
+            print(
+                f"Keycloak master realm username={username} password=<set via config/env>"
+            )
 
         print(
             "Additional administration docs can be found at https://www.nebari.dev/docs/how-tos/configuring-keycloak"
