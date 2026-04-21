@@ -5,7 +5,7 @@
 >
 > This project, now called nebari-classic, has been superseded by:
 > - [nebari-infrastructure-core (NIC)](https://github.com/nebari-dev/nebari-infrastructure-core), which takes a composable, modular approach to infrastructure management
-> - [nebari-data-science-pack](https://github.com/nebari-dev/nebari-data-science-pack), which provides the data science tools inlcuded in nebari-classic.
+> - [nebari-data-science-pack](https://github.com/nebari-dev/nebari-data-science-pack), which provides the data science tools included in nebari-classic.
 >
 > See the NIC design documents in that repository for the reasoning behind this transition.
 >
