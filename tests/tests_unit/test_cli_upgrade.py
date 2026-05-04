@@ -173,8 +173,7 @@ def test_cli_upgrade_image_tags(monkeypatch: pytest.MonkeyPatch):
         end_version,
         # # number of "y" inputs directly corresponds to how many matching images are found in yaml
         inputs=["y", "y", "y", "y", "y", "y", "y"],
-        addl_config=yaml.safe_load(
-            f"""
+        addl_config=yaml.safe_load(f"""
 default_images:
   jupyterhub: quay.io/nebari/nebari-jupyterhub:{start_version}
   jupyterlab: quay.io/nebari/nebari-jupyterlab:{start_version}
@@ -196,8 +195,7 @@ profiles:
   dask_worker:
     test:
       image: quay.io/nebari/nebari-dask-worker:{start_version}
-"""
-        ),
+"""),
     )
 
     for _, v in upgraded["default_images"].items():
@@ -240,15 +238,13 @@ def test_cli_upgrade_fail_on_downgrade():
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
         assert tmp_file.exists() is False
 
-        nebari_config = yaml.safe_load(
-            f"""
+        nebari_config = yaml.safe_load(f"""
 project_name: test
 provider: local
 domain: test.example.com
 namespace: dev
 nebari_version: {start_version}
-        """
-        )
+        """)
 
         with open(tmp_file.resolve(), "w") as f:
             yaml.dump(nebari_config, f)
@@ -279,15 +275,13 @@ def test_cli_upgrade_does_nothing_on_same_version():
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
         assert tmp_file.exists() is False
 
-        nebari_config = yaml.safe_load(
-            f"""
+        nebari_config = yaml.safe_load(f"""
 project_name: test
 provider: local
 domain: test.example.com
 namespace: dev
 nebari_version: {start_version}
-        """
-        )
+        """)
 
         with open(tmp_file.resolve(), "w") as f:
             yaml.dump(nebari_config, f)
@@ -323,8 +317,7 @@ def test_cli_upgrade_0_3_12_to_0_4_0(monkeypatch: pytest.MonkeyPatch):
         start_version,
         end_version,
         addl_args=["--attempt-fixes"],
-        addl_config=yaml.safe_load(
-            """
+        addl_config=yaml.safe_load("""
 security:
   authentication:
     type: custom
@@ -338,8 +331,7 @@ terraform_modules: []
 default_images:
   conda_store: ""
   dask_gateway: ""
-"""
-        ),
+"""),
         callback=callback,
     )
 
@@ -361,8 +353,7 @@ def test_cli_upgrade_to_0_4_0_fails_for_custom_auth_without_attempt_fixes():
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
         assert tmp_file.exists() is False
 
-        nebari_config = yaml.safe_load(
-            f"""
+        nebari_config = yaml.safe_load(f"""
 project_name: test
 provider: local
 domain: test.example.com
@@ -371,8 +362,7 @@ nebari_version: {start_version}
 security:
   authentication:
     type: custom
-        """
-        )
+        """)
 
         with open(tmp_file.resolve(), "w") as f:
             yaml.dump(nebari_config, f)
@@ -399,14 +389,12 @@ def test_cli_upgrade_to_2023_10_1_cdsdashboard_removed(monkeypatch: pytest.Monke
     start_version = "2023.7.2"
     end_version = "2023.10.1"
 
-    addl_config = yaml.safe_load(
-        """
+    addl_config = yaml.safe_load("""
 cdsdashboards:
   enabled: true
   cds_hide_user_named_servers: true
   cds_hide_user_dashboard_servers: false
-        """
-    )
+        """)
 
     upgraded = assert_nebari_upgrade_success(
         monkeypatch,
@@ -473,8 +461,7 @@ def test_cli_upgrade_to_2023_10_1_kubernetes_validations(
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
         assert tmp_file.exists() is False
 
-        nebari_config = yaml.safe_load(
-            f"""
+        nebari_config = yaml.safe_load(f"""
 project_name: test
 provider: {provider}
 domain: test.example.com
@@ -487,8 +474,7 @@ cdsdashboards:
 {get_provider_config_block_name(provider)}:
     region: {MOCK_CLOUD_REGIONS.get(provider, {})[0]}
     kubernetes_version: {kubernetes_configs[provider][k8s_status]}
-        """
-        )
+        """)
         with open(tmp_file.resolve(), "w") as f:
             yaml.dump(nebari_config, f)
 
@@ -543,15 +529,13 @@ def assert_nebari_upgrade_success(
 
         # merge basic config with any test case specific values provided
         nebari_config = {
-            **yaml.safe_load(
-                f"""
+            **yaml.safe_load(f"""
 project_name: test
 provider: {provider}
 domain: test.example.com
 namespace: dev
 nebari_version: {start_version}
-        """
-            ),
+        """),
             **addl_config,
         }
 

@@ -17,9 +17,7 @@ def deploy_configuration(
     disable_checks: bool = False,
 ) -> Dict[str, Any]:
     if config.prevent_deploy:
-        raise ValueError(
-            textwrap.dedent(
-                """
+        raise ValueError(textwrap.dedent("""
         Deployment prevented due to the prevent_deploy setting in your nebari-config.yaml file.
         You could remove that field to deploy your Nebari, but please do NOT do so without fully understanding why that value was set in the first place.
 
@@ -29,9 +27,7 @@ def deploy_configuration(
 
         PLEASE get in touch with Nebari development team at https://github.com/nebari-dev/nebari for assistance in proceeding.
         Your data may be at risk without our guidance.
-        """
-            )
-        )
+        """))
 
     if config.domain is None:
         logger.info(
