@@ -33,7 +33,7 @@ shell.nix
 build.nix
 .direnv
 
-# ignore deploments
+# ignore deployments
 do-jupyterhub
 jupyterhub-aws
 gcp-jupyterhub
