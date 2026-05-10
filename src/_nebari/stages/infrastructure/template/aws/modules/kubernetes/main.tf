@@ -151,6 +151,7 @@ resource "aws_eks_addon" "aws-ebs-csi-driver" {
   # required for Kubernetes v1.23+ on AWS
   addon_name                  = "aws-ebs-csi-driver"
   cluster_name                = aws_eks_cluster.main.name
+  service_account_role_arn    = aws_iam_role.ebs_csi_driver.arn
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
