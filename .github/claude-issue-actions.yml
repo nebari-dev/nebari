@@ -1,0 +1,148 @@
+name: Claude Issue Actions
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  handle-issue:
+    if: |
+      !github.event.issue.pull_request && (
+        contains(github.event.comment.body, '/claude fix') ||
+        contains(github.event.comment.body, '/claude implement') ||
+        contains(github.event.comment.body, '/claude investigate')
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check team membership
+        uses: ./.github/actions/check-team-membership
+        with:
+          org: nebari-dev
+          team: Contributors
+          username: ${{ github.event.comment.user.login }}
+          issue_number: ${{ github.event.issue.number }}
+          comment_type: issue
+          github_token: ${{ github.token }}
+
+      - name: Determine action type
+        id: action_type
+        run: |
+          COMMENT="${{ github.event.comment.body }}"
+          if echo "$COMMENT" | grep -q "/claude implement"; then
+            echo "type=implement" >> $GITHUB_OUTPUT
+            echo "branch_prefix=feature" >> $GITHUB_OUTPUT
+          elif echo "$COMMENT" | grep -q "/claude investigate"; then
+            echo "type=investigate" >> $GITHUB_OUTPUT
+            echo "branch_prefix=none" >> $GITHUB_OUTPUT
+          else
+            echo "type=fix" >> $GITHUB_OUTPUT
+            echo "branch_prefix=fix" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract custom instructions
+        id: instructions
+        run: |
+          COMMENT="${{ github.event.comment.body }}"
+          # Extract everything after the command
+          CUSTOM_INSTRUCTIONS=$(echo "$COMMENT" | sed -n 's/.*\/claude \(fix\|implement\|investigate\)\s*//p')
+
+          if [ -z "$CUSTOM_INSTRUCTIONS" ]; then
+            echo "instructions=No additional instructions provided." >> $GITHUB_OUTPUT
+          else
+            echo "instructions<<EOF" >> $GITHUB_OUTPUT
+            echo "$CUSTOM_INSTRUCTIONS" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Fix Bug
+        if: steps.action_type.outputs.type == 'fix'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          track_progress: true
+          prompt: |
+            REPO: ${{ github.repository }}
+            ISSUE: #${{ github.event.issue.number }} - ${{ github.event.issue.title }}
+            REQUESTED BY: @${{ github.event.comment.user.login }}
+
+            ISSUE DESCRIPTION:
+            ${{ github.event.issue.body }}
+
+            ADDITIONAL INSTRUCTIONS:
+            ${{ steps.instructions.outputs.instructions }}
+
+            Create a PR to fix this bug:
+
+            1. Analyze the issue and additional instructions
+            2. Create branch: "fix/issue-${{ github.event.issue.number }}-<short-desc>"
+            3. Implement the fix
+            4. Add/update tests to prevent regression
+            5. Commit: "fix: <description> (fixes #${{ github.event.issue.number }})"
+            6. Push and create PR with "Fixes #${{ github.event.issue.number }}"
+            7. Comment on the original issue with PR link
+
+          claude_args: |
+            --allowedTools "Read,Write,Edit,Bash(git:*),Bash(gh pr:*),Bash(gh issue:*),Bash(npm:*),Bash(pytest:*)"
+
+      - name: Implement Feature
+        if: steps.action_type.outputs.type == 'implement'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          track_progress: true
+          prompt: |
+            REPO: ${{ github.repository }}
+            ISSUE: #${{ github.event.issue.number }} - ${{ github.event.issue.title }}
+            REQUESTED BY: @${{ github.event.comment.user.login }}
+
+            FEATURE REQUEST:
+            ${{ github.event.issue.body }}
+
+            ADDITIONAL INSTRUCTIONS:
+            ${{ steps.instructions.outputs.instructions }}
+
+            Create a PR to implement this feature:
+
+            1. Analyze requirements and additional instructions
+            2. Create branch: "feature/issue-${{ github.event.issue.number }}-<short-desc>"
+            3. Implement the feature following project patterns
+            4. Add comprehensive tests
+            5. Update relevant documentation
+            6. Commit: "feat: <description> (implements #${{ github.event.issue.number }})"
+            7. Push and create PR with "Closes #${{ github.event.issue.number }}"
+            8. Comment on the original issue with PR link
+
+          claude_args: |
+            --allowedTools "Read,Write,Edit,Bash(git:*),Bash(gh pr:*),Bash(gh issue:*),Bash(npm:*),Bash(pytest:*)"
+
+      - name: Investigate Issue
+        if: steps.action_type.outputs.type == 'investigate'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          track_progress: true
+          prompt: |
+            REPO: ${{ github.repository }}
+            ISSUE: #${{ github.event.issue.number }} - ${{ github.event.issue.title }}
+            REQUESTED BY: @${{ github.event.comment.user.login }}
+
+            ISSUE TO INVESTIGATE:
+            ${{ github.event.issue.body }}
+
+            INVESTIGATION FOCUS:
+            ${{ steps.instructions.outputs.instructions }}
+
+            Investigate this issue and provide analysis:
+
+            1. Review the codebase to understand the issue
+            2. Consider the investigation focus provided above
+            3. Identify root cause and contributing factors
+            4. Search for similar issues or patterns in the codebase
+            5. Post a detailed comment with:
+               - **Root Cause**: What's causing this issue
