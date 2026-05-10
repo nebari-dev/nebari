@@ -1,5 +1,6 @@
 import contextlib
 import logging
+import os
 import pathlib
 import textwrap
 from typing import Any, Dict, List
@@ -70,7 +71,15 @@ def deploy_configuration(
         username = "root"
         password = config.security.keycloak.initial_root_password
         if password:
-            print(f"Kubecloak master realm username={username} password={password}")
+            password_from_env = os.environ.get(
+                "NEBARI_SECRET__security__keycloak__initial_root_password"
+            )
+            if password_from_env:
+                print(
+                    f"Keycloak master realm username={username} password=<set via env>"
+                )
+            else:
+                print(f"Keycloak master realm username={username} password={password}")
 
         print(
             "Additional administration docs can be found at https://www.nebari.dev/docs/how-tos/configuring-keycloak"
