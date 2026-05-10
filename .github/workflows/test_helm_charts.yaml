@@ -26,25 +26,31 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install additional Python dependencies
         run: |
           pip install python-hcl2
           pip install tqdm
+
       - name: Install nebari
         run: |
           pip install .
+
       - name: Install Helm
         run: |
           curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
           chmod 700 get_helm.sh
           ./get_helm.sh
+
       - name: Test Helm installation
         run: |
           helm version
+
       - name: Test Helm Charts
         run: |
           python scripts/helm-validate.py
