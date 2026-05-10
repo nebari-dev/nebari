@@ -178,6 +178,23 @@ def render_config(
         config["certificate"] = {"type": CertificateEnum.letsencrypt.value}
         config["certificate"]["acme_email"] = ssl_cert_email
 
+    # Add ingress configuration with HSTS settings
+    # Determine if HSTS should be enabled based on certificate type
+    cert_type = config.get("certificate", {}).get(
+        "type", CertificateEnum.selfsigned.value
+    )
+    is_valid_cert = cert_type in [CertificateEnum.letsencrypt.value, "existing"]
+    hsts_enabled = is_valid_cert
+
+    config["ingress"] = {
+        "hsts": {
+            "enabled": hsts_enabled,
+            "max_age": 31536000,  # 1 year
+            "include_subdomains": True,
+            "preload": False,
+        }
+    }
+
     if config_set:
         config_set = read_config_set(config_set)
         config = utils.deep_merge(config, config_set.config)
