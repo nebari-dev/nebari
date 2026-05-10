@@ -62,6 +62,24 @@ variable "shared-pvc" {
   })
 }
 
+variable "home-storage-mode" {
+  description = "Storage mode for user home directories: 'shared' or 'per_user'"
+  type        = string
+  default     = "per_user"
+}
+
+variable "home-storage-size" {
+  description = "Size of per-user home directory PVC"
+  type        = string
+  default     = "10Gi"
+}
+
+variable "home-storage-class" {
+  description = "Storage class for per-user home directories (null = cluster default)"
+  type        = string
+  default     = null
+}
+
 variable "conda-store-pvc" {
   description = "Name for persistent volume claim to use for conda-store directory"
   type        = string

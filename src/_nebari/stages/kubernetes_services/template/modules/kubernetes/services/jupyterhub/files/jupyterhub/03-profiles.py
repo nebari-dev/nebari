@@ -10,40 +10,139 @@ import z2jh
 def base_profile_home_mounts(username):
     """Configure the home directory mount for user.
 
-    Ensure that user directory exists and user has permissions to
-    read/write/execute.
+    Supports two modes:
+    - 'per_user': Each user gets their own dynamically provisioned PVC
+    - 'shared': All users share a single NFS PVC with subPath isolation (legacy)
+    """
+    home_storage_mode = z2jh.get_config("custom.home-storage-mode")
 
+    if home_storage_mode == "per_user":
+        return _per_user_home_mounts(username)
+    else:
+        return _shared_home_mounts(username)
+
+
+def _per_user_home_mounts(username):  # noqa: ARG001 - username kept for API consistency
+    """Per-user dynamic PVC mode.
+
+    KubeSpawner creates the PVC automatically via storage.dynamic config.
+    We only need to handle skel file initialization.
+
+    Note: username parameter is unused - we use KubeSpawner template strings
+    like {username} and {user_server} which get expanded at pod creation time.
+
+    Important: We use the 'volumes' traitlet (as a dict) which REPLACES the
+    volumes list that z2jh sets. Therefore, we must include the dynamic PVC
+    volume here since our dict replaces z2jh's list.
+
+    Important: We use 'volume_mounts' dict (NOT extra_container_config["volumeMounts"])
+    because only the volume_mounts traitlet gets KubeSpawner template expansion.
+    extra_container_config goes through update_k8s_model() which does NOT expand templates.
+    """
+    skel_mount = z2jh.get_config("custom.skel-mount")
+    # Use {username} template - KubeSpawner will expand it
+    pod_home_mount_path = "/home/{username}"
+
+    # The 'volumes' dict REPLACES z2jh's volumes list (because kubespawner_override
+    # can't merge list+dict). We must include ALL volumes needed, including the
+    # dynamic PVC volume that z2jh would have added.
+    volumes = {
+        # Re-add the dynamic PVC volume that z2jh would have created.
+        # This uses the same name template as z2jh's volumeNameTemplate default.
+        "dynamic-pvc": {
+            "name": "volume-{user_server}",
+            "persistentVolumeClaim": {"claimName": "{pvc_name}"},
+        },
+        "skel": {
+            "name": "skel",
+            "configMap": {"name": skel_mount["name"]},
+        },
+    }
+
+    # Use volume_mounts dict for template expansion by KubeSpawner.
+    # The dict key is arbitrary (used for deep_merge), value is the mount spec.
+    volume_mounts = {
+        "home": {
+            "mountPath": pod_home_mount_path,
+            "name": "volume-{user_server}",
+        },
+    }
+
+    # Init container to copy skel files only if home dir is empty
+    # The dynamic PVC volume is named "volume-{user_server}" by z2jh default.
+    # KubeSpawner expands both the volume name and our volumeMount name.
+    # Using quadruple braces {{{{}}}} because:
+    #   1. Our .format() reduces {{{{}}}} to {{}}
+    #   2. KubeSpawner's .format() reduces {{}} to {} (the shell placeholder for find -exec)
+    INIT_SKEL_CMD = (
+        'if [ -z "$(ls -A {pod_home_mount_path})" ]; then '
+        "find /etc/skel/. -maxdepth 1 -not -name '.' -not -name '..*' -exec "
+        "cp -rL {{{{}}}} {pod_home_mount_path} \\; ; fi"
+    ).format(pod_home_mount_path=pod_home_mount_path)
+
+    init_containers = [
+        {
+            "name": "initialize-home-skel",
+            "image": "busybox:1.31",
+            "command": ["sh", "-c", INIT_SKEL_CMD],
+            "securityContext": {"runAsUser": 0},
+            "volumeMounts": [
+                # Use template string - KubeSpawner expands {user_server} to match
+                # the z2jh dynamic volume name "volume-{user_server}"
+                {"mountPath": pod_home_mount_path, "name": "volume-{user_server}"},
+                {"mountPath": "/etc/skel", "name": "skel"},
+            ],
+        }
+    ]
+
+    return {
+        "volumes": volumes,
+        "volume_mounts": volume_mounts,
+        "extra_pod_config": {},
+        "extra_container_config": {},
+        "init_containers": init_containers,
+    }
+
+
+def _shared_home_mounts(username):
+    """Shared NFS mode - original behavior with subPath isolation.
+
+    Important: We use the 'volumes' traitlet (as a dict) instead of
+    'extra_pod_config["volumes"]' because extra_pod_config would OVERRIDE
+    any volumes already set. Using the 'volumes' dict allows proper merging.
+
+    Important: We use 'volume_mounts' dict (NOT extra_container_config["volumeMounts"])
+    because only the volume_mounts traitlet gets KubeSpawner template expansion.
     """
     home_pvc_name = z2jh.get_config("custom.home-pvc")
     skel_mount = z2jh.get_config("custom.skel-mount")
     pvc_home_mount_path = "home/{username}"
     pod_home_mount_path = "/home/{username}"
 
-    extra_pod_config = {
-        "volumes": [
-            {
-                "name": "home",
-                "persistentVolumeClaim": {
-                    "claimName": home_pvc_name,
-                },
+    # Use 'volumes' dict (not extra_pod_config) so it merges properly
+    volumes = {
+        "home": {
+            "name": "home",
+            "persistentVolumeClaim": {
+                "claimName": home_pvc_name,
             },
-            {
-                "name": "skel",
-                "configMap": {
-                    "name": skel_mount["name"],
-                },
+        },
+        "skel": {
+            "name": "skel",
+            "configMap": {
+                "name": skel_mount["name"],
             },
-        ]
+        },
     }
 
-    extra_container_config = {
-        "volumeMounts": [
-            {
-                "mountPath": pod_home_mount_path.format(username=username),
-                "name": "home",
-                "subPath": pvc_home_mount_path.format(username=username),
-            },
-        ]
+    # Use volume_mounts dict (not extra_container_config) for proper merging
+    # In shared mode, username is already known so we format it directly
+    volume_mounts = {
+        "home": {
+            "mountPath": pod_home_mount_path.format(username=username),
+            "name": "home",
+            "subPath": pvc_home_mount_path.format(username=username),
+        },
     }
 
     MKDIR_OWN_DIRECTORY = (
@@ -75,8 +174,10 @@ def base_profile_home_mounts(username):
         }
     ]
     return {
-        "extra_pod_config": extra_pod_config,
-        "extra_container_config": extra_container_config,
+        "volumes": volumes,
+        "volume_mounts": volume_mounts,
+        "extra_pod_config": {},
+        "extra_container_config": {},
         "init_containers": init_containers,
     }
 
@@ -89,20 +190,43 @@ def base_profile_shared_mounts(groups_to_volume_mount):
     same pvc to be a volume thus we must check that the home and share
     pvc are not the same for some operation.
 
+    In per_user mode, we always use the "shared" volume since there's no "home"
+    volume (per-user home is a dynamic PVC with a different name pattern).
+
+    Important: We use the 'volumes' traitlet (as a dict) instead of
+    'extra_pod_config["volumes"]' because extra_pod_config would OVERRIDE
+    any volumes already set. Using the 'volumes' dict allows proper merging.
+
+    Important: We use 'volume_mounts' dict (NOT extra_container_config["volumeMounts"])
+    because only the volume_mounts traitlet gets KubeSpawner template expansion.
     """
     home_pvc_name = z2jh.get_config("custom.home-pvc")
     shared_pvc_name = z2jh.get_config("custom.shared-pvc")
+    home_storage_mode = z2jh.get_config("custom.home-storage-mode")
 
     pvc_shared_mount_path = "shared/{group}"
     pod_shared_mount_path = "/shared/{group}"
 
-    extra_pod_config = {"volumes": []}
-    if home_pvc_name != shared_pvc_name:
-        extra_pod_config["volumes"].append(
-            {"name": "shared", "persistentVolumeClaim": {"claimName": shared_pvc_name}}
-        )
+    # In per_user mode, there's no "home" volume - each user gets a dynamic PVC.
+    # So we must always add the "shared" volume explicitly.
+    # In shared mode, if home_pvc == shared_pvc, we can reuse the "home" volume.
+    use_separate_shared_volume = (
+        home_storage_mode == "per_user" or home_pvc_name != shared_pvc_name
+    )
 
-    extra_container_config = {"volumeMounts": []}
+    # Use 'volumes' dict (not extra_pod_config) so it merges properly
+    volumes = {}
+    if use_separate_shared_volume:
+        volumes["shared"] = {
+            "name": "shared",
+            "persistentVolumeClaim": {"claimName": shared_pvc_name},
+        }
+
+    # Determine volume name to use for shared mounts
+    shared_volume_name = "shared" if use_separate_shared_volume else "home"
+
+    # Use volume_mounts dict (not extra_container_config) for proper merging
+    volume_mounts = {}
 
     MKDIR_OWN_DIRECTORY = "mkdir -p /mnt/{path} && chmod 777 /mnt/{path}"
     command = " && ".join(
@@ -123,25 +247,82 @@ def base_profile_shared_mounts(groups_to_volume_mount):
     ]
 
     for group in groups_to_volume_mount:
-        extra_container_config["volumeMounts"].append(
-            {
-                "mountPath": pod_shared_mount_path.format(group=group),
-                "name": "shared" if home_pvc_name != shared_pvc_name else "home",
-                "subPath": pvc_shared_mount_path.format(group=group),
-            }
-        )
+        # Use unique keys for each group mount to allow deep_merge
+        volume_mounts[f"shared-{group}"] = {
+            "mountPath": pod_shared_mount_path.format(group=group),
+            "name": shared_volume_name,
+            "subPath": pvc_shared_mount_path.format(group=group),
+        }
         init_containers[0]["volumeMounts"].append(
             {
                 "mountPath": f"/mnt/{pvc_shared_mount_path.format(group=group)}",
-                "name": "shared" if home_pvc_name != shared_pvc_name else "home",
+                "name": shared_volume_name,
                 "subPath": pvc_shared_mount_path.format(group=group),
             }
         )
 
     return {
-        "extra_pod_config": extra_pod_config,
-        "extra_container_config": extra_container_config,
+        "volumes": volumes,
+        "volume_mounts": volume_mounts,
+        "extra_pod_config": {},
+        "extra_container_config": {},
         "init_containers": init_containers,
+    }
+
+
+def base_profile_home_shared_mount():
+    """Mount the shared /home/shared directory.
+
+    In per_user mode, we must explicitly mount the shared PVC for /home/shared.
+    In shared mode, it's already accessible via the home PVC subPath.
+
+    Important: This function does NOT create a new volume. Instead, it reuses
+    the "shared" volume that base_profile_shared_mounts() creates. Having two
+    separate volumes pointing to the same PVC causes kubelet mount timeouts.
+
+    Important: We use 'volume_mounts' dict (NOT extra_container_config["volumeMounts"])
+    because only the volume_mounts traitlet gets KubeSpawner template expansion.
+    """
+    home_storage_mode = z2jh.get_config("custom.home-storage-mode")
+
+    if home_storage_mode != "per_user":
+        # In shared mode, /home/shared is already mounted via values.yaml extraVolumeMounts
+        return {}
+
+    # In per_user mode, reuse the "shared" volume from base_profile_shared_mounts().
+    # We do NOT create a new volume here - having two volumes pointing to the
+    # same PVC causes kubelet mount issues.
+
+    return {
+        "volumes": {},  # No new volume - reuse "shared" from base_profile_shared_mounts
+        "volume_mounts": {
+            "home-shared": {
+                "mountPath": "/home/shared",
+                "name": "shared",  # Use the "shared" volume, not a new one
+                "subPath": "home/shared",
+            },
+        },
+        "extra_pod_config": {},
+        "extra_container_config": {},
+        "init_containers": [
+            {
+                "name": "initialize-home-shared",
+                "image": "busybox:1.31",
+                "command": [
+                    "sh",
+                    "-c",
+                    "mkdir -p /mnt/home/shared && chmod 777 /mnt/home/shared",
+                ],
+                "securityContext": {"runAsUser": 0},
+                "volumeMounts": [
+                    {
+                        "mountPath": "/mnt/home/shared",
+                        "name": "shared",  # Use the "shared" volume
+                        "subPath": "home/shared",
+                    },
+                ],
+            }
+        ],
     }
 
 
@@ -152,32 +333,36 @@ def profile_conda_store_mounts(username, groups):
     Ensure that {shared}/{group} directory exists and user has
     permissions to read/write/execute.
 
+    Important: We use the 'volumes' traitlet (as a dict) instead of
+    'extra_pod_config["volumes"]' because extra_pod_config would OVERRIDE
+    any volumes already set. Using the 'volumes' dict allows proper merging.
+
+    Important: We use 'volume_mounts' dict (NOT extra_container_config["volumeMounts"])
+    because only the volume_mounts traitlet gets KubeSpawner template expansion.
     """
     conda_store_pvc_name = z2jh.get_config("custom.conda-store-pvc")
     conda_store_mount = Path(z2jh.get_config("custom.conda-store-mount"))
     default_namespace = z2jh.get_config("custom.default-conda-store-namespace")
 
-    extra_pod_config = {
-        "volumes": [
-            {
-                "name": "conda-store",
-                "persistentVolumeClaim": {
-                    "claimName": conda_store_pvc_name,
-                },
-            }
-        ]
+    # Use 'volumes' dict (not extra_pod_config) so it merges properly
+    volumes = {
+        "conda-store": {
+            "name": "conda-store",
+            "persistentVolumeClaim": {
+                "claimName": conda_store_pvc_name,
+            },
+        }
     }
 
     conda_store_namespaces = [username, default_namespace, "global"] + groups
-    extra_container_config = {
-        "volumeMounts": [
-            {
-                "mountPath": str(conda_store_mount / namespace),
-                "name": "conda-store",
-                "subPath": namespace,
-            }
-            for namespace in conda_store_namespaces
-        ]
+    # Use volume_mounts dict (not extra_container_config) for proper merging
+    volume_mounts = {
+        f"conda-store-{namespace}": {
+            "mountPath": str(conda_store_mount / namespace),
+            "name": "conda-store",
+            "subPath": namespace,
+        }
+        for namespace in conda_store_namespaces
     }
 
     MKDIR_OWN_DIRECTORY = "mkdir -p /mnt/{path} && chmod 755 /mnt/{path}"
@@ -204,41 +389,54 @@ def profile_conda_store_mounts(username, groups):
         }
     ]
     return {
-        "extra_pod_config": extra_pod_config,
-        "extra_container_config": extra_container_config,
+        "volumes": volumes,
+        "volume_mounts": volume_mounts,
+        "extra_pod_config": {},
+        "extra_container_config": {},
         "init_containers": init_containers,
     }
 
 
 def base_profile_extra_mounts():
+    """Configure extra mounts specified in the Nebari config.
+
+    Important: We use the 'volumes' traitlet (as a dict) instead of
+    'extra_pod_config["volumes"]' because extra_pod_config would OVERRIDE
+    any volumes already set. Using the 'volumes' dict allows proper merging.
+
+    Important: We use 'volume_mounts' dict (NOT extra_container_config["volumeMounts"])
+    because only the volume_mounts traitlet gets KubeSpawner template expansion.
+    """
     extra_mounts = z2jh.get_config("custom.extra-mounts")
 
-    extra_pod_config = {
-        "volumes": [
-            (
-                {
-                    "name": volume["name"],
-                    "persistentVolumeClaim": {"claimName": volume["name"]},
-                }
-                if volume["kind"] == "persistentvolumeclaim"
-                else {"name": volume["name"], "configMap": {"name": volume["name"]}}
-            )
-            for mount_path, volume in extra_mounts.items()
-        ]
-    }
-
-    extra_container_config = {
-        "volumeMounts": [
-            {
-                "name": volume["name"],
-                "mountPath": mount_path,
+    # Use 'volumes' dict (not extra_pod_config) so it merges properly
+    volumes = {}
+    for _, volume in extra_mounts.items():
+        vol_name = volume["name"]
+        if volume["kind"] == "persistentvolumeclaim":
+            volumes[vol_name] = {
+                "name": vol_name,
+                "persistentVolumeClaim": {"claimName": vol_name},
             }
-            for mount_path, volume in extra_mounts.items()
-        ]
+        else:
+            volumes[vol_name] = {
+                "name": vol_name,
+                "configMap": {"name": vol_name},
+            }
+
+    # Use volume_mounts dict (not extra_container_config) for proper merging
+    volume_mounts = {
+        f"extra-{volume['name']}": {
+            "name": volume["name"],
+            "mountPath": mount_path,
+        }
+        for mount_path, volume in extra_mounts.items()
     }
     return {
-        "extra_pod_config": extra_pod_config,
-        "extra_container_config": extra_container_config,
+        "volumes": volumes,
+        "volume_mounts": volume_mounts,
+        "extra_pod_config": {},
+        "extra_container_config": {},
     }
 
 
@@ -261,9 +459,17 @@ def node_taint_tolerations():
     }
 
 
-def configure_user_provisioned_repositories(username):
-    # Define paths and configurations
-    pvc_home_mount_path = f"home/{username}"
+def configure_user_provisioned_repositories(username):  # noqa: ARG001
+    """Clone initial git repositories into user's home directory.
+
+    Note: username parameter is unused in per_user mode - we use KubeSpawner
+    template strings which get expanded at pod creation time.
+
+    Important: We use the 'volumes' traitlet (as a dict) instead of
+    'extra_pod_config["volumes"]' because extra_pod_config would OVERRIDE
+    any volumes already set. Using the 'volumes' dict allows proper merging.
+    """
+    home_storage_mode = z2jh.get_config("custom.home-storage-mode")
 
     git_repos_provision_pvc = z2jh.get_config("custom.initial-repositories")
     git_clone_update_config = {
@@ -292,12 +498,35 @@ def configure_user_provisioned_repositories(username):
     if not git_repos_provision_pvc:
         return {}
 
-    # Define the extra pod configuration for the volumes
-    extra_pod_config = {
-        "volumes": [{"name": "git-clone-update", **git_clone_update_config}]
+    # Use 'volumes' dict (not extra_pod_config) so it merges properly
+    volumes = {
+        "git-clone-update": {"name": "git-clone-update", **git_clone_update_config}
     }
 
-    extras_git_clone_cp_path = f"/mnt/{pvc_home_mount_path}/.git-clone-update.sh"
+    # Configure paths and volume mount based on storage mode
+    if home_storage_mode == "per_user":
+        # In per_user mode, home is mounted directly at /home/{username}
+        # Use template strings for KubeSpawner expansion
+        home_mount_path = "/home/{username}"
+        volume_mount = {
+            "mountPath": home_mount_path,
+            "name": "volume-{user_server}",
+        }
+    else:
+        # In shared mode, use subPath on the shared "home" volume
+        pvc_home_mount_path = "home/{username}"
+        home_mount_path = "/mnt/{pvc_home_mount_path}".format(
+            pvc_home_mount_path=pvc_home_mount_path
+        )
+        volume_mount = {
+            "mountPath": home_mount_path,
+            "name": "home",
+            "subPath": pvc_home_mount_path,
+        }
+
+    extras_git_clone_cp_path = "{home_mount_path}/.git-clone-update.sh".format(
+        home_mount_path=home_mount_path
+    )
 
     BASH_EXECUTION = "./.git-clone-update.sh"
 
@@ -307,12 +536,20 @@ def configure_user_provisioned_repositories(username):
 
     EXEC_OWNERSHIP_CHANGE = " && ".join(
         [
-            f"cp /mnt/extras/git-clone-update.sh {extras_git_clone_cp_path}",
-            f"chmod 777 {extras_git_clone_cp_path}",
-            f"chown -R 1000:100 {extras_git_clone_cp_path}",
-            f"cd /mnt/{pvc_home_mount_path}",
+            "cp /mnt/extras/git-clone-update.sh {extras_git_clone_cp_path}".format(
+                extras_git_clone_cp_path=extras_git_clone_cp_path
+            ),
+            "chmod 777 {extras_git_clone_cp_path}".format(
+                extras_git_clone_cp_path=extras_git_clone_cp_path
+            ),
+            "chown -R 1000:100 {extras_git_clone_cp_path}".format(
+                extras_git_clone_cp_path=extras_git_clone_cp_path
+            ),
+            "cd {home_mount_path}".format(home_mount_path=home_mount_path),
             BASH_EXECUTION,
-            f"rm -f {extras_git_clone_cp_path}",
+            "rm -f {extras_git_clone_cp_path}".format(
+                extras_git_clone_cp_path=extras_git_clone_cp_path
+            ),
         ]
     )
 
@@ -324,18 +561,15 @@ def configure_user_provisioned_repositories(username):
             "command": ["sh", "-c", EXEC_OWNERSHIP_CHANGE],
             "securityContext": {"runAsUser": 0},
             "volumeMounts": [
-                {
-                    "mountPath": f"/mnt/{pvc_home_mount_path}",
-                    "name": "home",
-                    "subPath": pvc_home_mount_path,
-                },
+                volume_mount,
                 {"mountPath": "/mnt/extras", "name": "git-clone-update"},
             ],
         }
     ]
 
     return {
-        "extra_pod_config": extra_pod_config,
+        "volumes": volumes,
+        "extra_pod_config": {},
         "init_containers": init_containers,
     }
 
@@ -543,6 +777,7 @@ def render_profile(
         deep_merge,
         [
             base_profile_home_mounts(username),
+            base_profile_home_shared_mount(),
             base_profile_shared_mounts(groups_to_volume_mount),
             profile_conda_store_mounts(username, groups),
             base_profile_extra_mounts(),
