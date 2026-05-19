@@ -4,7 +4,7 @@
 > Over the years of building and maintaining Nebari, we accumulated a long list of patterns, tooling, and architectural decisions we wanted to apply but were constrained by the current architecture. Rather than continue layering on that foundation, we decided to pause feature development on what we now call **nebari-classic** and invest in a new architecture organized around the expertise we've built:
 >
 > - [nebari-infrastructure-core (NIC)](https://github.com/nebari-dev/nebari-infrastructure-core) — a composable, modular approach to infrastructure management.
-> - A set of software packs layered on top of NIC — including **Nebi** (A newer and more resilient replacement for conda-store), **Dask**, and the **data science pack** (JhubApps, Jupyter* and more) — that together cover the user-facing functionality nebari-classic provides today. Browse them under [Software Packs](https://nebari.dev/docs/software-packs/) on the docs site, or search the [nebari-dev org for "pack" repositories](https://github.com/orgs/nebari-dev/repositories?q=pack).
+> - A set of component layer "packs" that allow software to be easily integrated on top of NIC through GitOps: including **Nebi** (A newer and more resilient replacement for conda-store), **Dask**, and the **data science pack** (JhubApps, Jupyter* and more). All that together covers the user-facing functionality nebari-classic provides today. Browse them under [Software Packs](https://nebari.dev/docs/software-packs/) on the docs site, or search the [nebari-dev org for "pack" repositories](https://github.com/orgs/nebari-dev/repositories?q=pack).
 >
 > See the NIC design documents in that repository for the full reasoning behind this transition.
 >
