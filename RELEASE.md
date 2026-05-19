@@ -11,11 +11,18 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ## Release 2026.3.1 - May 19, 2026
 
-> **⚠️ CRITICAL — Keycloak chart migration.** This release migrates Keycloak from the legacy `keycloak` Helm chart (15.0.2, JBoss/WildFly) to the modern `keycloakx` chart (7.1.3, Quarkus). The legacy chart bundled PostgreSQL as a subchart; the new chart does not — PostgreSQL is now a standalone deployment. **You MUST back up the Keycloak PostgreSQL database before running `nebari deploy`** or you will lose all user, group, and realm data.
+> **⚠️ IMPORTANT — Keycloak chart migration.** This release migrates Keycloak from the legacy `keycloak` Helm chart (15.0.2, JBoss/WildFly) to the modern `keycloakx` chart (7.1.3, Quarkus). The legacy chart bundled PostgreSQL as a subchart; the new chart does not — PostgreSQL is now a standalone deployment.
 >
-> The `nebari upgrade -c <config>` step prompts you to perform the backup automatically — do not skip it. Additional changes to be aware of:
+> Database migration is automated end-to-end across the two CLI steps:
 >
-> - Keycloak service name changes from `keycloak-headless` to `keycloak-keycloakx-http` — any custom integrations referencing the old name must be updated.
+> 1. `nebari upgrade -c <config>` connects to your cluster, prompts you to pick a kubectl context, and runs `pg_dump` against the legacy `keycloak-postgresql-0` pod. The dump is written to `<config_dir>/keycloak-backup.sql`. The prompt to perform the backup defaults to "yes" — **do not decline**, or the upgrade aborts before any chart changes are applied.
+> 2. `nebari deploy` brings up the new `keycloakx` chart, then a post-deploy step scales Keycloak to zero, drops and recreates the new database, restores the SQL dump, and renames the backup file to `keycloak-backup.sql.restored` so re-running `nebari deploy` is idempotent. On restore failure the file is preserved as `keycloak-backup.sql.failed_restore` for manual recovery.
+>
+> Before running `nebari upgrade`, make sure your kubectl context points at the cluster you intend to upgrade — the upgrade step uses that context for `pg_dump`. Pointing at the wrong cluster will either fail outright (no `keycloak-postgresql-0` pod) or back up the wrong data.
+>
+> Two other behavioral changes to know about:
+>
+> - Keycloak service name changes from `keycloak-headless` to `keycloak-keycloakx-http` — custom integrations referencing the old name must be updated.
 > - OAuth clients must now request the `openid` scope explicitly.
 >
 > See #3179 for full details.
