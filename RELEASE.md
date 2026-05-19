@@ -11,6 +11,22 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ## Release 2026.3.1 - May 19, 2026
 
+> **⚠️ CRITICAL — Keycloak chart migration.** This release migrates Keycloak from the legacy `keycloak` Helm chart (15.0.2, JBoss/WildFly) to the modern `keycloakx` chart (7.1.3, Quarkus). The legacy chart bundled PostgreSQL as a subchart; the new chart does not — PostgreSQL is now a standalone deployment. **You MUST back up the Keycloak PostgreSQL database before running `nebari deploy`** or you will lose all user, group, and realm data.
+>
+> The `nebari upgrade -c <config>` step prompts you to perform the backup automatically — do not skip it. Additional changes to be aware of:
+>
+> - Keycloak service name changes from `keycloak-headless` to `keycloak-keycloakx-http` — any custom integrations referencing the old name must be updated.
+> - OAuth clients must now request the `openid` scope explicitly.
+>
+> See #3179 for full details.
+
+> **NOTE — AWS EKS node AMI migration to Amazon Linux 2023.** AWS is deprecating Amazon Linux 2 AMIs for EKS (Kubernetes 1.32 is the last version that supports AL2). Default AMI types for EKS node groups change in this release:
+>
+> - `AL2_x86_64` → `AL2023_x86_64`
+> - `AL2_x86_64_GPU` → `AL2023_x86_64_GPU`
+>
+> The next `nebari deploy` will recycle node groups to land on AL2023 — expect rolling node replacement and brief disruption to scheduled workloads. See #3166.
+
 > **NOTE — EBS CSI driver IRSA wiring.** This release attaches the `${cluster_name}-ebs-csi-driver` IAM role (created in `2025.10.1` but left unwired) to the `aws-ebs-csi-driver` EKS addon. The first `nebari deploy` after upgrade will perform an in-place `UpdateAddon` call to set `serviceAccountRoleArn`. No action is needed for most operators.
 >
 > If you previously applied `aws eks update-addon --service-account-role-arn …` manually to recover from the EBS CSI controller crashloop on AL2023, your addon is in drift relative to Terraform. Before deploying, either re-run `aws eks update-addon` with the canonical role ARN (`<cluster_name>-ebs-csi-driver`), or detach the manual override with `--remove-service-account-role-arn` and let Terraform reattach the correct role. Skipping this step results in `AccessDeniedException: Cross-account pass role is not allowed` on apply.
