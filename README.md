@@ -1,13 +1,16 @@
-> [!CAUTION]
-> **This project has been archived.**
+> [!NOTE]
+> **Nebari is evolving — this repository is now called nebari-classic.**
 >
-> Nebari has had its final release. No further development or releases are planned.
+> Over the years of building and maintaining Nebari, we accumulated a long list of patterns, tooling, and architectural decisions we wanted to apply but were constrained by the current architecture. Rather than continue layering on that foundation, we decided to pause feature development on what we now call **nebari-classic** and invest in a new architecture, split across two projects:
 >
-> This project, now called nebari-classic, has been superseded by:
-> - [nebari-infrastructure-core (NIC)](https://github.com/nebari-dev/nebari-infrastructure-core), which takes a composable, modular approach to infrastructure management
-> - [nebari-data-science-pack](https://github.com/nebari-dev/nebari-data-science-pack), which provides the data science tools included in nebari-classic.
+> - [nebari-infrastructure-core (NIC)](https://github.com/nebari-dev/nebari-infrastructure-core) — a composable, modular approach to infrastructure management.
+> - [nebari-data-science-pack](https://github.com/nebari-dev/nebari-data-science-pack) — the data science tooling that used to ship inside nebari-classic, now as a standalone layer.
 >
-> See the NIC design documents in that repository for the reasoning behind this transition.
+> See the NIC design documents in that repository for the full reasoning behind this transition.
+>
+> **What this means for nebari-classic.** We will continue to ship critical bug fixes, security and vulnerability patches, and dependency updates on this repository — but expect a slower release cadence than you have seen from us previously. New features and architectural improvements are going into NIC and the software-packs layer, and we are working to make that experience match — and improve on — what nebari-classic provides today.
+>
+> Nebari as a whole is very much still being built. To everyone in our community: you are more than welcome to join us at our [community meetings](https://www.nebari.dev/docs/community/) and help shape what comes next.
 >
 
 ---
