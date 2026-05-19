@@ -9,6 +9,12 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
+## Release 2026.3.1 - May 19, 2026
+
+> **NOTE — EBS CSI driver IRSA wiring.** This release attaches the `${cluster_name}-ebs-csi-driver` IAM role (created in `2025.10.1` but left unwired) to the `aws-ebs-csi-driver` EKS addon. The first `nebari deploy` after upgrade will perform an in-place `UpdateAddon` call to set `serviceAccountRoleArn`. No action is needed for most operators.
+>
+> If you previously applied `aws eks update-addon --service-account-role-arn …` manually to recover from the EBS CSI controller crashloop on AL2023, your addon is in drift relative to Terraform. Before deploying, either re-run `aws eks update-addon` with the canonical role ARN (`<cluster_name>-ebs-csi-driver`), or detach the manual override with `--remove-service-account-role-arn` and let Terraform reattach the correct role. Skipping this step results in `AccessDeniedException: Cross-account pass role is not allowed` on apply.
+
 ## Release 2025.6.1 - June 06, 2025
 
 ### What's Changed
