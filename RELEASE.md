@@ -9,6 +9,53 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
+## Release 2026.3.1 - May 19, 2026
+
+> **⚠️ IMPORTANT — Keycloak chart migration.** This release migrates Keycloak from the legacy `keycloak` Helm chart (15.0.2, JBoss/WildFly) to the modern `keycloakx` chart (7.1.3, Quarkus). The legacy chart bundled PostgreSQL as a subchart; the new chart does not — PostgreSQL is now a standalone deployment.
+>
+> Database migration is automated end-to-end across the two CLI steps: `nebari upgrade -c <config>` and `nebari deploy`.
+>
+> Before running `nebari upgrade`, make sure your kubectl context points at the cluster you intend to upgrade — the upgrade step uses that context for `pg_dump`. Pointing at the wrong cluster will either fail outright (no `keycloak-postgresql-0` pod) or back up the wrong data.
+>
+> Two other behavioral changes to know about:
+>
+> - Keycloak service name changes from `keycloak-headless` to `keycloak-keycloakx-http` — custom integrations referencing the old name must be updated.
+> - OAuth clients must now request the `openid` scope explicitly.
+>
+> See #3179 for full details.
+
+> **NOTE — AWS EKS node AMI migration to Amazon Linux 2023.** AWS is deprecating Amazon Linux 2 AMIs for EKS (Kubernetes 1.32 is the last version that supports AL2). Default AMI types for EKS node groups change in this release:
+>
+> - `AL2_x86_64` → `AL2023_x86_64`
+> - `AL2_x86_64_GPU` → `AL2023_x86_64_GPU`
+>
+> The next `nebari deploy` will recycle node groups to land on AL2023 — expect rolling node replacement and brief disruption to scheduled workloads. See #3166.
+
+> **NOTE — EBS CSI driver IRSA wiring.** This release attaches the `${cluster_name}-ebs-csi-driver` IAM role (created in `2025.10.1` but left unwired) to the `aws-ebs-csi-driver` EKS addon. The first `nebari deploy` after upgrade will perform an in-place `UpdateAddon` call to set `serviceAccountRoleArn`. No action is needed for most operators.
+>
+> If you previously applied `aws eks update-addon --service-account-role-arn …` manually to recover from the EBS CSI controller crashloop on AL2023, your addon is in drift relative to Terraform. Before deploying, either re-run `aws eks update-addon` with the canonical role ARN (`<cluster_name>-ebs-csi-driver`), or detach the manual override with `--remove-service-account-role-arn` and let Terraform reattach the correct role. Skipping this step results in `AccessDeniedException: Cross-account pass role is not allowed` on apply.
+
+### What's Changed
+- Remove notice after 2025.10.1 release by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/3180
+- old package gpg version expired - update to latest by @tylerpotts in https://github.com/nebari-dev/nebari/pull/3178
+- Use latest Kubernetes versions for GCP clusters by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/3182
+- update azure login gha provider by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/3183
+- fix typo in README by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/3185
+- Use updated google auth method by @tylerpotts in https://github.com/nebari-dev/nebari/pull/3186
+- Fix GCP failing provider tests by @tylerpotts in https://github.com/nebari-dev/nebari/pull/3187
+- allow hub pod to connect to itself for jhub-apps verification by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/3194
+- Update setup-miniconda action version to v3.3.0 by @viniciusdc in https://github.com/nebari-dev/nebari/pull/3203
+- Keycloak Upgrade by @tylerpotts in https://github.com/nebari-dev/nebari/pull/3179
+- Add keycloak tests by @tylerpotts in https://github.com/nebari-dev/nebari/pull/3157
+- Migrate AWS EKS AMI from Amazon Linux 2 to Amazon Linux 2023 by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/3166
+- Change upgrade step to version 2026.3.1 by @viniciusdc in https://github.com/nebari-dev/nebari/pull/3205
+- Bump HIGHEST_SUPPORTED_K8S_VERSION to 1.34 by @dcmcand in https://github.com/nebari-dev/nebari/pull/3206
+- Disable GHA schedule trigger on cloud integration tests by @marcelovilla in https://github.com/nebari-dev/nebari/pull/3212
+- Update README with deprecation notice by @dcmcand in https://github.com/nebari-dev/nebari/pull/3211
+- fix: EBS CSI driver crashes on AL2023 — missing IRSA role on addon by @asmacdo in https://github.com/nebari-dev/nebari/pull/3213
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2025.10.1...2026.3.1
+
 ## Release 2025.6.1 - June 06, 2025
 
 ### What's Changed
