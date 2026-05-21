@@ -261,6 +261,14 @@ def user_options(user):
             continue
         conda_environments.append(f"{namespace}/{namespace}-{name}")
 
+    def parse_default_profile(profiles: dict):
+        profiles_keys = profiles.keys()
+        for profile in profiles_keys:
+            if profiles[profile].get("default", False):
+                return profile
+            continue
+        return list(profiles_keys)[0]
+
     args = []
     if conda_environments:
         args += [
@@ -276,7 +284,7 @@ def user_options(user):
             Select(
                 "profile",
                 list(config["profiles"].keys()),
-                default=list(config["profiles"].keys())[0],
+                default=parse_default_profile(config["profiles"]),
                 label="Cluster Profile",
             )
         ]

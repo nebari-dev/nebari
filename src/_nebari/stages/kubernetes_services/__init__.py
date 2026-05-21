@@ -178,6 +178,7 @@ class DaskWorkerProfile(schema.Base):
     worker_memory: str
     worker_threads: int = 1
     model_config = ConfigDict(extra="allow")
+    default: bool = False
 
 
 class Profiles(schema.Base):
@@ -230,6 +231,17 @@ class Profiles(schema.Base):
             raise TypeError(
                 "Multiple default Jupyterlab profiles may cause unexpected problems."
             )
+        return value
+
+    @field_validator("dask_worker")
+    @classmethod
+    def assert_single_default_dask(cls, value):
+        """
+        Check if only one default value is present in the dask profiles
+        """
+        default = [attrs["default"] for attrs in value if "default" in attrs]
+        if default.count(True) > 1:
+            raise TypeError("Multiple default Dask worker profiles are not supported.")
         return value
 
 
