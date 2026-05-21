@@ -67,7 +67,7 @@ class DefaultImages(schema.Base):
 
 
 class Storage(schema.Base):
-    type: SharedFsEnum = Field(
+    type: Optional[SharedFsEnum] = Field(
         default=None,
         json_schema_extra={"immutable": True},
     )
