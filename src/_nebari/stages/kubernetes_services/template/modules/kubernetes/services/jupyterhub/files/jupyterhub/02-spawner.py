@@ -241,29 +241,53 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
     c.JAppsConfig.hub_host = "hub"
     c.JAppsConfig.service_workers = 4
 
+    # ------------------------------------------------------------------
+    # Base additional services shown in the JupyterHub Apps UI
+    # ------------------------------------------------------------------
+    base_additional_services = [
+        {
+            "name": "Monitoring",
+            "url": "/monitoring",
+            "description": "System monitoring dashboard",
+            "pinned": True,
+        },
+        {
+            "name": "Argo",
+            "url": "/argo",
+            "description": "Argo Workflows UI",
+        },
+        {
+            "name": "Users",
+            "url": "/auth/admin/nebari/console/",
+            "description": "Keycloak user and group management",
+        },
+        {
+            "name": "Environments",
+            "url": "/conda-store",
+            "description": "Conda environment manager",
+            "pinned": True,
+        },
+    ]
+
+    # Extra services injected via Terraform as JSON (custom.jhub-apps-additional-services)
+    extra_services_raw = z2jh.get_config("custom.jhub-apps-additional-services")
+    extra_additional_services = []
+    if extra_services_raw:
+        try:
+            extra_additional_services = json.loads(extra_services_raw)
+        except Exception:
+            # If misconfigured, fall back to just the base list
+            extra_additional_services = []
+
+    # Set the final list for JHub Apps
+    c.JAppsConfig.additional_services = (
+        base_additional_services + extra_additional_services
+    )
+
+    # Apply generic overrides (can override additional_services entirely if desired)
     jhub_apps_overrides = json.loads(z2jh.get_config("custom.jhub-apps-overrides"))
     for config_key, config_value in jhub_apps_overrides.items():
         setattr(c.JAppsConfig, config_key, config_value)
-
-    def service_for_jhub_apps(name, url):
-        return {
-            "name": name,
-            "display": True,
-            "info": {
-                "name": name,
-                "url": url,
-                "external": True,
-            },
-        }
-
-    c.JupyterHub.services.extend(
-        [
-            service_for_jhub_apps(name="Argo", url="/argo"),
-            service_for_jhub_apps(name="Users", url="/auth/admin/nebari/console/"),
-            service_for_jhub_apps(name="Environments", url="/conda-store"),
-            service_for_jhub_apps(name="Monitoring", url="/monitoring"),
-        ]
-    )
 
     c.JupyterHub.template_paths = theme_template_paths
 

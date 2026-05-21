@@ -229,3 +229,27 @@ variable "node-taint-tolerations" {
     effect   = string
   }))
 }
+
+variable "jhub-apps-additional-services" {
+  description = <<-EOT
+    Extra services to display in the JupyterHub App Launcher (jhub-apps).
+    These are *appended* to the built-in base services defined in 02-spawner.py.
+
+    Each element has the same shape as JAppsConfig.additional_services:
+      - name        (string, required)
+      - url         (string, required)
+      - description (string, optional)
+      - pinned      (bool, optional)
+      - thumbnail   (string, optional; URL or data:image/... base64)
+  EOT
+
+  type = list(object({
+    name        = string
+    url         = string
+    description = optional(string)
+    pinned      = optional(bool)
+    thumbnail   = optional(string)
+  }))
+
+  default = []
+}

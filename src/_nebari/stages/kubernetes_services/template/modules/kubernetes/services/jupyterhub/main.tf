@@ -78,6 +78,7 @@ resource "helm_release" "jupyterhub" {
         conda-store-jhub-apps-token   = var.conda-store-jhub-apps-token
         jhub-apps-enabled             = var.jhub-apps-enabled
         jhub-apps-overrides           = var.jhub-apps-overrides
+        jhub-apps-additional-services = jsonencode(var.jhub-apps-additional-services)
         initial-repositories          = var.initial-repositories
         node-taint-tolerations        = var.node-taint-tolerations
         skel-mount = {
