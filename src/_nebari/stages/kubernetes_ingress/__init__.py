@@ -145,7 +145,17 @@ class DnsProvider(schema.Base):
     auto_provision: Optional[bool] = False
 
 
+class HSTS(schema.Base):
+    # See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+    # for more info
+    enabled: bool = True
+    max_age: int = 31536000
+    include_subdomains: bool = True
+    preload: bool = False
+
+
 class Ingress(schema.Base):
+    hsts: Optional[HSTS] = None
     terraform_overrides: Dict = {}
 
 
@@ -203,6 +213,24 @@ class KubernetesIngressStage(NebariTerraformStage):
                 cert_details["cloudflare-dns-api-token"] = os.environ.get(
                     "CLOUDFLARE_TOKEN"
                 )
+
+        # Initialize HSTS based on certificate type if not explicitly configured
+        hsts = self.config.ingress.hsts
+        if hsts is None:
+            # Only enable HSTS for valid certificates (lets-encrypt, existing)
+            # Do not enable for self-signed certs to avoid HSTS pinning issues during initial setup
+            is_valid_cert = cert_type in ["lets-encrypt", "existing"]
+            if is_valid_cert:
+                hsts = HSTS()
+            else:
+                hsts = HSTS(enabled=False)
+
+        hsts_config = {
+            "hsts-enabled": hsts.enabled,
+            "hsts-max-age": hsts.max_age,
+            "hsts-include-subdomains": hsts.include_subdomains,
+            "hsts-preload": hsts.preload,
+        }
         return {
             **{
                 "traefik-image": {
@@ -217,6 +245,7 @@ class KubernetesIngressStage(NebariTerraformStage):
                 **self.config.ingress.terraform_overrides,
             },
             **cert_details,
+            **hsts_config,
         }
 
     def set_outputs(
