@@ -243,7 +243,7 @@ class AWSInputVars(schema.Base):
     kubernetes_version: str
     eks_endpoint_access: Optional[
         Literal["private", "public", "public_and_private"]
-    ] = "public"
+    ] = "public_and_private"
     eks_kms_arn: Optional[str] = None
     eks_public_access_cidrs: Optional[List[str]] = ["0.0.0.0/0"]
     node_groups: List[AWSNodeGroupInputVars]
@@ -565,7 +565,7 @@ class AmazonWebServicesProvider(schema.Base):
     ] = Field(DEFAULT_AWS_NODE_GROUPS, validate_default=True)
     eks_endpoint_access: Optional[
         Literal["private", "public", "public_and_private"]
-    ] = "public"
+    ] = "public_and_private"
     eks_public_access_cidrs: Optional[List[str]] = ["0.0.0.0/0"]
     eks_kms_arn: Optional[str] = None
     existing_subnet_ids: Optional[List[str]] = None
